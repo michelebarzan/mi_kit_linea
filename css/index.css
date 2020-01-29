@@ -1,0 +1,175 @@
+html
+{
+    width:100%;
+    height:100%;
+}
+body
+{
+    width:100%;
+    height:100%;
+    background-color: #1e1e1e;
+    margin:0px;
+}
+.structure-header
+{
+    width:100%;
+    height:50px;
+    background-color: #333333;
+    box-shadow: 0 -5px 10px 0 rgba(0,0,0,.5)!important;
+    display: flex;
+    flex-direction: row;
+}
+#infoLineaContainer,#infoStazioneContainer
+{
+    width:130px;
+    font-family: 'Questrial', sans-serif;
+    font-weight: normal;
+    height: 30px;
+    line-height: 30px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    box-sizing: border-box;
+    text-align: left;
+    border:none;
+    background-color:#3A3A3A ;
+    border-radius: 4px;
+    font-size: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    color:rgb(182, 182, 182);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.logo-container
+{
+    height:50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width:calc(100% - 560px);
+}
+.logo-container img
+{
+    height:40px;
+}
+#usernameContainer
+{
+    width:130px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: auto;
+    font-family: 'Questrial', sans-serif;
+    font-weight: normal;
+    height: 30px;
+    line-height: 30px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 20px;
+    text-align: right;
+    font-size: 16px;
+    color:#EBEBEB;
+}
+.section-container
+{
+    box-sizing: border-box;
+    padding:20px;
+    width:100% - 40px;
+    height:calc(100% - 50px);
+    display: flex;
+    flex-direction: row;
+}
+#listOuterContainer
+{
+    width:500px;
+    height:100%;
+    background-color: #333333;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    display: flex;
+    /*border-radius: 4px;*/
+    flex-direction: column;
+    box-sizing: border-box;
+}
+#listTitleContainer
+{
+    width: 100%;
+    height:50px;
+    line-height: 50px;
+    box-sizing: border-box;
+    color:#EBEBEB;
+    background-color: #3d3d3d;/*494949*/
+    box-shadow: 0 2px 3px rgba(0,0,0,0.16), 0 2px 3px rgba(0,0,0,0.23);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+#listTitleContainer span
+{
+    font-family: 'Questrial', sans-serif;
+    font-weight: normal;
+    text-align: left;
+    font-size: 16px;
+    margin-left: 15px;
+}
+#listTitleContainer i
+{
+    margin-left: 20px;
+}
+#listInnerContainer
+{
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding:5px;
+    /*height:calc(100% - )*/
+    width: 100%;
+}
+.lotti-item
+{
+    height: 25px;
+    line-height: 25px;
+    width: calc(100% - 10px);
+    margin:5px;
+    border:none;
+    outline:none;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.16), 0 2px 3px rgba(0,0,0,0.23);
+    background-color: #404040;
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    font-size: 16px;
+    color:#EBEBEB;
+    box-sizing: border-box;
+    padding-left: 10px;
+    /*padding-right: 5px;*/
+}
+.lotti-item:focus
+{
+    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+    background-color: #494949;
+}
+.lotti-item:active
+{
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    background-color: #494949;
+}
+.lotti-item span
+{
+    margin-right: 10px;
+    font-family: 'Questrial', sans-serif;
+    font-weight: normal;
+    font-size: 14px;
+}
+#pdfContainer
+{
+    width:calc(100% - 520px); 
+    margin-left: 20px;
+    height:100%;
+    background-color: #333333;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
