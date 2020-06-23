@@ -18,18 +18,46 @@
 </head>
 <body>
     <header class="structure-header">
-        <div id="infoLineaContainer"></div>
-        <div id="infoStazioneContainer"></div>
-        <div class="logo-container">
-            <img src="images/logo.png" alt="Logo">
+        <div class="structure-header-inner-container" style="width:calc(50% - 60px)">
+            <div id="infoLineaContainer" class="info-filters-container"></div>
+            <div id="infoStazioneContainer" class="info-filters-container"></div>
+            <div id="filtroLineaContainer" class="info-filters-container"></div>
+            <div id="filtroStazioneContainer" class="info-filters-container"></div>
+            <div id="filtroAvanzamentoContainer" class="info-filters-container"></div>
         </div>
-        <div id="usernameContainer"></div>
+        <div class="structure-header-inner-container">
+            <div class="logo-container">
+                <img src="images/logo.png" alt="Logo">
+            </div>
+        </div>
+        <div class="structure-header-inner-container" style="width:calc(50% - 60px)">
+            <div id="usernameContainer"></div>
+            <!--<button onclick="chiudiKit()">chiudi kit</button>
+            <button onclick="chiudiCabina()">chiudi cabina</button>-->
+        </div>
     </header>
     <div class="section-container">
         <div id="listOuterContainer">
-            <div id="listTitleContainer">
-                <i class="fad fa-layer-group"></i>
-                <span id="labelLottoSelezionato">Scegli un lotto</span>
+            <div class="listTitleContainer">
+                <div class="listTitleItem">
+                    <div class="listTitleItemRow">
+                        <i class="fad fa-layer-group"></i>
+                        <span id="labelLottoSelezionato">Scegli un lotto</span>
+                    </div>
+                    <div class="listTitleItemRow">
+                        <i class="fal fa-cube"></i>
+                        <span id="labelCabinaCorridoioSelezionato">Scegli una cabina / un corridoio</span>
+                    </div>
+                </div>
+                <!--<div class="listTitleItem">
+                    <i class="fad fa-layer-group"></i>
+                    <span id="labelLottoSelezionato">Scegli un lotto</span>
+                </div>
+                <div class="listTitleItem">
+                    <i class="fad fa-layer-group"></i>
+                    <span id="labelLottoSelezionato">Scegli un lotto</span>
+                </div>-->
+                <input type="number" id="inputNumber">
             </div>
             <div id="listInnerContainer"></div>
         </div>

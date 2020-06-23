@@ -1,15 +1,21 @@
 .swal2-title
 {
     font-family:'Questrial',sans-serif;
-    font-size:20px;
+    font-size:15px;
+    color:#EBEBEB;
+    font-weight: normal;
 }
 .swal2-content
 {
     font-family:'Questrial',sans-serif;
     font-size:15px;
+    color:#EBEBEB;
+    font-weight: normal;
 }
 .swal2-confirm,.swal2-cancel
 {
     font-family:'Questrial',sans-serif;
     font-size:15px;
+    color:#EBEBEB;
+    font-weight: normal;
 }

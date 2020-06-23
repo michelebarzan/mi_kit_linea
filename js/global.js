@@ -43,6 +43,22 @@ function setSessionValue(name,value)
 {
 
 }
+function getServerValue(name)
+{
+    return new Promise(function (resolve, reject) 
+    {
+        $.get("getServerValue.php",{name},
+        function(response, status)
+        {
+            if(status=="success")
+            {
+                resolve(response);
+            }
+            else
+                reject({status});
+        });
+    });
+}
 function getFirstObjByPropValue(array,prop,propValue)
 {
     var return_item;
@@ -54,4 +70,12 @@ function getFirstObjByPropValue(array,prop,propValue)
         }
     });
     return return_item;
+}
+function logout()
+{
+    $.get("logout.php",
+    function(response, status)
+    {
+        window.location = 'login.html';
+    });
 }

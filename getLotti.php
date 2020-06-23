@@ -4,7 +4,7 @@
 
     $lotti=[];
 
-    $query2="SELECT * FROM dbo.lotti";	
+    $query2="SELECT * FROM dbo.lotti WHERE producibile='true' and chiuso='false'";	
     $result2=sqlsrv_query($conn,$query2);
     if($result2==TRUE)
     {
@@ -12,6 +12,7 @@
         {
             $lotto["id_lotto"]=$row2['id_lotto'];
             $lotto["lotto"]=$row2['lotto'];
+            $lotto["commessa"]=$row2['commessa'];
 
             array_push($lotti,$lotto);
         }
