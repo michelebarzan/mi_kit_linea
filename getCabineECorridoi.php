@@ -6,6 +6,7 @@
     $commessa=$_REQUEST['commessa'];
     $filtroLinea=$_REQUEST['filtroLinea'];
     $filtroStazione=$_REQUEST['filtroStazione'];
+    $id_turno=$_REQUEST['id_turno'];
     $id_linea=$_REQUEST['id_linea'];
     $id_stazione_precedente=$_REQUEST['id_stazione_precedente'];
     $filtroAvanzamento=$_REQUEST['filtroAvanzamento'];
@@ -14,6 +15,12 @@
 
     if($filtroLinea=="attivo")
     {
+        $filtroTurno="";
+        if($id_turno!=="*")
+        {
+            $filtroTurno="AND (dbo.linee_cabine_corridoi.turno = $id_turno)";
+        }
+
         $query2="SELECT derivedtbl_1.disegno_cabina, derivedtbl_1.numero_cabina,derivedtbl_1.tipo
                 FROM dbo.linee_cabine_corridoi INNER JOIN
                     (SELECT DISTINCT disegno_cabina, numero_cabina,tipo
@@ -22,7 +29,7 @@
                                                 UNION ALL
                                                 SELECT commessa, lotto, numero_cabina, disegno_cabina, kit, posizione, qnt,'corridoio' AS tipo
                                                 FROM dbo.view_corridoi) AS derivedtbl_2) AS derivedtbl_1 ON dbo.linee_cabine_corridoi.cabina_corridoio = derivedtbl_1.numero_cabina
-                WHERE (dbo.linee_cabine_corridoi.lotto = '$lotto') AND (dbo.linee_cabine_corridoi.commessa = '$commessa') AND (dbo.linee_cabine_corridoi.linea = $id_linea)";	
+                WHERE (dbo.linee_cabine_corridoi.lotto = '$lotto') AND (dbo.linee_cabine_corridoi.commessa = '$commessa') AND (dbo.linee_cabine_corridoi.linea = $id_linea) $filtroTurno";	
         $result2=sqlsrv_query($conn,$query2);
         if($result2==TRUE)
         {

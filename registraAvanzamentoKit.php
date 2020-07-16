@@ -11,42 +11,49 @@
     $id_utente=$_REQUEST['id_utente'];
     $posizione=$_REQUEST['posizione'];
 
-    $query1="SELECT COUNT(*) AS numero FROM dbo.kit_linea WHERE linea=$id_linea";	
-    $result1=sqlsrv_query($conn,$query1);
-    if($result1==TRUE)
+    $query0="DELETE FROM dbo.kit_linea WHERE lotto='$lotto' AND cabina='$cabina' AND posizione='$posizione' AND stazione=$id_stazione";	
+    $result0=sqlsrv_query($conn,$query0);
+    if($result0==TRUE)
     {
-        while($row1=sqlsrv_fetch_array($result1))
+        $query1="SELECT COUNT(*) AS numero FROM dbo.kit_linea WHERE linea=$id_linea";	
+        $result1=sqlsrv_query($conn,$query1);
+        if($result1==TRUE)
         {
-            $numero=$row1['numero']+1;
+            while($row1=sqlsrv_fetch_array($result1))
+            {
+                $numero=$row1['numero']+1;
+            }
         }
-    }
-    else
-        die("error");
+        else
+            die("error");
 
-    $query2="INSERT INTO [dbo].[kit_linea]
-                ([numero]
-                ,[lotto]
-                ,[cabina]
-                ,[kit]
-                ,[stazione]
-                ,[utente]
-                ,[linea]
-                ,[dataOra]
-                ,[posizione])
-            VALUES
-                ($numero
-                ,'$lotto'
-                ,'$cabina'
-                ,'$kit'
-                ,$id_stazione
-                ,$id_utente
-                ,$id_linea
-                ,GETDATE()
-                ,'$posizione')";	
-    $result2=sqlsrv_query($conn,$query2);
-    if($result2==TRUE)
-    {
-        echo "ok";
+        $query2="INSERT INTO [dbo].[kit_linea]
+                    ([numero]
+                    ,[lotto]
+                    ,[cabina]
+                    ,[kit]
+                    ,[stazione]
+                    ,[utente]
+                    ,[linea]
+                    ,[dataOra]
+                    ,[posizione])
+                VALUES
+                    ($numero
+                    ,'$lotto'
+                    ,'$cabina'
+                    ,'$kit'
+                    ,$id_stazione
+                    ,$id_utente
+                    ,$id_linea
+                    ,GETDATE()
+                    ,'$posizione')";	
+        $result2=sqlsrv_query($conn,$query2);
+        if($result2==TRUE)
+        {
+            echo "ok";
+        }
+        else
+            die("error");
     }
     else
         die("error");

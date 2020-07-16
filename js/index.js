@@ -8,15 +8,19 @@ var numbers_array=
 };
 var view;
 var iframe;
+var ordinamentoKit;
+var mostraMisureTraversine;
 var filtroLinea;
 var filtroStazione;
 var filtroAvanzamento;
+var turno;
 var linea;
 var stazione;
 var id_utente;
 var interval;
 var frequenza_aggiornamento_dati_linea
 var dot;
+var shownPdf;
 
 window.addEventListener("load", async function(event)
 {
@@ -24,16 +28,30 @@ window.addEventListener("load", async function(event)
 
     frequenza_aggiornamento_dati_linea=await getParametro("frequenza_aggiornamento_dati_linea");
     frequenza_aggiornamento_dati_linea=parseInt(frequenza_aggiornamento_dati_linea);
-    console.log(frequenza_aggiornamento_dati_linea)
 
+    var nome_turno=await getSessionValue("turno");
     var nome_linea=await getSessionValue("linea");
     var nome_stazione=await getSessionValue("stazione");
 
+    var turni=await getAnagraficaTurni();
     var linee=await getAnagraficaLinee();
     var stazioni=await getAnagraficaStazioni();
 
+    turno=getFirstObjByPropValue(turni,"nome",nome_turno);
     stazione=getFirstObjByPropValue(stazioni,"nome",nome_stazione);
     linea=getFirstObjByPropValue(linee,"nome",nome_linea);
+
+    console.log(turno);
+
+    ordinamentoKit=await getCookie("ordinamentoKit");
+    if(ordinamentoKit=="")
+        ordinamentoKit="kit";
+    //setOrdinamentoKitLabel();
+
+    mostraMisureTraversine=await getCookie("mostraMisureTraversine");
+    if(mostraMisureTraversine=="")
+        mostraMisureTraversine="false";
+    //setMostraMisureTraversineLabel();
 
     filtroLinea=await getCookie("filtroLinea");
     if(filtroLinea=="")
@@ -62,24 +80,54 @@ window.addEventListener("load", async function(event)
     document.getElementById("infoStazioneContainer").setAttribute("id_stazione",stazione.id_stazione);
 
     var username=await getSessionValue("username");
-    document.getElementById("usernameContainer").innerHTML=username+'<i class="fad fa-user" style="margin-left:20px"></i>';
+    document.getElementById("usernameContainer").innerHTML=username+'<i class="fad fa-user" style="margin-left:10px"></i>';
 
     getListLotti(true);
 
-    funzioniTasti=await getParametriByHelp("funzione_tasto");
-
+    funzioniTasti=await getFunzioniTasti();
+    
     interval = setInterval(checkLists, frequenza_aggiornamento_dati_linea);
 
 });
+function getFunzioniTasti()
+{
+    return new Promise(function (resolve, reject) 
+    {
+        $.get("getFunzioniTasti.php",
+        function(response, status)
+        {
+            if(status=="success")
+            {
+                resolve(JSON.parse(response));
+            }
+            else
+                reject({status});
+        });
+    });
+}
 function checkLists()
 {
     switch (view)
     {
         case "lotti":getListLotti(false);break;
         case "cabine_corridoi":getListCabineECorridoi(false);break;
-        case "kit":getListKit(false);break;
+        case "kit":if(mostraMisureTraversine=="false"){getListKit(false)};break;
         default:break;
     }
+}
+function setOrdinamentoKitLabel()
+{
+    if(ordinamentoKit=="kit")
+        document.getElementById("ordinamentoContainer").innerHTML="Ordinati per codice";
+    if(ordinamentoKit=="posizione")
+        document.getElementById("ordinamentoContainer").innerHTML="Ordinati per posizione";
+}
+function setMostraMisureTraversineLabel()
+{
+    if(mostraMisureTraversine=="true")
+        document.getElementById("mostraMisureTraversineContainer").innerHTML="Mostra misure traversine";
+    if(mostraMisureTraversine=="false")
+        document.getElementById("mostraMisureTraversineContainer").innerHTML="Nascondi misure traversine";
 }
 function setFiltroLineaLabel()
 {
@@ -222,6 +270,36 @@ window.addEventListener("keydown", function(event)
         case 55:setNumber(event.key);break;//7
         case 56:setNumber(event.key);break;//8
         case 57:setNumber(event.key);break;//9
+        case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","elimina_registrazione_avanzamento_kit").valore):
+            event.preventDefault();
+            if(view=="kit")
+            {
+                eliminaRegistrazioneAvanzamentoKit(focused);
+            }
+        break;
+        case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_mostra_misure_traversine").valore):
+            event.preventDefault();
+            if(view=="kit" && stazione.nome=="traversine")
+            {
+                if(mostraMisureTraversine=="true")
+                    mostraMisureTraversine="false";
+                else
+                    mostraMisureTraversine="true";
+                getListKit(false);
+            }
+        break;
+        case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_ordinamento").valore):
+            event.preventDefault();
+            if(view=="kit")
+            {
+                if(ordinamentoKit=="kit")
+                    ordinamentoKit="posizione";
+                else
+                    ordinamentoKit="kit";
+                //setOrdinamentoKitLabel();
+                getListKit(false);
+            }
+        break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_filtro_linea").valore):
             event.preventDefault();
             toggleFiltroLinea();
@@ -270,10 +348,10 @@ window.addEventListener("keydown", function(event)
                         selectLotto(focused);
                     break;
                     case "cabine_corridoi":
-                        selectCabinaCorridoio(focused);
+                        shownPdf=null;selectCabinaCorridoio(focused);
                     break;
                     case "kit":
-                        confermaKit(focused);
+                        shownPdf=null;confermaKit(focused);
                     break;
                 }
             }
@@ -297,7 +375,10 @@ window.addEventListener("keydown", function(event)
                 {
                     case "cabine_corridoi":
                         if(focused!=null)
+                        {
+                            shownPdf=null;
                             selectCabinaCorridoio(focused);
+                        }
                     break;
                     case "lotti":break;
                     default:
@@ -318,14 +399,14 @@ window.addEventListener("keydown", function(event)
             event.preventDefault();
             zoomout()
         break;
-        case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","zoom_+_2").valore):
+        /*case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","zoom_+_2").valore):
             event.preventDefault();
             zoomin()
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","zoom_-_2").valore):
             event.preventDefault();
             zoomout()
-        break;
+        break;*/
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","muovi_su").valore):
             event.preventDefault();
             scrolltop();
@@ -393,6 +474,56 @@ function scrollright()
         if(iframe!=null)
             iframe.contentWindow.document.getElementById("viewerContainer").scrollLeft+=50;
     } catch (error) {}
+}
+async function eliminaRegistrazioneAvanzamentoKit(number)
+{
+    kitSelezionato=getFirstObjByPropValue(kit,"number",number);
+
+    var lotto=lottoSelezionato.lotto;
+    var cabina=cabina_corridoioSelezionato.numero_cabina;
+    var id_stazione=stazione.id_stazione;
+
+    $.get("eliminaRegistrazioneAvanzamentoKit.php",
+    {
+        lotto,
+        cabina,
+        posizione:kitSelezionato.posizione,
+        id_stazione
+    },
+    function(response, status)
+    {
+        if(status=="success")
+        {
+            if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+            {
+                Swal.fire
+                ({
+                    background:"#404040",
+                    icon: 'error',
+                    title: "Errore. Se il problema persiste contatta l' amministratore",
+                    showConfirmButton:false,
+                    showCloseButton:true
+                });
+                console.log(response);
+            }
+            else
+            {
+                getListKit(true);
+            }
+        }
+        else
+        {
+            Swal.fire
+            ({
+                background:"#404040",
+                icon: 'error',
+                title: "Errore. Se il problema persiste contatta l' amministratore",
+                showConfirmButton:false,
+                showCloseButton:true
+            });
+            console.log(status);
+        }
+    });
 }
 async function confermaKit(number)
 {
@@ -463,24 +594,48 @@ function selectCabinaCorridoio(number)
 async function getListKit(cleanFocused)
 {
     view="kit";
+
+    document.getElementById("ordinamentoContainer").style.display="";
+    setOrdinamentoKitLabel();
+
+    setCookie("ordinamentoKit",ordinamentoKit);
+
+    if(stazione.nome=="traversine")
+    {
+        document.getElementById("mostraMisureTraversineContainer").style.display="";
+        setMostraMisureTraversineLabel();
+
+        setCookie("mostraMisureTraversine",mostraMisureTraversine);
+    }
+    else
+        document.getElementById("mostraMisureTraversineContainer").style.display="none";
+    
     if(cleanFocused)
     {
         numbers_array[view]=[];
         focused=null;
         document.getElementById("inputNumber").value="";
+        document.getElementById("pdfContainer").innerHTML="";
+        iframe=null;
     }
 
     kitSelezionato=null;
 
-    document.getElementById("pdfContainer").innerHTML="";
-    iframe=null;
+    /*document.getElementById("pdfContainer").innerHTML="";
+    iframe=null;*/
 
     var container=document.getElementById("listInnerContainer");
     container.innerHTML="";
 
+    if(mostraMisureTraversine=="true")
+        container.innerHTML='<div id="listInnerContainerSpinner"><i class="fad fa-spinner fa-spin"></i><span>Caricamento in corso...</span></div>'
+
     var i=1;
     kit=await getKit(lottoSelezionato.lotto,lottoSelezionato.commessa,cabina_corridoioSelezionato.numero_cabina);
-    //console.log(kit);
+
+    if(mostraMisureTraversine=="true")
+        container.innerHTML="";
+
     kit.forEach(function (kitItem)
     {
         if(i<10)
@@ -509,9 +664,67 @@ async function getListKit(cleanFocused)
         span.innerHTML="<u>Pos:</u> "+kitItem["posizione"];
         item.appendChild(span);
 
-        var span=document.createElement("span");
-        span.innerHTML="<u>Qnt:</u> "+kitItem["qnt"];
-        item.appendChild(span);
+        if(filtroAvanzamento=="inattivo")
+        {
+            if(kitItem.registrato)
+            {
+                var fa=document.createElement("i");
+                fa.setAttribute("class","fad fa-check-circle");
+                fa.setAttribute("style","color:#70B085;margin-left:auto;margin-top:5px;margin-right:5px;font-size:15px");
+                item.appendChild(fa);
+            }
+        }
+
+        if(mostraMisureTraversine=="true")
+        {
+            var table=document.createElement("table");
+            table.setAttribute("class","misure-traversine-table");
+
+            var tr=document.createElement("tr");
+                
+            var th=document.createElement("th");
+            th.innerHTML="CODMAT";
+            tr.appendChild(th);
+
+            var th=document.createElement("th");
+            th.innerHTML="LUNG";
+            tr.appendChild(th);
+
+            var th=document.createElement("th");
+            th.innerHTML="POS";
+            tr.appendChild(th);
+
+            table.appendChild(tr);
+
+            var j=0;
+            kitItem.traversine.forEach(traversina => 
+            {
+                var tr=document.createElement("tr");
+                
+                var td=document.createElement("td");
+                if(j==kitItem.traversine.length-1)
+                    td.setAttribute("style","border-bottom:none");
+                td.innerHTML=traversina.CODMAT;
+                tr.appendChild(td);
+
+                var td=document.createElement("td");
+                if(j==kitItem.traversine.length-1)
+                    td.setAttribute("style","border-bottom:none");
+                td.innerHTML=traversina.LUNG;
+                tr.appendChild(td);
+
+                var td=document.createElement("td");
+                if(j==kitItem.traversine.length-1)
+                    td.setAttribute("style","border-bottom:none");
+                td.innerHTML=traversina.posizione_traversina;
+                tr.appendChild(td);
+
+                table.appendChild(tr);
+                j++;
+            });
+
+            item.appendChild(table);
+        }
 
         container.appendChild(item);
 
@@ -519,6 +732,18 @@ async function getListKit(cleanFocused)
 
         i++;
     });
+    if(mostraMisureTraversine=="true")
+    {
+        var kitItems=document.getElementsByClassName("kit-item");
+        for (let index = 0; index < kitItems.length; index++)
+        {
+            const kitItem = kitItems[index];
+            var table=kitItem.getElementsByTagName("table")[0];
+            var height=table.offsetHeight+35;
+            kitItem.style.minHeight=height+"px";
+        }
+    }
+
     if(!cleanFocused && focused!=null)
     {
         document.getElementById(view+"Item"+focused).focus();   
@@ -540,7 +765,9 @@ function getKit(lotto,commessa,numero_cabina)
             id_linea,
             id_stazione,
             id_stazione_precedente,
-            filtroAvanzamento
+            filtroAvanzamento,
+            ordinamentoKit,
+            mostraMisureTraversine
         },
         function(response, status)
         {
@@ -564,6 +791,10 @@ function logout()
 async function getListLotti(cleanFocused)
 {
     view="lotti";
+
+    document.getElementById("ordinamentoContainer").style.display="none";
+    document.getElementById("mostraMisureTraversineContainer").style.display="none";
+    
     if(cleanFocused)
     {
         numbers_array[view]=[];
@@ -627,18 +858,24 @@ function selectLotto(number)
 async function getListCabineECorridoi(cleanFocused)
 {
     view="cabine_corridoi";
+
+    document.getElementById("ordinamentoContainer").style.display="none";
+    document.getElementById("mostraMisureTraversineContainer").style.display="none";
+
     if(cleanFocused)
     {
         numbers_array[view]=[];
         focused=null;
         document.getElementById("inputNumber").value="";
+        document.getElementById("pdfContainer").innerHTML="";
+        iframe=null;
     }
 
     cabina_corridoioSelezionato=null;
     document.getElementById("labelCabinaCorridoioSelezionato").innerHTML="Scegli una cabina / un corridoio";
 
-    document.getElementById("pdfContainer").innerHTML="";
-    iframe=null;
+    /*document.getElementById("pdfContainer").innerHTML="";
+    iframe=null;*/
 
     var container=document.getElementById("listInnerContainer");
     container.innerHTML="";
@@ -687,17 +924,21 @@ async function getListCabineECorridoi(cleanFocused)
 }
 async function getPdf(folder,fileName)
 {
-    /*var container=document.getElementById("pdfContainer");
-    container.innerHTML="";
+    /*if(fileName != shownPdf)
+    {
+        shownPdf=fileName;
+        var container=document.getElementById("pdfContainer");
+        container.innerHTML="";
 
-    iframe=document.createElement("iframe");
-    iframe.setAttribute("id","");
-    iframe.setAttribute("class","");
-    iframe.setAttribute("onload","fixPdf(this)");
-    var server_adress=await getServerValue("SERVER_ADDR");
-    var server_port=await getServerValue("SERVER_PORT");
-    iframe.setAttribute("src","http://"+server_adress+":"+server_port+"/mi_kit_pdf/pdf.js/web/viewer.html?file=pdf/"+folder+"/"+fileName+".pdf");
-    container.appendChild(iframe);*/
+        iframe=document.createElement("iframe");
+        iframe.setAttribute("id","");
+        iframe.setAttribute("class","");
+        iframe.setAttribute("onload","fixPdf(this);shownPdf='"+fileName+"';");
+        var server_adress=await getServerValue("SERVER_ADDR");
+        var server_port=await getServerValue("SERVER_PORT");
+        iframe.setAttribute("src","http://"+server_adress+":"+server_port+"/mi_kit_pdf/pdf.js/web/viewer.html?file=pdf/"+folder+"/"+fileName+".pdf");
+        container.appendChild(iframe);
+    }*/
 }
 function fixPdf(iframe)
 {
@@ -727,6 +968,7 @@ function getCabineECorridoi(lotto,commessa)
 {
     return new Promise(function (resolve, reject) 
     {
+        var id_turno=turno.id_turno;
         var id_linea=linea.id_linea;
         var id_stazione_precedente=stazione.stazione_precedente;
         $.get("getCabineECorridoi.php",
@@ -735,6 +977,7 @@ function getCabineECorridoi(lotto,commessa)
             commessa,
             filtroLinea,
             filtroStazione,
+            id_turno,
             id_linea,
             id_stazione_precedente,
             filtroAvanzamento
@@ -760,6 +1003,24 @@ function getLotti()
             if(status=="success")
             {
                 resolve(JSON.parse(response));
+            }
+            else
+                reject({status});
+        });
+    });
+}
+function getAnagraficaTurni()
+{
+    return new Promise(function (resolve, reject) 
+    {
+        $.get("getAnagraficaTurni.php",
+        function(response, status)
+        {
+            if(status=="success")
+            {
+                var arrayRespone=JSON.parse(response);
+                arrayRespone.push({"id_turno":"*","nome":"*","label":"Tutti"});
+                resolve(arrayRespone);
             }
             else
                 reject({status});

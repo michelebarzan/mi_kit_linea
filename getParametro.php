@@ -4,7 +4,7 @@
 
     $nome=$_REQUEST["nome"];
 
-    $qParametri="SELECT [id_parametro],[nome],[valore] FROM [mi_linea_kit_parametri].[dbo].[parametri] WHERE nome='$nome'";
+    $qParametri="SELECT [id_parametro],[nome],[valore] FROM [dbo].[parametri] WHERE nome='$nome'";
     $rParametri=sqlsrv_query($conn,$qParametri);
     if($rParametri==FALSE)
     {

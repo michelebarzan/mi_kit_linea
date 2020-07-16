@@ -5,7 +5,7 @@
     $help=$_REQUEST["help"];
     $parametri=[];
 
-    $qParametri="SELECT * FROM [mi_linea_kit_parametri].[dbo].[parametri] WHERE help='$help'";
+    $qParametri="SELECT * FROM [dbo].[parametri] WHERE help='$help'";
     $rParametri=sqlsrv_query($conn,$qParametri);
     if($rParametri==FALSE)
     {

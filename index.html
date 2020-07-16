@@ -18,12 +18,12 @@
 </head>
 <body>
     <header class="structure-header">
-        <div class="structure-header-inner-container" style="width:calc(50% - 60px)">
-            <div id="infoLineaContainer" class="info-filters-container"></div>
-            <div id="infoStazioneContainer" class="info-filters-container"></div>
+        <div class="structure-header-inner-container" style="width:calc(50% - 60px);box-sizing:border-box;padding-right: 10px;">
             <div id="filtroLineaContainer" class="info-filters-container"></div>
             <div id="filtroStazioneContainer" class="info-filters-container"></div>
             <div id="filtroAvanzamentoContainer" class="info-filters-container"></div>
+            <div id="ordinamentoContainer" style="display :none;" class="info-filters-container"></div>
+            <div id="mostraMisureTraversineContainer" style="display :none;" class="info-filters-container"></div>
         </div>
         <div class="structure-header-inner-container">
             <div class="logo-container">
@@ -31,6 +31,8 @@
             </div>
         </div>
         <div class="structure-header-inner-container" style="width:calc(50% - 60px)">
+            <div id="infoLineaContainer" class="info-filters-container" style="margin-left: auto;"></div>
+            <div id="infoStazioneContainer" class="info-filters-container"></div>
             <div id="usernameContainer"></div>
             <!--<button onclick="chiudiKit()">chiudi kit</button>
             <button onclick="chiudiCabina()">chiudi cabina</button>-->
