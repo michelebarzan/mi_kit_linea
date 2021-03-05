@@ -29,7 +29,6 @@ window.addEventListener("load", async function(event)
 
     funzioniTasti=await getFunzioniTasti();
 
-
     turno=JSON.parse(turno);
     linea=JSON.parse(linea);
     stazione=JSON.parse(stazione);
@@ -52,7 +51,7 @@ window.addEventListener("load", async function(event)
         var item=document.createElement("button");
         item.setAttribute("class","login-user-item");
         item.setAttribute("id","loginUserItem"+utente.number);
-        item.setAttribute("onclick","login("+utente.number+")");
+        item.setAttribute("onclick","login('"+utente.number+"')");
 
         var i=document.createElement("i");
         i.setAttribute("class","fad fa-user");
@@ -164,7 +163,7 @@ async function login(number)
     var utente=await getFirstObjByPropValue(utenti,"number",number);
     var username=utente.username;
     var turno=document.getElementById("loginTurnoContainer").value;
-    var stazione=document.getElementById("loginStazioneContainer").value;
+    var nomeStazione=stazione.nome;
     var linea=document.getElementById("loginLineaContainer").value;
 
     button.innerHTML='<i class="fad fa-spinner-third fa-spin"></i>';
@@ -172,7 +171,7 @@ async function login(number)
     {
         username,
         turno,
-        stazione,
+        stazione:nomeStazione,
         linea
     },
     function(response, status)
@@ -194,7 +193,7 @@ async function login(number)
             else
             {
                 button.innerHTML='<i class="far fa-check-circle" style="color:#70B085"></i>';
-                window.location = 'index.html';
+                window.location = stazione.pagina;
             }
         }
         else
@@ -354,9 +353,9 @@ window.addEventListener("keydown", function(event)
                     if(stazioni.length>0)
                     {
                         var nome=document.getElementById("loginStazioneContainer").value;
-                        var stazione=getFirstObjByPropValue(stazioni,"nome",nome);
+                        var stazioneLocal=getFirstObjByPropValue(stazioni,"nome",nome);
 
-                        var index=stazioni.indexOf(stazione);
+                        var index=stazioni.indexOf(stazioneLocal);
                         var new_index=index-1;
                         if(stazioni.indexOf(new_index)==-1)
                             var new_index=index+1;
@@ -364,6 +363,7 @@ window.addEventListener("keydown", function(event)
                             var new_index=0;
                         //console.log(new_index)
                         var new_stazione=stazioni[new_index];
+                        stazione=new_stazione;
 
                         document.getElementById("loginStazioneContainer").value=new_stazione.nome;
                         document.getElementById("loginStazioneContainer").innerHTML=new_stazione.label;
@@ -433,9 +433,9 @@ window.addEventListener("keydown", function(event)
                     if(stazioni.length>0)
                     {
                         var nome=document.getElementById("loginStazioneContainer").value;
-                        var stazione=getFirstObjByPropValue(stazioni,"nome",nome);
+                        var stazioneLocal=getFirstObjByPropValue(stazioni,"nome",nome);
 
-                        var index=stazioni.indexOf(stazione);
+                        var index=stazioni.indexOf(stazioneLocal);
                         var new_index=index-1;
                         if(stazioni.indexOf(new_index)==-1)
                             var new_index=index+1;
@@ -443,6 +443,7 @@ window.addEventListener("keydown", function(event)
                             var new_index=0;
                         //console.log(new_index)
                         var new_stazione=stazioni[new_index];
+                        stazione=new_stazione;
 
                         document.getElementById("loginStazioneContainer").value=new_stazione.nome;
                         document.getElementById("loginStazioneContainer").innerHTML=new_stazione.label;
@@ -570,4 +571,119 @@ function getParametriByHelp(help)
                 reject({status});
         });
     });
+}
+function clickCambiaTurno()
+{
+    var nome=document.getElementById("loginTurnoContainer").value;
+    var turno=getFirstObjByPropValue(turni,"nome",nome);
+
+    var index=turni.indexOf(turno);
+    var new_index=index-1;
+    if(turni.indexOf(new_index)==-1)
+        var new_index=index+1;
+    if(new_index==turni.length)
+        var new_index=0;
+    //console.log(new_index)
+    var new_turno=turni[new_index];
+
+    document.getElementById("loginTurnoContainer").value=new_turno.nome;
+    document.getElementById("loginTurnoContainer").innerHTML=new_turno.label;
+    setCookie("turno",JSON.stringify(new_turno));
+}
+function clickCambiaLinea()
+{
+    if(passwordCambiaLineaStazione==false)
+    {
+        var input=document.createElement("input");
+        input.setAttribute("type","password");
+        input.setAttribute("id","inputPasswordCambiaLineaStazione");
+        input.setAttribute("onkeyup","checkEnter(event)");
+
+        Swal.fire
+        ({
+            title: 'Inserisci la password',
+            showCloseButton: false,
+            showConfirmButton:false,
+            showCancelButton:false,
+            showLoaderOnConfirm: true,
+            background:"#353535",
+            html:input.outerHTML,
+            onOpen : function()
+                    {
+                        document.getElementsByClassName("swal2-close")[0].style.outline="none";
+                    },
+        });
+    }
+    else
+    {
+        document.getElementById("loginLineaContainer").focus();
+        focused2="loginLineaContainer";
+        if(linee.length>0)
+        {
+            var nome=document.getElementById("loginLineaContainer").value;
+            var linea=getFirstObjByPropValue(linee,"nome",nome);
+
+            var index=linee.indexOf(linea);
+            var new_index=index-1;
+            if(linee.indexOf(new_index)==-1)
+                var new_index=index+1;
+            if(new_index==linee.length)
+                var new_index=0;
+            //console.log(new_index)
+            var new_linea=linee[new_index];
+
+            document.getElementById("loginLineaContainer").value=new_linea.nome;
+            document.getElementById("loginLineaContainer").innerHTML=new_linea.label;
+            setCookie("linea",JSON.stringify(new_linea));
+        }
+    }
+}
+function clickCambiaStazione()
+{
+    if(passwordCambiaLineaStazione==false)
+    {
+        var input=document.createElement("input");
+        input.setAttribute("type","password");
+        input.setAttribute("id","inputPasswordCambiaLineaStazione");
+        input.setAttribute("onkeyup","checkEnter(event)");
+
+        Swal.fire
+        ({
+            title: 'Inserisci la password',
+            showCloseButton: false,
+            showConfirmButton:false,
+            showCancelButton:false,
+            showLoaderOnConfirm: true,
+            background:"#353535",
+            html:input.outerHTML,
+            onOpen : function()
+                    {
+                        document.getElementsByClassName("swal2-close")[0].style.outline="none";
+                    },
+        });
+    }
+    else
+    {
+        document.getElementById("loginStazioneContainer").focus();
+        focused2="loginStazioneContainer";
+        if(stazioni.length>0)
+        {
+            var nome=document.getElementById("loginStazioneContainer").value;
+            var stazioneLocal=getFirstObjByPropValue(stazioni,"nome",nome);
+
+            var index=stazioni.indexOf(stazioneLocal);
+            var new_index=index-1;
+            if(stazioni.indexOf(new_index)==-1)
+                var new_index=index+1;
+            if(new_index==stazioni.length)
+                var new_index=0;
+            //console.log(new_index)
+            var new_stazione=stazioni[new_index];
+            stazione=new_stazione;
+
+            document.getElementById("loginStazioneContainer").value=new_stazione.nome;
+            document.getElementById("loginStazioneContainer").innerHTML=new_stazione.label;
+            setCookie("stazione",JSON.stringify(new_stazione));
+        }
+    }
 }

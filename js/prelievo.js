@@ -21,8 +21,6 @@ var interval;
 var frequenza_aggiornamento_dati_linea
 var dot;
 var shownPdf;
-var raggruppamentoTraversine="LUNG";
-var popupRaggruppamentoTraversine=false;
 
 window.addEventListener("load", async function(event)
 {
@@ -252,7 +250,7 @@ function setNumber(key)
         }
     }
 }
-window.addEventListener("keydown", async function(event)
+window.addEventListener("keydown", function(event)
 {
     clearInterval(interval);
     var keyCode=event.keyCode;
@@ -270,13 +268,6 @@ window.addEventListener("keydown", async function(event)
         case 55:setNumber(event.key);break;//7
         case 56:setNumber(event.key);break;//8
         case 57:setNumber(event.key);break;//9
-        case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","apri_popup_raggruppamento_traversine").valore):
-            event.preventDefault();
-            if(view=="kit" && stazione.nome=="traversine")
-            {
-                getPopupRaggruppamentoTraversine();
-            }
-        break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","elimina_registrazione_avanzamento_kit").valore):
             event.preventDefault();
             if(view=="kit")
@@ -358,44 +349,8 @@ window.addEventListener("keydown", async function(event)
                         shownPdf=null;selectCabinaCorridoio(focused);
                     break;
                     case "kit":
-                        shownPdf=null;
-                        kitSelezionato=getFirstObjByPropValue(kit,"number",focused);
-                        if(!kitSelezionato.chiuso && !kitSelezionato.registrato)
-                        {
-                            if(stazione.nome=="montaggio")
-                            {
-                                var kitRegistrato=await checkRegistrazioniKitStazioni();
-                                if(kitRegistrato)
-                                    chiudiKit();
-                                else
-                                {
-                                    Swal.fire
-                                    ({
-                                        icon:"warning",
-                                        title: 'Il kit '+kitSelezionato.kit+' non è stato registrato in tutte le stazioni precedenti',
-                                        showCloseButton: false,
-                                        showConfirmButton:true,
-                                        showCancelButton:true,
-                                        confirmButtonText:"Continua [INVIO]",
-                                        cancelButtonText:"Annulla [ESC]",
-                                        background:"#353535",
-                                        onOpen : function()
-                                                {
-                                                    document.getElementsByClassName("swal2-close")[0].style.outline="none";
-                                                },
-                                    }).then((result) => 
-                                    {
-                                        if(result.value)
-                                        {
-                                            chiudiKit();
-                                        }
-                                    });
-                                }
-                            }
-                            else
-                                confermaKit(focused);
-                        }
-                        break;
+                        shownPdf=null;confermaKit(focused);
+                    break;
                 }
             }
         break;
@@ -551,10 +506,7 @@ async function eliminaRegistrazioneAvanzamentoKit(number)
             }
             else
             {
-                //getListKit(true);
-                try {
-                    document.getElementById("iconCheckKit"+number).remove();
-                } catch (error) {}
+                getListKit(true);
             }
         }
         else
@@ -573,11 +525,9 @@ async function eliminaRegistrazioneAvanzamentoKit(number)
 }
 async function confermaKit(number)
 {
-    console.log("conferma kit");
+    console.clear();
 
-    //console.clear();
-
-    //kitSelezionato=getFirstObjByPropValue(kit,"number",number);
+    kitSelezionato=getFirstObjByPropValue(kit,"number",number);
 
     var lotto=lottoSelezionato.lotto;
     var cabina=cabina_corridoioSelezionato.numero_cabina;
@@ -612,26 +562,7 @@ async function confermaKit(number)
             }
             else
             {
-                //getListKit(true);
-                if(filtroAvanzamento=="inattivo")
-                {
-                    try {
-                        document.getElementById("iconCheckKit"+number).remove();
-                    } catch (error) {}
-
-                    var fa=document.createElement("i");
-                    fa.setAttribute("class","fad fa-check-circle");
-                    fa.setAttribute("id","iconCheckKit"+number);
-                    fa.setAttribute("style","color:#70B085;margin-left:auto;margin-top:5px;margin-right:5px;font-size:15px");
-                    if(document.getElementById("kitItem"+number).getElementsByTagName("table")[0]==null)
-                        document.getElementById("kitItem"+number).appendChild(fa);
-                    else
-                        document.getElementById("kitItem"+number).insertBefore(fa, document.getElementById("kitItem"+number).getElementsByTagName("table")[0]);
-                }
-                else
-                {
-                    document.getElementById("kitItem"+number).remove();
-                }
+                getListKit(true);
             }
         }
         else
@@ -733,28 +664,16 @@ async function getListKit(cleanFocused)
 
         if(filtroAvanzamento=="inattivo")
         {
-            if(kitItem.chiuso)
+            if(kitItem.registrato)
             {
                 var fa=document.createElement("i");
                 fa.setAttribute("class","fad fa-check-circle");
-                fa.setAttribute("id","iconCheckKit"+kitItem.number);
-                fa.setAttribute("style","color:#DA6969;margin-left:auto;margin-top:5px;margin-right:5px;font-size:15px");
+                fa.setAttribute("style","color:#70B085;margin-left:auto;margin-top:5px;margin-right:5px;font-size:15px");
                 item.appendChild(fa);
-            }
-            else
-            {
-                if(kitItem.registrato)
-                {
-                    var fa=document.createElement("i");
-                    fa.setAttribute("class","fad fa-check-circle");
-                    fa.setAttribute("id","iconCheckKit"+kitItem.number);
-                    fa.setAttribute("style","color:#70B085;margin-left:auto;margin-top:5px;margin-right:5px;font-size:15px");
-                    item.appendChild(fa);
-                }
             }
         }
 
-        if(stazione.nome=="traversine" && mostraMisureTraversine=="true")
+        if(mostraMisureTraversine=="true")
         {
             var table=document.createElement("table");
             table.setAttribute("class","misure-traversine-table");
@@ -811,7 +730,7 @@ async function getListKit(cleanFocused)
 
         i++;
     });
-    if(stazione.nome=="traversine" && mostraMisureTraversine=="true")
+    if(mostraMisureTraversine=="true")
     {
         var kitItems=document.getElementsByClassName("kit-item");
         for (let index = 0; index < kitItems.length; index++)
@@ -852,6 +771,7 @@ function getKit(lotto,commessa,numero_cabina)
         {
             if(status=="success")
             {
+                console.log(response);
                 resolve(JSON.parse(response));
             }
             else
@@ -972,8 +892,7 @@ async function getListCabineECorridoi(cleanFocused)
 
         var item=document.createElement("button");
         item.setAttribute("class","cabine_corridoi-item");
-        if(cabina_corridoio.tipo=="cabina")
-            item.setAttribute("onfocus","getPdf('cabine_corridoi','"+cabina_corridoio.numero_cabina+"')");
+        item.setAttribute("onfocus","getPdf('cabine_corridoi','"+cabina_corridoio.numero_cabina+"')");
         item.setAttribute("id","cabine_corridoiItem"+cabina_corridoio.number);
 
         var div=document.createElement("div");
@@ -1141,7 +1060,9 @@ function getAnagraficaStazioni()
 }
 function chiudiKit()
 {
-    console.log("chiudi kit");
+    var tmp = prompt("kit", "");
+    
+    var tmpKit=getFirstObjByPropValue(kit,"kit",tmp);
 
     var lotto=lottoSelezionato.lotto;
     var cabina=cabina_corridoioSelezionato.numero_cabina;
@@ -1150,11 +1071,8 @@ function chiudiKit()
     {
         lotto,
         cabina,
-        kit:kitSelezionato.kit,
-        posizione:kitSelezionato.posizione,
-        id_utente,
-        linea:linea.id_linea,
-        stazione:stazione.id_stazione
+        kit:tmpKit.kit,
+        posizione:tmpKit.posizione
     },
     function(response, status)
     {
@@ -1190,252 +1108,5 @@ function chiudiKit()
             });
             console.log(status);
         }
-    });
-}
-async function getPopupRaggruppamentoTraversine()
-{
-    popupRaggruppamentoTraversine=true;
-    Swal.fire
-    ({
-        title: "Caricamento in corso... ",
-        background:"transparent",
-        html: '<i style="color:white" class="fad fa-spinner-third fa-spin fa-4x"></i>',
-        showConfirmButton:false,
-        showCloseButton:false,
-        allowEscapeKey:false,
-        allowOutsideClick:false,
-        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="white";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";document.getElementsByClassName("swal2-close")[0].style.outline="none";}
-    });
-
-    var data=await getRaggruppamentoTraversine(kit);
-
-    var outerContainer=document.createElement("div");
-    outerContainer.setAttribute("class","raggruppamento-traversine-outer-container");
-
-    var tableContainer=document.createElement("div");
-    tableContainer.setAttribute("class","raggruppamento-traversine-table-container");
-
-    /*var headers=
-    [
-        {
-            value:raggruppamentoTraversine,
-            label:raggruppamentoTraversine
-        },
-        {
-            value:"n_kit",
-            label:"N. kit"
-        },
-        {
-            value:"kit",
-            label:"Kit"
-        }
-    ];*/
-    var headers=
-    [
-        {
-            value:"LUNG",
-            label:"LUNG"
-        },
-        {
-            value:"CODMAT",
-            label:"CODMAT"
-        },
-        {
-            value:"n_kit",
-            label:"N. kit"
-        },
-        {
-            value:"kit",
-            label:"Kit"
-        }
-    ];
-    
-    var raggruppamentoTraversineTable=document.createElement("table");
-    raggruppamentoTraversineTable.setAttribute("id","raggruppamentoTraversineTable");
-
-    var thead=document.createElement("thead");
-    var tr=document.createElement("tr");
-    headers.forEach(function (header)
-    {
-        var th=document.createElement("th");
-        th.setAttribute("class","raggruppamentoTraversineTableCell"+header.value);
-        th.innerHTML=header.label;
-        tr.appendChild(th);
-    });
-    thead.appendChild(tr);
-    raggruppamentoTraversineTable.appendChild(thead);
-
-    var tbody=document.createElement("tbody");
-    var i=0;
-    data.forEach(function (row)
-    {
-        var tr=document.createElement("tr");
-        headers.forEach(function (header)
-        {
-            var td=document.createElement("td");
-            td.setAttribute("class","raggruppamentoTraversineTableCell"+header.value);
-            if(raggruppamentoTraversine=="LUNG" && header.value=="LUNG")
-                td.innerHTML=row[header.value].toFixed(2);
-            else
-            {
-                if(header.value=="kit")
-                    td.innerHTML=row[header.value].join(", ");
-                else
-                    td.innerHTML=row[header.value];
-            }
-            tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-        i++;
-    });
-    raggruppamentoTraversineTable.appendChild(tbody);
-
-    tableContainer.appendChild(raggruppamentoTraversineTable);
-
-    outerContainer.appendChild(tableContainer);
-
-    Swal.fire
-    ({
-        html: outerContainer.outerHTML,
-        //showConfirmButton:true,
-        showConfirmButton:false,
-        width:"70%",
-        showCloseButton:false,
-        allowEscapeKey:true,
-        allowOutsideClick:true,
-        onOpen : function()
-                {
-                    document.getElementsByClassName("swal2-title")[0].remove();
-                    document.getElementsByClassName("swal2-popup")[0].style.padding="0px";
-                    document.getElementsByClassName("swal2-popup")[0].style.borderRadius="4px";
-
-                    /*$('.swal2-actions').insertBefore('.swal2-content');
-                    document.getElementsByClassName("swal2-confirm")[0].focus();
-
-                    document.getElementsByClassName("swal2-actions")[0].style.margin="0px";
-                    document.getElementsByClassName("swal2-actions")[0].style.backgroundColor="#404040";
-                    document.getElementsByClassName("swal2-actions")[0].style.display="flex";
-                    document.getElementsByClassName("swal2-actions")[0].style.flexDirection="row";
-                    document.getElementsByClassName("swal2-actions")[0].style.alignItems="center";
-                    document.getElementsByClassName("swal2-actions")[0].style.justifyContent="flex-start";
-
-                    document.getElementsByClassName("swal2-confirm")[0].style.padding="10px";
-                    document.getElementsByClassName("swal2-confirm")[0].style.margin="5px";
-                    document.getElementsByClassName("swal2-confirm")[0].style.display="flex";
-                    document.getElementsByClassName("swal2-confirm")[0].style.alignItems="center";
-                    document.getElementsByClassName("swal2-confirm")[0].style.justifyContent="center";
-                    document.getElementsByClassName("swal2-confirm")[0].style.backgroundColor="transparent";
-                    document.getElementsByClassName("swal2-confirm")[0].style.border="none";
-                    document.getElementsByClassName("swal2-confirm")[0].innerHTML="";
-                    var span=document.createElement("span");
-                    span.setAttribute("style","font-family:'Questrial',sans-serif;font-size:14px");
-                    span.innerHTML="Raggruppamento: "+raggruppamentoTraversine;
-                    document.getElementsByClassName("swal2-confirm")[0].appendChild(span);
-                    document.getElementsByClassName("swal2-confirm")[0].style.outline="none";*/
-                }
-    }).then((result) => 
-    {
-        /*if(result.value)
-        {
-            if(view=="kit" && stazione.nome=="traversine" && popupRaggruppamentoTraversine)
-            {
-                if(raggruppamentoTraversine=="LUNG")
-                    raggruppamentoTraversine="CODMAT";
-                else
-                    raggruppamentoTraversine="LUNG";
-                getPopupRaggruppamentoTraversine();
-            }
-        }
-        else*/
-            popupRaggruppamentoTraversine=false;
-    });
-}
-function fixTableRaggruppamentoTraversine()
-{
-    try
-    {
-        var tableWidth=document.getElementById("raggruppamentoTraversineTable").offsetWidth;
-		var tableColWidth=tableWidth/document.getElementById("raggruppamentoTraversineTable").getElementsByTagName("thead")[0].getElementsByTagName("tr")[0].childElementCount;
-        
-        $("#raggruppamentoTraversineTable th").css({"width":tableColWidth+"px"});
-        $("#raggruppamentoTraversineTable td").css({"width":tableColWidth+"px"});
-    } catch (error) {}
-}
-function getRaggruppamentoTraversine(kit)
-{
-    return new Promise(function (resolve, reject) 
-    {
-        var JSONkit=JSON.stringify(kit);
-        $.post("getRaggruppamentoTraversine.php",
-        {
-            JSONkit/*,
-            raggruppamentoTraversine*/
-        },
-        function(response, status)
-        {
-			//console.log(response);
-            if(status=="success")
-            {
-                if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
-                {
-                    Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
-                    console.log(response);
-                    resolve([]);
-                }
-                else
-                {
-                    try {
-                        resolve(JSON.parse(response));
-                    } catch (error) {
-                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
-                        console.log(response);
-                        resolve([]);
-                    }
-                }
-            }
-            else
-            {
-                Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
-                console.log(response);
-                resolve([]);
-            }
-        });
-    });
-}
-function checkRegistrazioniKitStazioni()
-{
-    return new Promise(function (resolve, reject) 
-    {
-        var JSONkit=JSON.stringify(kit);
-        $.post("checkRegistrazioniKitStazioni.php",{lotto:lottoSelezionato.lotto,cabina:cabina_corridoioSelezionato.numero_cabina,kit:kitSelezionato.kit},
-        function(response, status)
-        {
-			//console.log(response);
-            if(status=="success")
-            {
-                if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
-                {
-                    Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
-                    console.log(response);
-                    resolve([]);
-                }
-                else
-                {
-                    try {
-                        resolve(JSON.parse(response));
-                    } catch (error) {
-                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
-                        console.log(response);
-                        resolve(false);
-                    }
-                }
-            }
-            else
-            {
-                Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
-                console.log(response);
-                resolve(false);
-            }
-        });
     });
 }

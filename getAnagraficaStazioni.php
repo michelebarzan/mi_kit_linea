@@ -14,6 +14,7 @@
             $stazione["nome"]=$row2['nome'];
             $stazione["label"]=$row2['label'];
             $stazione["stazione_precedente"]=$row2['stazione_precedente'];
+            $stazione["pagina"]=$row2['pagina'];
 
             array_push($stazioni,$stazione);
         }

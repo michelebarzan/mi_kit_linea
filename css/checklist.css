@@ -143,30 +143,6 @@ body
 {
     margin-right: 10px;
 }
-.listTitleContainer input
-{
-    margin-right: 10px;
-    margin-left:auto;
-    font-family: 'Questrial', sans-serif;
-    font-weight: normal;
-    height:30px;
-    line-height: 30px;
-    width:50px;
-    text-align: center;
-    border:none;
-    background-color:#3A3A3A ;
-    border-radius: 4px;
-    font-family: 'Questrial', sans-serif;
-    font-size: 16px;
-    outline:none;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-    color:rgb(182, 182, 182);
-}
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
-}
 #listInnerContainer
 {
     display: flex;
@@ -177,10 +153,10 @@ input[type=number]::-webkit-outer-spin-button {
     overflow-y: auto;
     width: 100%;
 }
-.lotti-item,.cabine_corridoi-item,.kit-item
+.lotti-item,.carrelli-item
 {
-    height: 25px;
-    line-height: 25px;
+    height: 35px;
+    min-height: 35px;
     width: calc(100% - 10px);
     margin:5px;
     border:none;
@@ -191,88 +167,59 @@ input[type=number]::-webkit-outer-spin-button {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: start;
+    justify-content: flex-start;
     color:#EBEBEB;
     box-sizing: border-box;
+    border-radius: 4px;
     padding:0px;
-    /*padding-left: 10px;*/
-    font-weight: normal;
-    /*padding-right: 5px;*/
+    padding-left:10px;
+    padding-right:10px;
 }
-.kit-item
+.lotti-item span,.carrelli-item span,.componenti-item span
 {
-    min-height: 25px;
-    height: auto;
-    align-items: flex-start;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    line-height:normal;
-}
-.misure-traversine-table
-{
-    width: calc(100% - 80px);
-    border-collapse: collapse;
-    margin-right: 40px;
-    margin-left: 40px;
-    margin-bottom: 5px;
-    margin-top: 5px;
-}
-.misure-traversine-table th
-{
-    border-bottom: 1px solid #ddd;
     font-family: 'Questrial', sans-serif;
     font-weight: normal;
     font-size: 14px;
-    color:gray;
-    text-align: left;
-    padding:5px;
 }
-.misure-traversine-table td
-{
-    border-bottom: 1px solid gray;
-    font-family: 'Questrial', sans-serif;
-    font-weight: normal;
-    font-size: 12px;
-    color:#ddd;
-    text-align: left;
-    padding:5px;
-}
-.lotti-item:focus,.cabine_corridoi-item:focus,.kit-item:focus
+.lotti-item:focus,.carrelli-item:focus,.componenti-item:focus
 {
     box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
     background-color: #494949;
     color:#4C91CB;
 }
-.lotti-item:active,.cabine_corridoi-item:active,.kit-item:active
+.componenti-item
 {
-    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    height: 50px;
+    min-height: 50px;
+    width: calc(100% - 10px);
+    margin:5px;
+    border:none;
+    outline:none;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.16), 0 2px 3px rgba(0,0,0,0.23);
+    background-color: #404040;
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    color:#EBEBEB;
+    box-sizing: border-box;
+    border-radius: 4px;
+    padding:0px;
+}
+.componenti-item span
+{
+    font-family: 'Questrial', sans-serif;
+    font-weight: normal;
+    font-size: 14px;
+}
+.componenti-item:focus
+{
+    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
     background-color: #494949;
+    color:#4C91CB;
 }
-.lotti-item span,.cabine_corridoi-item span,.kit-item span
-{
-    margin-right: 10px;
-    font-family: 'Questrial', sans-serif;
-    font-weight: normal;
-    font-size: 14px;
-    line-height:27px;
-    height:25px;
-}
-.lotti-item div,.cabine_corridoi-item div,.kit-item div
-{
-    margin-right: 10px;
-    font-family: 'Questrial', sans-serif;
-    font-weight: normal;
-    font-size: 14px;
-    background-color:#242424;
-    box-sizing:border-box;
-    padding-left:10px;
-    padding-right:10px;
-    /*margin-top:-2px;*/
-    height:25px;
-    line-height:27px;
-    width:40px;
-}
-#labelLottoSelezionato b,#labelCabinaCorridoioSelezionato b
+#labelLottoSelezionato b,#labelCarrelloSelezionato b
 {
     color:#4C91CB;
 }
@@ -294,25 +241,25 @@ input[type=number]::-webkit-outer-spin-button {
     border:none;
 }
 /* width */
-::-webkit-scrollbar
+::-webcomponenti-scrollbar
 {
     width: 7px;
 }
 /* Track */
-::-webkit-scrollbar-track
+::-webcomponenti-scrollbar-track
 {
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
     border-radius: 10px;
     background-color: rgba(0,0,0,0.05);
 }
 /* Handle */
-::-webkit-scrollbar-thumb
+::-webcomponenti-scrollbar-thumb
 {
     background: rgb(128, 127, 127); 
     border-radius: 10px;
 }
 /* Handle on hover */
-::-webkit-scrollbar-thumb:hover
+::-webcomponenti-scrollbar-thumb:hover
 {
     background: #aaa; 
 }
@@ -346,106 +293,38 @@ input[type=number]::-webkit-outer-spin-button {
     font-size: 12px;
     color:gray;
 }
-/*--------------------------------------------------------------------------------------------*/
-#raggruppamentoTraversineTable
+.listButtonIndietro
 {
-    width:100%;
-    border-collapse: collapse;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    min-height: calc(100% - 50px);
-    max-height: calc(100% - 50px);
-    height: calc(100% - 50px);
-    max-width: 100%;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-}
-#raggruppamentoTraversineTable thead
-{
-    background-color: #404040;
-}
-#raggruppamentoTraversineTable th
-{
-    font-family: 'Questrial',sans-serif;
-    color:white;
-    font-weight: normal;
-    font-size:14px;
-    text-align: left;
-    background-color: transparent;
-    padding:10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-#raggruppamentoTraversineTable td
-{
-    text-align: left;
-    font-family: 'Questrial',sans-serif;
-    color:black;
-    font-weight: bold;
-    font-size:14px;
-    padding:10px;
-    /*white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;*/
-    word-wrap: break-word;
-}
-#raggruppamentoTraversineTable tbody tr
-{
-    width:100%;
-}
-#raggruppamentoTraversineTable tbody tr:nth-child(odd)
-{
-    background-color:rgba(76, 146, 203, 0.199);
-}
-#raggruppamentoTraversineTable tbody tr:nth-child(even)
-{
-    background-color:rgb(235, 235, 235);
-}
-#raggruppamentoTraversineTable tbody
-{
-    overflow: hidden;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-}
-.raggruppamento-traversine-outer-container
-{
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    border-radius: 4px;
-}
-.raggruppamento-traversine-table-container
-{
-    width: 100%;
-    max-height: 550px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-}
-.raggruppamento-traversine-title-bar
-{
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    background-color: #404040;
+    height: 30px;
+    line-height: 30px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
     box-sizing: border-box;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    padding: 10px;
-}
-.raggruppamento-traversine-title-bar span
-{
-    font-family: 'Questrial',sans-serif;
-    font-size: 14px;
-    color: #ddd;
-}
-.raggruppamento-traversine-title-bar i
-{
+    text-align: left;
+    border:none;
+    background-color:#313131 ;
+    border-radius: 4px;
+    color:rgb(182, 182, 182);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    outline: none;
     cursor: pointer;
-    color: #ddd;
+}
+.listButtonIndietro span
+{
+    font-family: 'Questrial', sans-serif;
+    font-weight: normal;
+    font-size: 14px;
+    font-weight: bold;
+}
+.listButtonIndietro i
+{
+    margin-right: 5px;
+}
+.listButtonIndietro:active
+{
+    color:#4C91CB;
 }

@@ -12,18 +12,14 @@
 
     <script src="js/global.js"></script>
     <link href="css/global.css" rel="stylesheet">
-    <script src="js/index.js"></script>
-    <link href="css/index.css" rel="stylesheet">
+    <script src="js/checklist.js"></script>
+    <link href="css/checklist.css" rel="stylesheet">
     <link href="css/fonts.css" rel="stylesheet">
 </head>
 <body>
     <header class="structure-header">
         <div class="structure-header-inner-container" style="width:calc(50% - 60px);box-sizing:border-box;padding-right: 10px;">
-            <div id="filtroLineaContainer" class="info-filters-container"></div>
-            <div id="filtroStazioneContainer" class="info-filters-container"></div>
-            <div id="filtroAvanzamentoContainer" class="info-filters-container"></div>
-            <div id="ordinamentoContainer" style="display :none;" class="info-filters-container"></div>
-            <div id="mostraMisureTraversineContainer" style="display :none;" class="info-filters-container"></div>
+            <!--<div id="" class="info-filters-container"></div>-->
         </div>
         <div class="structure-header-inner-container">
             <div class="logo-container">
@@ -34,8 +30,6 @@
             <div id="infoLineaContainer" class="info-filters-container" style="margin-left: auto;"></div>
             <div id="infoStazioneContainer" class="info-filters-container"></div>
             <div id="usernameContainer"></div>
-            <!--<button onclick="chiudiKit()">chiudi kit</button>
-            <button onclick="chiudiCabina()">chiudi cabina</button>-->
         </div>
     </header>
     <div class="section-container">
@@ -48,18 +42,15 @@
                     </div>
                     <div class="listTitleItemRow">
                         <i class="fal fa-cube"></i>
-                        <span id="labelCabinaCorridoioSelezionato">Scegli una cabina / un corridoio</span>
+                        <span id="labelCarrelloSelezionato">Scegli un carrello</span>
                     </div>
                 </div>
-                <!--<div class="listTitleItem">
-                    <i class="fad fa-layer-group"></i>
-                    <span id="labelLottoSelezionato">Scegli un lotto</span>
+                <div class="listTitleItem" style="margin-left:auto">
+                    <button class="listButtonIndietro" onclick="indietro()">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>INDIETRO</span>
+                    </button>
                 </div>
-                <div class="listTitleItem">
-                    <i class="fad fa-layer-group"></i>
-                    <span id="labelLottoSelezionato">Scegli un lotto</span>
-                </div>-->
-                <input type="number" id="inputNumber">
             </div>
             <div id="listInnerContainer"></div>
         </div>
