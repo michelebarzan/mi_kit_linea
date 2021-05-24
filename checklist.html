@@ -46,15 +46,35 @@
                     </div>
                 </div>
                 <div class="listTitleItem" style="margin-left:auto">
-                    <button class="listButtonIndietro" onclick="indietro()">
+                    <span id="totaliChecklistLabel"></span>
+                </div>
+                <div class="listTitleItem">
+                    <button class="listButtonIndietro" id="listButtonIndietro" onclick="indietro()">
                         <i class="fas fa-chevron-left"></i>
                         <span>INDIETRO</span>
                     </button>
                 </div>
             </div>
             <div id="listInnerContainer"></div>
+            <div class="list-comandi-container">
+                <button class="action-button" onclick="listToTop()"><i class="far fa-arrow-to-top"></i></button>
+                <button class="action-button" onclick="listToBottom()"><i class="far fa-arrow-to-bottom"></i></button>
+                <button class="action-button" style="margin-left:auto" onclick="listScrolltop()"><i class="far fa-angle-up"></i></button>
+                <button class="action-button" onclick="listScrolldown()"><i class="far fa-angle-down"></i></button>
+            </div>
         </div>
-        <div id="pdfContainer"></div>
+        <div class="pdf-outer-container">
+            <div id="pdfContainer"></div>
+            <div class="pdf-comandi-container">
+                <button class="action-button" onclick="pdfZoomout()"><i class="far fa-minus"></i></button>
+                <button class="action-button" onclick="pdfZoomin()"><i class="far fa-plus"></i></button>
+                <button class="action-button" onclick="pdfScrollleft()"><i class="far fa-angle-left"></i></button>
+                <button class="action-button" onclick="pdfScrolltop()"><i class="far fa-angle-up"></i></button>
+                <button class="action-button" onclick="pdfScrolldown()"><i class="far fa-angle-down"></i></button>
+                <button class="action-button" onclick="pdfScrollright()"><i class="far fa-angle-right"></i></button>
+                <button class="action-button" style="margin-left:auto" onclick="resetPdfZoom()"><i class="far fa-expand"></i></button>
+            </div>
+        </div>
     </div>
     <div id="poweredBy">Powered by Servizio Globale (www.servizioglobale.it)</div>
 </body>

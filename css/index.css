@@ -293,29 +293,25 @@ input[type=number]::-webkit-outer-spin-button {
     height: 100%;
     border:none;
 }
-/* width */
-::-webkit-scrollbar
+/*::-webkit-scrollbar
 {
     width: 7px;
 }
-/* Track */
 ::-webkit-scrollbar-track
 {
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
     border-radius: 10px;
     background-color: rgba(0,0,0,0.05);
 }
-/* Handle */
 ::-webkit-scrollbar-thumb
 {
     background: rgb(128, 127, 127); 
     border-radius: 10px;
 }
-/* Handle on hover */
 ::-webkit-scrollbar-thumb:hover
 {
     background: #aaa; 
-}
+}*/
 #listInnerContainerSpinner
 {
     height:25px;

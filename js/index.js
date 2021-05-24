@@ -630,7 +630,7 @@ async function confermaKit(number)
                 }
                 else
                 {
-                    document.getElementById("kitItem"+number).remove();
+                    checkLists();
                 }
             }
         }

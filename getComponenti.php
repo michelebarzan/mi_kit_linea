@@ -21,6 +21,7 @@
             $componente["numero_cabina"]=$row2['numero_cabina'];
             $componente["qnt"]=$row2['qnt'];
             $componente["id_checklist"]=$row2['id_checklist'];
+            $componente["checked"]= $row2['checked'] === 'true'? true: false;
 
             array_push($componenti,$componente);
         }

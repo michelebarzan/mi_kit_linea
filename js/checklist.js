@@ -10,6 +10,8 @@ var interval;
 var frequenza_aggiornamento_dati_linea;
 var dot;
 var shownPdf;
+var intervalOverflowPdf1;
+var intervalOverflowPdf2;
 
 window.addEventListener("load", async function(event)
 {
@@ -137,8 +139,7 @@ async function getListLotti()
 {
     view="lotti";
 
-    document.getElementById("pdfContainer").innerHTML="";
-    iframe=null;
+    document.getElementById("totaliChecklistLabel").style.display="none";
 
     lottoSelezionato=null;
     document.getElementById("labelLottoSelezionato").innerHTML="Scegli un lotto";
@@ -149,10 +150,14 @@ async function getListLotti()
     iframe=null;
 
     var container=document.getElementById("listInnerContainer");
-    container.innerHTML='<div id="listInnerContainerSpinner"><i class="fad fa-spinner fa-spin"></i><span>Caricamento in corso...</span></div>'
+    container.innerHTML='<div id="listInnerContainerSpinner"><i class="fad fa-spinner fa-spin"></i><span>Caricamento in corso...</span></div>';
+
+    document.getElementById("listButtonIndietro").disabled=true;
 
     var i=1;
     lotti=await getLotti();
+
+    document.getElementById("listButtonIndietro").disabled=false;
 
     container.innerHTML="";
 
@@ -212,6 +217,8 @@ async function getListCarrelli()
 {
     view="carrelli";
 
+    document.getElementById("totaliChecklistLabel").style.display="none";
+
     document.getElementById("pdfContainer").innerHTML="";
     iframe=null;
 
@@ -219,10 +226,14 @@ async function getListCarrelli()
     document.getElementById("labelCarrelloSelezionato").innerHTML="Scegli un carrello";
 
     var container=document.getElementById("listInnerContainer");
-    container.innerHTML='<div id="listInnerContainerSpinner"><i class="fad fa-spinner fa-spin"></i><span>Caricamento in corso...</span></div>'
+    container.innerHTML='<div id="listInnerContainerSpinner"><i class="fad fa-spinner fa-spin"></i><span>Caricamento in corso...</span></div>';
+
+    document.getElementById("listButtonIndietro").disabled=true;
 
     var i=1;
     carrelli=await getCarrelli(lottoSelezionato.lotto,lottoSelezionato.commessa);
+
+    document.getElementById("listButtonIndietro").disabled=false;
 
     container.innerHTML="";
 
@@ -282,20 +293,27 @@ async function getListComponenti()
 {
     view="componenti";
 
+    document.getElementById("totaliChecklistLabel").style.display="";
+
     document.getElementById("pdfContainer").innerHTML="";
     iframe=null;
 
     componenteSelezionato=null;
 
     var container=document.getElementById("listInnerContainer");
-    container.innerHTML='<div id="listInnerContainerSpinner"><i class="fad fa-spinner fa-spin"></i><span>Caricamento in corso...</span></div>'
+    container.innerHTML='<div id="listInnerContainerSpinner"><i class="fad fa-spinner fa-spin"></i><span>Caricamento in corso...</span></div>';
+
+    document.getElementById("listButtonIndietro").disabled=true;
 
     var i=1;
     componenti=await getComponenti(carrelloSelezionato.CODCAR,lottoSelezionato.lotto);
     console.log(componenti);
 
+    document.getElementById("listButtonIndietro").disabled=false;
+
     container.innerHTML="";
 
+    var nComponentiChecked=0;
     componenti.forEach(function (componente)
     {
         var item=document.createElement("button");
@@ -308,6 +326,11 @@ async function getListComponenti()
 
         var checkbox=document.createElement("input");
         checkbox.setAttribute("type","checkbox");
+        if(componente.checked)
+        {
+            checkbox.setAttribute("checked","checked");
+            nComponentiChecked++;
+        }
         checkbox.setAttribute("id","checkboxComponente_"+componente.id_checklist);
         checkbox.setAttribute("onclick","disableCheckboxComponente(event);checkComponente('"+componente.codice_componente+"',"+componente.id_checklist+")");
         checkbox.setAttribute("style","margin:0px");
@@ -361,6 +384,8 @@ async function getListComponenti()
 
         i++;
     });
+
+    document.getElementById("totaliChecklistLabel").innerHTML=nComponentiChecked+"/"+componenti.length;
 }
 function disableCheckboxComponente(event)
 {
@@ -368,12 +393,25 @@ function disableCheckboxComponente(event)
 }
 function checkComponente(codice_componente,id_checklist)
 {
-    document.getElementById("pdfContainer").innerHTML="";
-    iframe=null;
-
     if(codice_componente.charAt(0)=="+" && codice_componente.substring(3, 5)=="KT")
         getPdf('kit',codice_componente);
+    else
+    {
+        document.getElementById("pdfContainer").innerHTML="";
+        iframe=null;
+        shownPdf=null;
+    }
     
+    var nComponentiChecked=0;
+    var componentiItems=document.getElementsByClassName("componenti-item");
+    for (let index = 0; index < componentiItems.length; index++)
+    {
+        const componenteItem = componentiItems[index];
+        if(componenteItem.getElementsByTagName("input")[0].checked)
+            nComponentiChecked++;
+    }
+    document.getElementById("totaliChecklistLabel").innerHTML=nComponentiChecked+"/"+componentiItems.length;
+
     var checked=document.getElementById("checkboxComponente_"+id_checklist).checked.toString();
     $.get("checkComponente.php",{id_checklist,checked,id_utente},
     function(response, status)
@@ -439,7 +477,7 @@ async function getPdf(folder,fileName)
 {
     if(fileName != shownPdf)
     {
-        shownPdf=fileName;
+        //shownPdf=fileName;
         var container=document.getElementById("pdfContainer");
         container.innerHTML="";
 
@@ -476,4 +514,126 @@ function fixPdf(iframe)
     iframe.contentWindow.document.getElementById("viewer").style.margin="10px";
     iframe.contentWindow.document.getElementById("viewer").style.width="calc(100% - 40px)";
     iframe.contentWindow.document.getElementById("viewer").style.height="calc(100% - 40px)";
+
+    resetPdfZoom();
+}
+function resetPdfZoom()
+{
+    if(iframe!=null)
+    {
+        try {
+            clearInterval(intervalOverflowPdf1);
+        } catch (error) {}
+        try {
+            clearInterval(intervalOverflowPdf2);
+        } catch (error) {}
+
+        intervalOverflowPdf1 = setInterval(() => 
+        {
+            try {
+                overflow=checkOverflow(iframe.contentWindow.document.getElementById("viewerContainer"));
+            } catch (error) {
+                overflow=true;
+            }
+            if(!overflow)
+                pdfZoomin();
+            else
+            {
+                clearInterval(intervalOverflowPdf1);
+                intervalOverflowPdf2 = setInterval(() => 
+                {
+                    try {
+                        overflow=checkOverflow(iframe.contentWindow.document.getElementById("viewerContainer"));
+                    } catch (error) {
+                        overflow=true;
+                    }
+                    if(overflow)
+                        pdfZoomout();
+                    else
+                        clearInterval(intervalOverflowPdf2);
+                }, 10);
+            }
+        }, 10);
+    }
+}
+function checkOverflow(el)
+{
+    try {
+        var curOverflow = el.style.overflow;
+
+        if ( !curOverflow || curOverflow === "visible" )
+            el.style.overflow = "hidden";
+
+        var isOverflowing = el.clientWidth < el.scrollWidth || el.clientHeight < el.scrollHeight;
+
+        el.style.overflow = curOverflow;
+
+        return isOverflowing;
+    } catch (error) {
+        return true;
+    }
+}
+function pdfZoomin()
+{
+    try
+    {
+        if(iframe!=null)
+            iframe.contentWindow.document.getElementById("zoomIn").click();
+    } catch (error) {}
+}
+function pdfZoomout()
+{
+    try
+    {
+        if(iframe!=null)
+            iframe.contentWindow.document.getElementById("zoomOut").click();
+    } catch (error) {}
+}
+function pdfScrolltop()
+{
+    try
+    {
+        if(iframe!=null)
+            iframe.contentWindow.document.getElementById("viewerContainer").scrollTop-=50;
+    } catch (error) {}
+}
+function pdfScrolldown()
+{
+    try
+    {
+        if(iframe!=null)
+            iframe.contentWindow.document.getElementById("viewerContainer").scrollTop+=50;
+    } catch (error) {}
+}
+function pdfScrollleft()
+{
+    try
+    {
+        if(iframe!=null)
+            iframe.contentWindow.document.getElementById("viewerContainer").scrollLeft-=50;
+    } catch (error) {}
+}
+function pdfScrollright()
+{
+    try
+    {
+        if(iframe!=null)
+            iframe.contentWindow.document.getElementById("viewerContainer").scrollLeft+=50;
+    } catch (error) {}
+}
+function listToTop()
+{
+    document.getElementById("listInnerContainer").scrollTop = 0;
+}
+function listToBottom()
+{
+    document.getElementById("listInnerContainer").scrollTo(0,document.getElementById("listInnerContainer").scrollHeight);
+}
+function listScrolltop()
+{
+    document.getElementById("listInnerContainer").scrollTop = document.getElementById("listInnerContainer").scrollTop-45;
+}
+function listScrolldown()
+{
+    document.getElementById("listInnerContainer").scrollTop = document.getElementById("listInnerContainer").scrollTop+45;
 }

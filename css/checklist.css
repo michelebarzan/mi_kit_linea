@@ -149,9 +149,49 @@ body
     flex-direction: column;
     box-sizing: border-box;
     padding:5px;
-    max-height:calc(100% - 50px);
+    max-height:calc(100% - 100px);
+    min-height:calc(100% - 100px);
+    height:calc(100% - 100px);
     overflow-y: auto;
     width: 100%;
+}
+.list-comandi-container
+{
+    width: 100%;
+    height:50px;
+    box-sizing: border-box;
+    background-color: #3d3d3d;
+    box-shadow: 0 0 5px rgba(0,0,0,0.16), 0 0 10px rgba(0,0,0,0.23);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content:flex-start;
+    box-sizing:border-box;
+    padding-right:5px;
+}
+.action-button
+{
+    height: 40px;
+    width: 40px;
+    box-sizing: border-box;
+    border:none;
+    /*background-color:#313131 ;*/
+    background-color: gray;
+    border-radius: 4px;
+    color:#ddd;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    outline: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 5px;
+    font-size: 20px;
+}
+.action-button:active
+{
+    color:#4C91CB;
 }
 .lotti-item,.carrelli-item
 {
@@ -223,16 +263,27 @@ body
 {
     color:#4C91CB;
 }
-#pdfContainer
+.pdf-outer-container
 {
     width:calc(100% - 520px); 
     margin-left: 20px;
+    height:100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    background-color: #333333;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
+#pdfContainer
+{
     background-image: url("../images/logo.png");
 	background-position: center center;
 	background-repeat: no-repeat;
-    height:100%;
-    background-color: #333333;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    width: 100%;
+    height: calc(100% - 50px);
+    min-height: calc(100% - 50px);
+    max-height: calc(100% - 50px);
 }
 #pdfContainer iframe
 {
@@ -240,29 +291,40 @@ body
     height: 100%;
     border:none;
 }
-/* width */
-::-webcomponenti-scrollbar
+.pdf-comandi-container
+{
+    width: 100%;
+    height:50px;
+    box-sizing: border-box;
+    background-color: #3d3d3d;
+    box-shadow: 0 0 5px rgba(0,0,0,0.16), 0 0 10px rgba(0,0,0,0.23);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content:flex-start;
+    box-sizing:border-box;
+    padding-right:5px;
+}
+/*
+::-webkit-scrollbar
 {
     width: 7px;
 }
-/* Track */
-::-webcomponenti-scrollbar-track
+::-webkit-scrollbar-track
 {
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
     border-radius: 10px;
     background-color: rgba(0,0,0,0.05);
 }
-/* Handle */
-::-webcomponenti-scrollbar-thumb
+::-webkit-scrollbar-thumb
 {
     background: rgb(128, 127, 127); 
     border-radius: 10px;
 }
-/* Handle on hover */
-::-webcomponenti-scrollbar-thumb:hover
+::-webkit-scrollbar-thumb:hover
 {
     background: #aaa; 
-}
+}*/
 #listInnerContainerSpinner
 {
     height:25px;
@@ -327,4 +389,11 @@ body
 .listButtonIndietro:active
 {
     color:#4C91CB;
+}
+#totaliChecklistLabel
+{
+    font-family: 'Questrial', sans-serif;
+    font-weight: normal;
+    font-size: 14px;
+    letter-spacing: 1px;
 }
