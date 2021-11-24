@@ -27,6 +27,20 @@ var printList=[];
 
 window.addEventListener("load", async function(event)
 {
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
     id_utente=await getSessionValue("id_utente");
 
     frequenza_aggiornamento_dati_linea=await getParametro("frequenza_aggiornamento_dati_linea");
@@ -83,12 +97,13 @@ window.addEventListener("load", async function(event)
     var username=await getSessionValue("username");
     document.getElementById("usernameContainer").innerHTML=username+'<i class="fad fa-user" style="margin-left:10px"></i>';
 
-    getListLotti(true);
-
     funzioniTasti=await getFunzioniTasti();
     
     interval = setInterval(checkLists, frequenza_aggiornamento_dati_linea);
 
+    Swal.close();
+
+    getListLotti(true);
 });
 function getFunzioniTasti()
 {
@@ -930,7 +945,9 @@ async function getListLotti(cleanFocused)
     });
     if(!cleanFocused && focused!=null)
     {
-        document.getElementById(view+"Item"+focused).focus();   
+        try {
+            document.getElementById(view+"Item"+focused).focus();
+        } catch (error) {}
     }
 }
 function selectLotto(number)
