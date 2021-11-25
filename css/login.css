@@ -278,3 +278,16 @@ input[type=number]::-webkit-outer-spin-button {
     font-size: 20px;
     color:white;
 }
+.login-close-button
+{
+    position: absolute;
+    right: 10px;
+    top:10px;
+    background-color: transparent;
+    border:none;
+    margin:0px;
+    padding:0px;
+    font-size: 27px;
+    color: #DA6969;
+    cursor: pointer;
+}

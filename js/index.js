@@ -9,7 +9,7 @@ var numbers_array=
 var view;
 var iframe;
 var ordinamentoKit;
-var mostraMisureTraversine;
+var mostraMisureTraversine="false";
 var filtroLinea;
 var filtroStazione;
 var filtroAvanzamento;
@@ -63,10 +63,13 @@ window.addEventListener("load", async function(event)
         ordinamentoKit="kit";
     //setOrdinamentoKitLabel();
 
-    mostraMisureTraversine=await getCookie("mostraMisureTraversine");
-    if(mostraMisureTraversine=="")
-        mostraMisureTraversine="false";
-    //setMostraMisureTraversineLabel();
+    if(stazione=="traversine")
+    {
+        mostraMisureTraversine=await getCookie("mostraMisureTraversine");
+        if(mostraMisureTraversine=="")
+            mostraMisureTraversine="false";
+        //setMostraMisureTraversineLabel();
+    }
 
     filtroLinea=await getCookie("filtroLinea");
     if(filtroLinea=="")
@@ -98,6 +101,7 @@ window.addEventListener("load", async function(event)
     document.getElementById("usernameContainer").innerHTML=username+'<i class="fad fa-user" style="margin-left:10px"></i>';
 
     funzioniTasti=await getFunzioniTasti();
+    console.log(funzioniTasti)
     
     interval = setInterval(checkLists, frequenza_aggiornamento_dati_linea);
 
@@ -114,20 +118,43 @@ function getFunzioniTasti()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
         });
     });
 }
-function checkLists()
+async function checkLists()
 {
     switch (view)
     {
-        case "lotti":getListLotti(false);break;
-        case "cabine_corridoi":getListCabineECorridoi(false);break;
-        case "kit":if(mostraMisureTraversine=="false"){getListKit(false)};break;
+        case "lotti":
+            var checkLotti=await getLotti();
+            if(!arrayCompare(lotti,checkLotti))
+                getListLotti(false);
+        break;
+        case "cabine_corridoi":
+            var checkCabine_corridoi=await getCabineECorridoi(lottoSelezionato.lotto,lottoSelezionato.commessa);
+            if(!arrayCompare(cabine_corridoi,checkCabine_corridoi))
+                getListCabineECorridoi(false);
+        break;
+        case "kit":
+            if(mostraMisureTraversine=="false")
+            {
+                var checkKit=await getKit(lottoSelezionato.lotto,lottoSelezionato.commessa,cabina_corridoioSelezionato.numero_cabina);
+                console.log(kit,checkKit,arrayCompare(kit,checkKit))
+                if(!arrayCompare(kit,checkKit))
+                    getListKit(false);
+            };
+        break;
         default:break;
     }
 }
@@ -224,7 +251,14 @@ function getParametriByHelp(help)
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -487,7 +521,9 @@ window.addEventListener("keydown", async function(event)
             event.preventDefault();
             scrollright();
         break;
-        default:break;
+        default:
+            event.preventDefault();
+        break;
     }
     interval = setInterval(checkLists, frequenza_aggiornamento_dati_linea);
 });
@@ -594,7 +630,19 @@ async function eliminaRegistrazioneAvanzamentoKit(number)
 }
 async function confermaKit(number)
 {
-    console.log("conferma kit");
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
 
     //console.clear();
 
@@ -619,6 +667,7 @@ async function confermaKit(number)
     {
         if(status=="success")
         {
+            Swal.close();
             if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
             {
                 Swal.fire
@@ -650,9 +699,7 @@ async function confermaKit(number)
                         document.getElementById("kitItem"+number).insertBefore(fa, document.getElementById("kitItem"+number).getElementsByTagName("table")[0]);
                 }
                 else
-                {
-                    checkLists();
-                }
+                    getListKit(false)
             }
         }
         else
@@ -681,6 +728,20 @@ function selectCabinaCorridoio(number)
 }
 async function getListKit(cleanFocused)
 {
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
     view="kit";
 
     document.getElementById("ordinamentoContainer").style.display="";
@@ -848,6 +909,8 @@ async function getListKit(cleanFocused)
     {
         document.getElementById(view+"Item"+focused).focus();   
     }
+
+    Swal.close();
 }
 function getKit(lotto,commessa,numero_cabina)
 {
@@ -873,7 +936,15 @@ function getKit(lotto,commessa,numero_cabina)
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    console.log(response);
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -890,6 +961,20 @@ function logout()
 }
 async function getListLotti(cleanFocused)
 {
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
     view="lotti";
 
     document.getElementById("ordinamentoContainer").style.display="none";
@@ -949,6 +1034,8 @@ async function getListLotti(cleanFocused)
             document.getElementById(view+"Item"+focused).focus();
         } catch (error) {}
     }
+
+    Swal.close();
 }
 function selectLotto(number)
 {
@@ -959,6 +1046,20 @@ function selectLotto(number)
 }
 async function getListCabineECorridoi(cleanFocused)
 {
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
     view="cabine_corridoi";
 
     document.getElementById("ordinamentoContainer").style.display="none";
@@ -1024,6 +1125,8 @@ async function getListCabineECorridoi(cleanFocused)
     {
         document.getElementById(view+"Item"+focused).focus();   
     }
+
+    Swal.close();
 }
 async function getPdf(folder,fileName)
 {
@@ -1089,7 +1192,14 @@ function getCabineECorridoi(lotto,commessa)
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -1105,7 +1215,14 @@ function getLotti()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -1155,7 +1272,14 @@ function getAnagraficaStazioni()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -1767,8 +1891,9 @@ function getRaggruppamentoTraversine(kit)
                     try {
                         resolve(JSON.parse(response));
                     } catch (error) {
-                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
-                        console.log(response);
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
                         resolve([]);
                     }
                 }
@@ -1804,9 +1929,10 @@ function checkRegistrazioniKitStazioni()
                     try {
                         resolve(JSON.parse(response));
                     } catch (error) {
-                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
-                        console.log(response);
-                        resolve(false);
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
+                        resolve([]);
                     }
                 }
             }

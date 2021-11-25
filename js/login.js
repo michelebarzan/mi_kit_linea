@@ -84,7 +84,14 @@ function getFunzioniTasti()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -118,7 +125,14 @@ function getAnagraficaLinee()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -134,7 +148,14 @@ function getAnagraficaStazioni()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -150,7 +171,14 @@ function getUtentiStazioni()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -456,7 +484,9 @@ window.addEventListener("keydown", function(event)
                 login(focused);
             }
         break;
-        default:break;
+        default:
+            event.preventDefault();
+        break;
     }
     console.log(keyCode);
 });
@@ -493,7 +523,14 @@ function getParametriByHelp(help)
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
