@@ -18,7 +18,7 @@
     {
         while($row=sqlsrv_fetch_array($r))
         {
-            echo $row["DESCRIZIONE"];
+            echo $row["descrizione"];
         }
     }
 
