@@ -1,0 +1,63 @@
+
+.etichetta-outer-container
+{
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-start;
+	flex-direction: column;
+	background-color: white;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+.etichetta-row
+{
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	width: 100%;
+    box-sizing: border-box;
+}
+.etichetta-column
+{
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+}
+.etichetta-barcode
+{
+	/*line-height: 70px;*/
+	width: 100%;
+	font-size:40px;
+	/*font-size:80px;*/
+	font-family: 'Libre Barcode 39 Extended', cursive;
+	overflow: hidden;
+}
+.etichetta-span
+{
+	color: black;
+	font-family: Arial, Helvetica, sans-serif;
+	text-align: center;
+	overflow:hidden;
+}
+.etichetta-table-cabine
+{
+	width: 100%;
+}
+.etichetta-table-cabine th
+{
+	font-size: 18px;
+	color: black;
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: normal;
+	border:1px solid black;
+	text-align: center;
+}
+.etichetta-table-cabine td
+{
+	font-size: 25px;
+	font-weight: bold;
+	color: black;
+	font-family: Arial, Helvetica, sans-serif;
+	border:1px solid black;
+	text-align: center;
+}

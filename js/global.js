@@ -79,3 +79,30 @@ function logout()
         window.location = 'login.html';
     });
 }
+function arrayCompare(array1,array2)
+{
+	var equals = true;
+
+    if(array1.length != array2.length)
+        equals = false;
+    else
+    {
+        array1.forEach(element1 =>
+        {
+            if(array2.filter(function (element2)
+            {
+                var equals_lcl = true;
+                for (const property in element2)
+                {
+                    if(element2[property] != element1[property])
+                        equals_lcl = false;
+                }
+                if(equals_lcl)
+                    return element2;
+            }).length == 0)
+                equals = false;
+        });
+    }
+
+	return equals;
+}

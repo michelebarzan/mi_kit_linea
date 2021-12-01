@@ -10,6 +10,9 @@ var linea;
 var stazione;
 var passwordCambiaLineaStazione=false;
 var funzioniTasti;
+var popupCheckPassword=false;
+var nClickNumpadButtonPopupCheckPassword;
+var codiceCambiaLineaStazione;
 
 window.addEventListener("load", async function(event)
 {
@@ -81,7 +84,14 @@ function getFunzioniTasti()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -115,7 +125,14 @@ function getAnagraficaLinee()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -131,7 +148,14 @@ function getAnagraficaStazioni()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -147,7 +171,14 @@ function getUtentiStazioni()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -210,24 +241,9 @@ async function login(number)
         }
     });
 }
-function checkEnter(event)
-{
-    var keyCode=event.keyCode;
-    switch (keyCode) 
-    {
-        case 13:
-            event.preventDefault();
-            checkPasswordCambiaLineaStazione();
-            break;
-        case 27:
-            event.preventDefault();
-            Swal.close();
-            break;
-    }
-}
 function checkPasswordCambiaLineaStazione()
 {
-    var password=document.getElementById("inputPasswordCambiaLineaStazione").value;
+    var password=codiceCambiaLineaStazione;
     $.post("checkPasswordCambiaLineaStazione.php",
     {
         password
@@ -236,7 +252,6 @@ function checkPasswordCambiaLineaStazione()
     {
         if(status=="success")
         {
-            console.log(response);
             if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
             {
                 Swal.fire
@@ -282,40 +297,20 @@ window.addEventListener("keydown", function(event)
                 login(focused);
             }
         break;
-        case 48:setNumber(event.key);break;
-        case 49:setNumber(event.key);break;
-        case 50:setNumber(event.key);break;
-        case 51:setNumber(event.key);break;
-        case 52:setNumber(event.key);break;
-        case 53:setNumber(event.key);break;
-        case 54:setNumber(event.key);break;
-        case 55:setNumber(event.key);break;
-        case 56:setNumber(event.key);break;
-        case 57:setNumber(event.key);break;
+        case 48:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("0")};break;
+        case 49:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("1")};break;
+        case 50:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("2")};break;
+        case 51:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("3")};break;
+        case 52:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("4")};break;
+        case 53:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("5")};break;
+        case 54:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("6")};break;
+        case 55:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("7")};break;
+        case 56:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("8")};break;
+        case 57:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("9")};break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","scorri_sinistra_di_1").valore):
             event.preventDefault();
             if(passwordCambiaLineaStazione==false)
-            {
-                var input=document.createElement("input");
-                input.setAttribute("type","password");
-                input.setAttribute("id","inputPasswordCambiaLineaStazione");
-                input.setAttribute("onkeyup","checkEnter(event)");
-
-                Swal.fire
-                ({
-                    title: 'Inserisci la password',
-                    showCloseButton: false,
-                    showConfirmButton:false,
-                    showCancelButton:false,
-                    showLoaderOnConfirm: true,
-                    background:"#353535",
-                    html:input.outerHTML,
-                    onOpen : function()
-                            {
-                                document.getElementsByClassName("swal2-close")[0].style.outline="none";
-                            },
-                });
-            }
+                getPopupCheckPassword();
             else
             {
                 if(focused2==null)
@@ -375,27 +370,7 @@ window.addEventListener("keydown", function(event)
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","scorri_destra_di_1").valore):
             event.preventDefault();
             if(passwordCambiaLineaStazione==false)
-            {
-                var input=document.createElement("input");
-                input.setAttribute("type","password");
-                input.setAttribute("id","inputPasswordCambiaLineaStazione");
-                input.setAttribute("onkeyup","checkEnter(event)");
-
-                Swal.fire
-                ({
-                    title: 'Inserisci la password',
-                    showCloseButton: false,
-                    showConfirmButton:false,
-                    showCancelButton:false,
-                    showLoaderOnConfirm: true,
-                    background:"#353535",
-                    html:input.outerHTML,
-                    onOpen : function()
-                            {
-                                document.getElementsByClassName("swal2-close")[0].style.outline="none";
-                            },
-                });
-            }
+                getPopupCheckPassword();
             else
             {
                 if(focused2==null)
@@ -509,7 +484,9 @@ window.addEventListener("keydown", function(event)
                 login(focused);
             }
         break;
-        default:break;
+        default:
+            event.preventDefault();
+        break;
     }
     console.log(keyCode);
 });
@@ -534,25 +511,6 @@ function setFocusLineaStazione()
         }
     }
 }
-function setNumber(key)
-{
-    passwordCambiaLineaStazione=false;
-    var checkLength=document.getElementById("loginInputNumber").value.length;
-    if(checkLength==2)
-        document.getElementById("loginInputNumber").value="";
-    var oldValue=document.getElementById("loginInputNumber").value;
-    var newValue=oldValue+key;
-    document.getElementById("loginInputNumber").value=newValue;
-    var length=document.getElementById("loginInputNumber").value.length;
-    if(length==2)
-    {
-        if(document.getElementById("loginUserItem"+newValue)!=null)
-        {
-            document.getElementById("loginUserItem"+newValue).focus();
-            focused=newValue;
-        }
-    }
-}
 function getParametriByHelp(help)
 {
     return new Promise(function (resolve, reject) 
@@ -565,7 +523,14 @@ function getParametriByHelp(help)
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -593,27 +558,7 @@ function clickCambiaTurno()
 function clickCambiaLinea()
 {
     if(passwordCambiaLineaStazione==false)
-    {
-        var input=document.createElement("input");
-        input.setAttribute("type","password");
-        input.setAttribute("id","inputPasswordCambiaLineaStazione");
-        input.setAttribute("onkeyup","checkEnter(event)");
-
-        Swal.fire
-        ({
-            title: 'Inserisci la password',
-            showCloseButton: false,
-            showConfirmButton:false,
-            showCancelButton:false,
-            showLoaderOnConfirm: true,
-            background:"#353535",
-            html:input.outerHTML,
-            onOpen : function()
-                    {
-                        document.getElementsByClassName("swal2-close")[0].style.outline="none";
-                    },
-        });
-    }
+        getPopupCheckPassword();
     else
     {
         document.getElementById("loginLineaContainer").focus();
@@ -641,27 +586,7 @@ function clickCambiaLinea()
 function clickCambiaStazione()
 {
     if(passwordCambiaLineaStazione==false)
-    {
-        var input=document.createElement("input");
-        input.setAttribute("type","password");
-        input.setAttribute("id","inputPasswordCambiaLineaStazione");
-        input.setAttribute("onkeyup","checkEnter(event)");
-
-        Swal.fire
-        ({
-            title: 'Inserisci la password',
-            showCloseButton: false,
-            showConfirmButton:false,
-            showCancelButton:false,
-            showLoaderOnConfirm: true,
-            background:"#353535",
-            html:input.outerHTML,
-            onOpen : function()
-                    {
-                        document.getElementsByClassName("swal2-close")[0].style.outline="none";
-                    },
-        });
-    }
+        getPopupCheckPassword();
     else
     {
         document.getElementById("loginStazioneContainer").focus();
@@ -685,5 +610,75 @@ function clickCambiaStazione()
             document.getElementById("loginStazioneContainer").innerHTML=new_stazione.label;
             setCookie("stazione",JSON.stringify(new_stazione));
         }
+    }
+}
+function getPopupCheckPassword()
+{
+    popupCheckPassword=true;
+    nClickNumpadButtonPopupCheckPassword=0;
+    codiceCambiaLineaStazione="";
+
+    var outerContainer=document.createElement("div");
+    outerContainer.setAttribute("class","popup-cambia-linea-stazione-outer-container");
+
+    var title=document.createElement("span");
+    title.setAttribute("class","popup-cambia-linea-stazione-title");
+    title.innerHTML="Inserisci il codice";
+    outerContainer.appendChild(title);
+
+    var fakeInputContainer=document.createElement("div");
+    fakeInputContainer.setAttribute("class","popup-cambia-linea-stazione-fake-input-container");
+    var i=document.createElement("i");i.setAttribute("class","fal fa-circle");fakeInputContainer.appendChild(i);
+    var i=document.createElement("i");i.setAttribute("class","fal fa-circle");fakeInputContainer.appendChild(i);
+    var i=document.createElement("i");i.setAttribute("class","fal fa-circle");fakeInputContainer.appendChild(i);
+    var i=document.createElement("i");i.setAttribute("class","fal fa-circle");fakeInputContainer.appendChild(i);
+    outerContainer.appendChild(fakeInputContainer);
+
+    var numpad=document.createElement("div");
+    numpad.setAttribute("class","popup-cambia-linea-stazione-numpad");
+    var button=document.createElement("button");button.innerHTML="<span>1</span>";button.setAttribute("onclick","clickNumpadButtonPopupCheckPassword('1')");numpad.appendChild(button);
+    var button=document.createElement("button");button.innerHTML="<span>2</span>";button.setAttribute("onclick","clickNumpadButtonPopupCheckPassword('2')");numpad.appendChild(button);
+    var button=document.createElement("button");button.innerHTML="<span>3</span>";button.setAttribute("onclick","clickNumpadButtonPopupCheckPassword('3')");numpad.appendChild(button);
+    var button=document.createElement("button");button.innerHTML="<span>4</span>";button.setAttribute("onclick","clickNumpadButtonPopupCheckPassword('4')");numpad.appendChild(button);
+    var button=document.createElement("button");button.innerHTML="<span>5</span>";button.setAttribute("onclick","clickNumpadButtonPopupCheckPassword('5')");numpad.appendChild(button);
+    var button=document.createElement("button");button.innerHTML="<span>6</span>";button.setAttribute("onclick","clickNumpadButtonPopupCheckPassword('6')");numpad.appendChild(button);
+    var button=document.createElement("button");button.innerHTML="<span>7</span>";button.setAttribute("onclick","clickNumpadButtonPopupCheckPassword('7')");numpad.appendChild(button);
+    var button=document.createElement("button");button.innerHTML="<span>8</span>";button.setAttribute("onclick","clickNumpadButtonPopupCheckPassword('8')");numpad.appendChild(button);
+    var button=document.createElement("button");button.innerHTML="<span>9</span>";button.setAttribute("onclick","clickNumpadButtonPopupCheckPassword('9')");numpad.appendChild(button);
+    var button=document.createElement("button");button.innerHTML="<span>0</span>";button.setAttribute("onclick","clickNumpadButtonPopupCheckPassword('0')");numpad.appendChild(button);
+    outerContainer.appendChild(numpad);
+
+    Swal.fire
+    ({
+        html:outerContainer.outerHTML,
+        showCloseButton: false,
+        showConfirmButton:false,
+        showCancelButton:false,
+        background:"#353535",
+        onOpen : function()
+                {
+                    document.body.classList.remove("swal2-height-auto");
+                    document.getElementsByClassName("swal2-content")[0].style.padding="0px";
+                    document.getElementsByClassName("swal2-popup")[0].style.padding="0px";
+                    document.getElementsByClassName("swal2-popup")[0].style.width="210px";
+                    document.getElementsByClassName("swal2-content")[0].style.boxShadow="0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23)";
+                    document.activeElement.blur()
+                },
+    }).then((result) => 
+    {
+        popupCheckPassword=false;
+    });
+}
+function clickNumpadButtonPopupCheckPassword(n)
+{
+    if(nClickNumpadButtonPopupCheckPassword<5)
+    {
+        nClickNumpadButtonPopupCheckPassword++;
+        codiceCambiaLineaStazione+=n;
+        document.getElementsByClassName("popup-cambia-linea-stazione-fake-input-container")[0].getElementsByTagName("i")[(nClickNumpadButtonPopupCheckPassword-1)].className="fas fa-circle";
+    }
+    if(nClickNumpadButtonPopupCheckPassword==4)
+    {
+        checkPasswordCambiaLineaStazione();
     }
 }

@@ -9,7 +9,7 @@ var numbers_array=
 var view;
 var iframe;
 var ordinamentoKit;
-var mostraMisureTraversine;
+var mostraMisureTraversine="false";
 var filtroLinea;
 var filtroStazione;
 var filtroAvanzamento;
@@ -27,6 +27,20 @@ var printList=[];
 
 window.addEventListener("load", async function(event)
 {
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
     id_utente=await getSessionValue("id_utente");
 
     frequenza_aggiornamento_dati_linea=await getParametro("frequenza_aggiornamento_dati_linea");
@@ -49,10 +63,13 @@ window.addEventListener("load", async function(event)
         ordinamentoKit="kit";
     //setOrdinamentoKitLabel();
 
-    mostraMisureTraversine=await getCookie("mostraMisureTraversine");
-    if(mostraMisureTraversine=="")
-        mostraMisureTraversine="false";
-    //setMostraMisureTraversineLabel();
+    if(stazione=="traversine")
+    {
+        mostraMisureTraversine=await getCookie("mostraMisureTraversine");
+        if(mostraMisureTraversine=="")
+            mostraMisureTraversine="false";
+        //setMostraMisureTraversineLabel();
+    }
 
     filtroLinea=await getCookie("filtroLinea");
     if(filtroLinea=="")
@@ -83,12 +100,14 @@ window.addEventListener("load", async function(event)
     var username=await getSessionValue("username");
     document.getElementById("usernameContainer").innerHTML=username+'<i class="fad fa-user" style="margin-left:10px"></i>';
 
-    getListLotti(true);
-
     funzioniTasti=await getFunzioniTasti();
+    console.log(funzioniTasti)
     
     interval = setInterval(checkLists, frequenza_aggiornamento_dati_linea);
 
+    Swal.close();
+
+    getListLotti(true);
 });
 function getFunzioniTasti()
 {
@@ -99,20 +118,42 @@ function getFunzioniTasti()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
         });
     });
 }
-function checkLists()
+async function checkLists()
 {
     switch (view)
     {
-        case "lotti":getListLotti(false);break;
-        case "cabine_corridoi":getListCabineECorridoi(false);break;
-        case "kit":if(mostraMisureTraversine=="false"){getListKit(false)};break;
+        case "lotti":
+            var checkLotti=await getLotti();
+            if(!arrayCompare(lotti,checkLotti))
+                getListLotti(false);
+        break;
+        case "cabine_corridoi":
+            var checkCabine_corridoi=await getCabineECorridoi(lottoSelezionato.lotto,lottoSelezionato.commessa);
+            if(!arrayCompare(cabine_corridoi,checkCabine_corridoi))
+                getListCabineECorridoi(false);
+        break;
+        case "kit":
+            if(mostraMisureTraversine=="false")
+            {
+                var checkKit=await getKit(lottoSelezionato.lotto,lottoSelezionato.commessa,cabina_corridoioSelezionato.numero_cabina);
+                if(!arrayCompare(kit,checkKit))
+                    getListKit(false);
+            };
+        break;
         default:break;
     }
 }
@@ -209,7 +250,14 @@ function getParametriByHelp(help)
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -275,6 +323,8 @@ window.addEventListener("keydown", async function(event)
             event.preventDefault();
             if(stazione.nome=="montaggio")
                 stampaEtichettaKit();
+            if(stazione.nome=="caricamento" && cabina_corridoioSelezionato != null)
+                stampaEtichettaCarrelo();
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","apri_popup_raggruppamento_traversine").valore):
             event.preventDefault();
@@ -472,7 +522,9 @@ window.addEventListener("keydown", async function(event)
             event.preventDefault();
             scrollright();
         break;
-        default:break;
+        default:
+            event.preventDefault();
+        break;
     }
     interval = setInterval(checkLists, frequenza_aggiornamento_dati_linea);
 });
@@ -579,7 +631,19 @@ async function eliminaRegistrazioneAvanzamentoKit(number)
 }
 async function confermaKit(number)
 {
-    console.log("conferma kit");
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
 
     //console.clear();
 
@@ -604,6 +668,7 @@ async function confermaKit(number)
     {
         if(status=="success")
         {
+            Swal.close();
             if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
             {
                 Swal.fire
@@ -635,9 +700,7 @@ async function confermaKit(number)
                         document.getElementById("kitItem"+number).insertBefore(fa, document.getElementById("kitItem"+number).getElementsByTagName("table")[0]);
                 }
                 else
-                {
-                    checkLists();
-                }
+                    getListKit(false)
             }
         }
         else
@@ -666,6 +729,20 @@ function selectCabinaCorridoio(number)
 }
 async function getListKit(cleanFocused)
 {
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
     view="kit";
 
     document.getElementById("ordinamentoContainer").style.display="";
@@ -831,8 +908,12 @@ async function getListKit(cleanFocused)
 
     if(!cleanFocused && focused!=null)
     {
-        document.getElementById(view+"Item"+focused).focus();   
+        try {
+            document.getElementById(view+"Item"+focused).focus();   
+        } catch (error) {}
     }
+
+    Swal.close();
 }
 function getKit(lotto,commessa,numero_cabina)
 {
@@ -858,7 +939,15 @@ function getKit(lotto,commessa,numero_cabina)
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    console.log(response);
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -875,6 +964,20 @@ function logout()
 }
 async function getListLotti(cleanFocused)
 {
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
     view="lotti";
 
     document.getElementById("ordinamentoContainer").style.display="none";
@@ -930,8 +1033,12 @@ async function getListLotti(cleanFocused)
     });
     if(!cleanFocused && focused!=null)
     {
-        document.getElementById(view+"Item"+focused).focus();   
+        try {
+            document.getElementById(view+"Item"+focused).focus();
+        } catch (error) {}
     }
+
+    Swal.close();
 }
 function selectLotto(number)
 {
@@ -942,6 +1049,20 @@ function selectLotto(number)
 }
 async function getListCabineECorridoi(cleanFocused)
 {
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
     view="cabine_corridoi";
 
     document.getElementById("ordinamentoContainer").style.display="none";
@@ -1007,6 +1128,8 @@ async function getListCabineECorridoi(cleanFocused)
     {
         document.getElementById(view+"Item"+focused).focus();   
     }
+
+    Swal.close();
 }
 async function getPdf(folder,fileName)
 {
@@ -1072,7 +1195,14 @@ function getCabineECorridoi(lotto,commessa)
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -1088,7 +1218,14 @@ function getLotti()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -1138,7 +1275,14 @@ function getAnagraficaStazioni()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -1204,6 +1348,284 @@ function chiudiKit()
         }
     });
 }
+async function stampaEtichettaCarrelo()
+{
+    Swal.fire
+    ({
+        title: "Caricamento in corso... ",
+        background:"transparent",
+        html: '<i style="color:white" class="fad fa-spinner-third fa-spin fa-4x"></i>',
+        showConfirmButton:false,
+        showCloseButton:false,
+        allowEscapeKey:false,
+        allowOutsideClick:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="white";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";document.getElementsByClassName("swal2-close")[0].style.outline="none";}
+    });
+
+    var server_adress=await getServerValue("SERVER_ADDR");
+    var server_port=await getServerValue("SERVER_PORT");
+    
+    var testiEtichette=await getTestiEtichetta();
+    const carrello = await getCarrelloCabinaCommessa(cabina_corridoioSelezionato.numero_cabina,lottoSelezionato.commessa.substring(2, 6));
+    var commessa_breve=carrello.substring(0, 4);
+    var descrizioneCarrello=await getDescrizioniCarrelli(commessa_breve);
+    //contorlla length descrizioneCarrello
+    if(descrizioneCarrello.length==0)
+    {
+        Swal.fire
+        ({
+            icon:"error",
+            title: "Errore. Descrizioni commessa "+commessa_breve+" mancanti",
+            onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}
+        });
+    }
+    else
+    {
+        var height = 14.5;
+        var width = 10
+        var body_vertical_padding = 0.15;
+        var body_horizontal_padding = 0.35;
+        var pages_space = 10;
+    
+        var printWindow = window.open('', '_blank', 'height=1080,width=1920');
+    
+        printWindow.document.body.setAttribute("onafterprint","window.close();");
+    
+        printWindow.document.body.style.backgroundColor="white";
+        printWindow.document.body.style.overflow="hidden";
+        printWindow.document.body.style.paddingTop=body_vertical_padding+"cm";
+        printWindow.document.body.style.paddingLeft=body_horizontal_padding+"cm";
+        printWindow.document.body.style.boxSizing="border-box";
+    
+        var link=document.createElement("link");
+        link.setAttribute("href","http://"+server_adress+":"+server_port+"/mi_kit_linea/css/etichettaCarrello.css");
+        link.setAttribute("rel","stylesheet");
+        printWindow.document.head.appendChild(link);
+    
+        var link=document.createElement("link");
+        link.setAttribute("href","http://"+server_adress+":"+server_port+"/mi_kit_linea/css/fonts.css");
+        link.setAttribute("rel","stylesheet");
+        printWindow.document.head.appendChild(link);
+    
+        var testo_cantiere=getFirstObjByPropValue(testiEtichette,"nome","testo_cantiere");
+        var testo_costruzione=getFirstObjByPropValue(testiEtichette,"nome","testo_costruzione");
+        var testo_carrello=getFirstObjByPropValue(testiEtichette,"nome","testo_carrello");
+        var testo_descrizione_carrello=getFirstObjByPropValue(testiEtichette,"nome","testo_descrizione_carrello");
+        var testo_colonna_quantita=getFirstObjByPropValue(testiEtichette,"nome","testo_colonna_quantita");
+        var testo_misure_carrello=getFirstObjByPropValue(testiEtichette,"nome","testo_misure_carrello");
+        var testo_colonna_numero=getFirstObjByPropValue(testiEtichette,"nome","testo_colonna_numero");
+        var testo_colonna_codice=getFirstObjByPropValue(testiEtichette,"nome","testo_colonna_codice");
+        var testo_apertura_carrelli=getFirstObjByPropValue(testiEtichette,"nome","testo_apertura_carrelli");
+        var testo_indicazioni=getFirstObjByPropValue(testiEtichette,"nome","testo_indicazioni");
+    
+        var cantiere=getFirstObjByPropValue(descrizioneCarrello,"nome","cantiere");
+        cantiere.descrizione.replace(/\r?\n/g, "<br />");
+        var costruzione=getFirstObjByPropValue(descrizioneCarrello,"nome","costruzione");
+        var misure=getFirstObjByPropValue(descrizioneCarrello,"nome","misure");
+    
+        var outerContainer=document.createElement("div");
+        outerContainer.setAttribute("class","etichetta-outer-container");
+        outerContainer.setAttribute("style","height: "+height+"cm;width: "+width+"cm;");
+        var id_carrello=carrello.replace("+","");
+        outerContainer.setAttribute("id","outerContainer"+id_carrello);
+    
+        var logoContainer=document.createElement("div");
+        logoContainer.setAttribute("style","display:flex;align-items:center;justify-content:center;width:100%;height: 13%;max-height: 13%;min-height: 13%");
+        var logo=document.createElement("img");
+        logo.setAttribute("src","http://"+server_adress+":"+server_port+"/mi_kit_linea/images/logoCabins.png");
+        logoContainer.appendChild(logo);
+        outerContainer.appendChild(logoContainer);
+    
+        var div=document.createElement("div");
+        div.setAttribute("style","height:7%;max-height: 7%;min-height: 7%;width:100%;overflow:hidden;display:flex;align-items:center;justify-content:center");
+        var barcode=document.createElement("span");
+        barcode.setAttribute("class","etichetta-barcode");
+        barcode.setAttribute("style","");
+        barcode.innerHTML="*"+carrello+"*";
+        div.appendChild(barcode);
+        outerContainer.appendChild(div);
+    
+        var div=document.createElement("div");
+        div.setAttribute("class","etichetta-column");
+        div.setAttribute("style","height:8%;max-height: 8%;min-height: 8%;width:100%");
+    
+        var span=document.createElement("span");
+        span.setAttribute("class","etichetta-span");
+        span.setAttribute("style","height:45%;font-size:18px;width:100%;border-top:1px solid black;border-left:1px solid black;border-right:1px solid black;display:flex;align-items:center;justify-content:center");
+        span.innerHTML=testo_misure_carrello.testo;
+        div.appendChild(span);
+        
+        var span=document.createElement("span");
+        span.setAttribute("class","etichetta-span");
+        span.setAttribute("style","height:55%;font-size:24px;font-weight:bold;width:100%;border-top:1px solid black;border-bottom:1px solid black;border-left:1px solid black;border-right:1px solid black;display:flex;align-items:center;justify-content:center");
+        span.innerHTML=misure.descrizione;
+        div.appendChild(span);
+    
+        outerContainer.appendChild(div);
+    
+        var spanRow=document.createElement("div");
+        spanRow.setAttribute("class","etichetta-row");
+        spanRow.setAttribute("style","height:15%;max-height: 15%;min-height: 15%;border-top:1px solid black;border-bottom:1px solid black;border-left:1px solid black;border-right:1px solid black;align-items:center;justify-content:flex-start;flex-direction:column");
+    
+        var span=document.createElement("span");
+        span.setAttribute("class","etichetta-span");
+        span.setAttribute("style","border-bottom:1px solid black;font-size:18px;width:100%;box-sizing:border-box");
+        span.innerHTML=testo_cantiere.testo;
+        spanRow.appendChild(span);
+    
+        var span=document.createElement("span");
+        span.setAttribute("class","etichetta-span");
+        span.setAttribute("style","font-size:15px;font-weight:bold;width:100%;box-sizing:border-box");
+        span.innerHTML=cantiere.descrizione;
+        spanRow.appendChild(span);
+    
+        outerContainer.appendChild(spanRow);
+    
+        var spanRow=document.createElement("div");
+        spanRow.setAttribute("class","etichetta-row");
+        spanRow.setAttribute("style","height:7%;max-height: 7%;min-height: 7%;border-bottom:1px solid black;border-left:1px solid black;border-right:1px solid black;align-items:center;justify-content:space-evenly;box-sizing:border-box;");
+    
+        var span=document.createElement("span");
+        span.setAttribute("class","etichetta-span");
+        span.setAttribute("style","font-size:18px;");
+        span.innerHTML=testo_costruzione.testo;
+        spanRow.appendChild(span);
+    
+        var span=document.createElement("span");
+        span.setAttribute("class","etichetta-span");
+        span.setAttribute("style","font-size:30px;font-weight:bold;");
+        span.innerHTML=costruzione.descrizione;
+        spanRow.appendChild(span);
+    
+        outerContainer.appendChild(spanRow);
+    
+        var spanRow=document.createElement("div");
+        spanRow.setAttribute("class","etichetta-row");
+        spanRow.setAttribute("style","height:7%;max-height: 7%;min-height: 7%;border-bottom:1px solid black;border-left:1px solid black;border-right:1px solid black;align-items:center;justify-content:space-evenly;box-sizing:border-box;");
+    
+        var span=document.createElement("span");
+        span.setAttribute("class","etichetta-span");
+        span.setAttribute("style","font-size:18px;");
+        span.innerHTML=testo_carrello.testo;
+        spanRow.appendChild(span);
+    
+        var span=document.createElement("span");
+        span.setAttribute("class","etichetta-span");
+        span.setAttribute("style","font-size:30px;font-weight:bold;");
+        span.innerHTML=carrello;
+        spanRow.appendChild(span);
+    
+        outerContainer.appendChild(spanRow);
+    
+        var span=document.createElement("span");
+        span.setAttribute("class","etichetta-span");
+        span.setAttribute("style","height:4%;max-height: 4%;min-height: 4%;font-size:18px;width:100%;border-top:1px solid black;border-left:1px solid black;border-right:1px solid black;align-items:center;justify-content:center;box-sizing:border-box;");
+        span.innerHTML=testo_descrizione_carrello.testo;
+        outerContainer.appendChild(span);
+    
+        var span=document.createElement("span");
+        span.setAttribute("class","etichetta-span");
+        span.setAttribute("style","height:7%;max-height: 7%;min-height: 7%;font-size:30px;font-weight:bold;width:100%;border-top:1px solid black;border-bottom:1px solid black;border-left:1px solid black;border-right:1px solid black;align-items:center;justify-content:center;box-sizing:border-box;");
+        var descrizioneCarrelloEng=await getDescrizioneCarrello(carrello);
+        descrizioneCarrelloEng=descrizioneCarrelloEng.replace("Carrello","Trolley");
+        descrizioneCarrelloEng=descrizioneCarrelloEng.replace("Carello","Trolley");
+        descrizioneCarrelloEng=descrizioneCarrelloEng.replace("Ponte","Deck");
+        descrizioneCarrelloEng=descrizioneCarrelloEng.replace("Corridoio","Corridor");
+        descrizioneCarrelloEng=descrizioneCarrelloEng.replace("corridoio","Corridor");
+        descrizioneCarrelloEng=descrizioneCarrelloEng.replace("cabine","cabins");
+        descrizioneCarrelloEng=descrizioneCarrelloEng.replace("Pref","PRF");
+        span.innerHTML=descrizioneCarrelloEng;
+        outerContainer.appendChild(span);
+    
+        var tableCabine=document.createElement("table");
+        tableCabine.setAttribute("class","etichetta-table-cabine");
+        tableCabine.setAttribute("style","max-height: 45%;");
+    
+        var tr=document.createElement("tr");
+    
+        var th=document.createElement("th");
+        th.innerHTML=testo_colonna_quantita.testo;
+        tr.appendChild(th);
+    
+        var th=document.createElement("th");
+        th.innerHTML=testo_colonna_numero.testo;
+        tr.appendChild(th);
+    
+        var th=document.createElement("th");
+        th.innerHTML=testo_colonna_codice.testo;
+        tr.appendChild(th);
+    
+        tableCabine.appendChild(tr);
+    
+        var cabine=await getCabineCarrello(carrello);
+    
+        var i=0;
+        
+        cabine.forEach(function(cabina)
+        {
+            if(i<3)
+            {
+                var tr=document.createElement("tr");
+    
+                var td=document.createElement("td");
+                td.innerHTML=cabina.QNT;
+                tr.appendChild(td);
+    
+                var td=document.createElement("td");
+                td.innerHTML=cabina.NCAB;
+                tr.appendChild(td);
+    
+                var td=document.createElement("td");
+                td.innerHTML=cabina.CODCAB;
+                tr.appendChild(td);
+    
+                tableCabine.appendChild(tr);
+            }
+            
+            i++;
+        });
+    
+        outerContainer.appendChild(tableCabine);
+    
+        printWindow.document.body.appendChild(outerContainer);
+    
+        var outerContainer=document.createElement("div");
+        outerContainer.setAttribute("class","etichetta-outer-container");
+        outerContainer.setAttribute("style","height: "+height+"cm;width: "+width+"cm;margin-top:"+pages_space+"mm");
+    
+        var row=document.createElement("div");
+        row.setAttribute("class","etichetta-row");
+        row.setAttribute("style","box-sizing:border-box;padding:5mm");
+    
+        var span=document.createElement("span");
+        span.setAttribute("class","etichetta-span");
+        span.setAttribute("style","font-size:24px;text-align:left;font-weight:bold;box-sizing:border-box");
+        span.innerHTML = testo_indicazioni.testo.replace(/\r?\n/g, "<br />");
+        row.appendChild(span);
+    
+        outerContainer.appendChild(row);
+    
+        var row=document.createElement("div");
+        row.setAttribute("class","etichetta-row");
+        row.setAttribute("style","box-sizing:border-box;padding:5mm;border-top:1px solid black;box-sizing:border-box;");
+    
+        var span=document.createElement("span");
+        span.setAttribute("class","etichetta-span");
+        span.setAttribute("style","font-size:13px;text-align:left;font-weight:bold");
+        span.innerHTML = testo_apertura_carrelli.testo.replace(/\r?\n/g, "<br />");
+        row.appendChild(span);
+    
+        outerContainer.appendChild(row);
+
+        var script=document.createElement("script");
+        script.innerHTML="setTimeout(function(){window.print();}, 800);";
+        outerContainer.appendChild(script);
+    
+        printWindow.document.body.appendChild(outerContainer);
+    
+        Swal.close();
+    }
+}
 async function stampaEtichettaKit()
 {
     if(printList.length>0)
@@ -1218,9 +1640,8 @@ async function stampaEtichettaKit()
         var body_vertical_padding = 0.15;
         var body_horizontal_padding = 0.35;
 
-        var printWindow = window.open('', '_blank', 'height=100,width=100');
+		var printWindow = window.open('', '_blank', 'height=1080,width=1920');
 
-        printWindow.document.body.setAttribute("onload","setTimeout(() => {window.print();}, 200);");
         printWindow.document.body.setAttribute("onafterprint","window.close();");
 
         printWindow.document.body.style.backgroundColor="white";
@@ -1230,12 +1651,7 @@ async function stampaEtichettaKit()
         printWindow.document.body.style.boxSizing="border-box";
 
         var link=document.createElement("link");
-        link.setAttribute("href","http://"+server_adress+":"+server_port+"/dw_incollaggio/css/caricamento.css");
-        link.setAttribute("rel","stylesheet");
-        printWindow.document.head.appendChild(link);
-
-        var link=document.createElement("link");
-        link.setAttribute("href","http://"+server_adress+":"+server_port+"/dw_incollaggio/css/fonts.css");
+        link.setAttribute("href","http://"+server_adress+":"+server_port+"/mi_kit_linea/css/fonts.css");
         link.setAttribute("rel","stylesheet");
         printWindow.document.head.appendChild(link);
         
@@ -1330,229 +1746,13 @@ async function stampaEtichettaKit()
             column.appendChild(span);
             outerContainer.appendChild(column);
 
-            /*var innerContainer=document.createElement("div");
-            innerContainer.setAttribute("style","display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;min-width:90%;max-width:90%;width:90%;min-height:100%;max-height:100%;height:100%;box-sizing:border-box");
-
-            var row=document.createElement("div");
-            row.setAttribute("style","min-width:100%;max-width:100%;width:100%;min-height:13%;max-height:13%;height:13%;display: flex;flex-direction: row;align-items: center;justify-content: flex-start;border-bottom:.5mm solid black;box-sizing:border-box");
-
-            var img=document.createElement("img");
-            img.setAttribute("style","min-width:15%;max-width:15%;width:15%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;box-sizing:border-box");
-            img.setAttribute("src","http://"+server_adress+":"+server_port+"/dw_incollaggio/images/logo_bw.png");
-            row.appendChild(img);
-
-            var div=document.createElement("div");
-            div.setAttribute("style","overflow:hidden;min-width:60%;max-width:60%;width:60%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box");
-            var span=document.createElement("span");
-            span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:3.5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
-            span.innerHTML="<b>Costruzione: </b>"+data.descrizione_commessa;
-            div.appendChild(span);
-            row.appendChild(div);
-
-            var div=document.createElement("div");
-            div.setAttribute("style","overflow:hidden;min-width:25%;max-width:25%;width:25%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box");
-            var span=document.createElement("span");
-            span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:3.5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
-            span.innerHTML="<b>0474/"+data.year+"</b>"
-            div.appendChild(span);
-            row.appendChild(div);
-
-            innerContainer.appendChild(row);
-
-            outerContainer.appendChild(innerContainer);
-    
-            var img=document.createElement("img");
-            img.setAttribute("style","min-width:10%;max-width:10%;width:10%;min-height:100%;max-height:100%;height:100%;box-sizing:border-box");
-            img.setAttribute("src","http://"+server_adress+":"+server_port+"/dw_incollaggio/images/alto.png");
-            outerContainer.appendChild(img);*/
+            var script=document.createElement("script");
+            script.innerHTML="setTimeout(function(){window.print();}, 800);";
+            outerContainer.appendChild(script);
     
             printWindow.document.body.appendChild(outerContainer);
         });
         printList=[];
-
-        /*
-        var server_adress=await getServerValue("SERVER_ADDR");
-        var server_port=await getServerValue("SERVER_PORT");
-
-        var data=await getDataEtichettaPannello(id_distinta);
-
-        var eight = 6;
-        var width = 10;
-
-        var printWindow = window.open('', '_blank', 'height=100,width=100');
-
-        printWindow.document.body.setAttribute("onload","setTimeout(() => {window.print();}, 200);");
-        printWindow.document.body.setAttribute("onafterprint","window.close();");
-
-        printWindow.document.body.style.backgroundColor="white";
-        printWindow.document.body.style.overflow="hidden";
-
-        var link=document.createElement("link");
-        link.setAttribute("href","http://"+server_adress+":"+server_port+"/dw_incollaggio/css/caricamento.css");
-        link.setAttribute("rel","stylesheet");
-        printWindow.document.head.appendChild(link);
-
-        var link=document.createElement("link");
-        link.setAttribute("href","http://"+server_adress+":"+server_port+"/dw_incollaggio/css/fonts.css");
-        link.setAttribute("rel","stylesheet");
-        printWindow.document.head.appendChild(link);
-
-        var outerContainer=document.createElement("div");
-        outerContainer.setAttribute("id","printContainer");
-        outerContainer.setAttribute("style","display: flex;flex-direction: row;align-items: flex-start;justify-content: flex-start;height: "+eight+"cm;width: "+width+"cm;border:.5mm solid black;box-sizing:border-box;margin:5mm");
-        
-        var innerContainer=document.createElement("div");
-        innerContainer.setAttribute("style","display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;min-width:90%;max-width:90%;width:90%;min-height:100%;max-height:100%;height:100%;box-sizing:border-box");
-
-        var row=document.createElement("div");
-        row.setAttribute("style","min-width:100%;max-width:100%;width:100%;min-height:13%;max-height:13%;height:13%;display: flex;flex-direction: row;align-items: center;justify-content: flex-start;border-bottom:.5mm solid black;box-sizing:border-box");
-
-        var img=document.createElement("img");
-        img.setAttribute("style","min-width:15%;max-width:15%;width:15%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;box-sizing:border-box");
-        img.setAttribute("src","http://"+server_adress+":"+server_port+"/dw_incollaggio/images/logo_bw.png");
-        row.appendChild(img);
-
-        var div=document.createElement("div");
-        div.setAttribute("style","overflow:hidden;min-width:60%;max-width:60%;width:60%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box");
-        var span=document.createElement("span");
-        span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:3.5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
-        span.innerHTML="<b>Costruzione: </b>"+data.descrizione_commessa;
-        div.appendChild(span);
-        row.appendChild(div);
-
-        var div=document.createElement("div");
-        div.setAttribute("style","overflow:hidden;min-width:25%;max-width:25%;width:25%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box");
-        var span=document.createElement("span");
-        span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:3.5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
-        span.innerHTML="<b>0474/"+data.year+"</b>"
-        div.appendChild(span);
-        row.appendChild(div);
-
-        innerContainer.appendChild(row);
-
-        var row=document.createElement("div");
-        row.setAttribute("style","min-width:100%;max-width:100%;width:100%;min-height:18%;max-height:18%;height:18%;display: flex;flex-direction: row;align-items: center;justify-content: flex-start;border-bottom:.5mm solid black;box-sizing:border-box");
-
-        var div=document.createElement("div");
-        div.setAttribute("style","overflow:hidden;min-width:75%;max-width:75%;width:75%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box");
-        var span=document.createElement("span");
-        span.setAttribute("style","text-align:center;font-family: 'Libre Barcode 39', cursive;font-size: 12mm;padding-top: 5mm;;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
-        span.innerHTML="*"+data.codice_pannello+"*";
-        div.appendChild(span);
-        row.appendChild(div);
-
-        var div=document.createElement("div");
-        div.setAttribute("style","min-width:25%;max-width:25%;width:25%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box");
-        var img=document.createElement("img");
-        img.setAttribute("style","min-height:100%;max-height:100%;height:100%;");
-        img.setAttribute("src","http://"+server_adress+":"+server_port+"/dw_incollaggio/images/timone.png");
-        div.appendChild(img);
-        row.appendChild(div);
-
-        innerContainer.appendChild(row);
-
-        var row=document.createElement("div");
-        row.setAttribute("style","min-width:100%;max-width:100%;width:100%;min-height:22%;max-height:22%;height:22%;display: flex;flex-direction: row;align-items: center;justify-content: flex-start;border-bottom:.5mm solid black;box-sizing:border-box");
-
-        var div=document.createElement("div");
-        div.setAttribute("style","overflow:hidden;min-width:100%;max-width:100%;width:100%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;box-sizing:border-box");
-        var span=document.createElement("span");
-        span.setAttribute("style","text-align:center;font-family: 'Questrial', sans-serif;font-size:7mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
-        span.innerHTML="<b>"+data.codice_pannello+"</b>"
-        div.appendChild(span);
-        var span=document.createElement("span");
-        span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:4.5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
-        span.innerHTML="<b>XSIDE: </b>"+data.xside+" <b>YSIDE: </b>"+data.yside;
-        div.appendChild(span);
-        row.appendChild(div);
-
-        innerContainer.appendChild(row);
-
-        var row=document.createElement("div");
-        row.setAttribute("style","min-width:100%;max-width:100%;width:100%;min-height:9%;max-height:9%;height:9%;display: flex;flex-direction: row;align-items: center;justify-content: flex-start;border-bottom:.5mm solid black;box-sizing:border-box");
-
-        var div=document.createElement("div");
-        div.setAttribute("style","overflow:hidden;min-width:50%;max-width:50%;width:50%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box");
-        var span=document.createElement("span");
-        span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:3.5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
-        span.innerHTML="<b>Larghezza: </b>"+data.larghezza;
-        div.appendChild(span);
-        row.appendChild(div);
-
-        var div=document.createElement("div");
-        div.setAttribute("style","overflow:hidden;min-width:50%;max-width:50%;width:50%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box");
-        var span=document.createElement("span");
-        span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:3.5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
-        span.innerHTML="<b>Altezza: </b>"+data.altezza;
-        div.appendChild(span);
-        row.appendChild(div);
-
-        innerContainer.appendChild(row);
-
-        var row=document.createElement("div");
-        row.setAttribute("style","min-width:100%;max-width:100%;width:100%;min-height:15%;max-height:15%;height:15%;display: flex;flex-direction: row;align-items: center;justify-content: flex-start;border-bottom:.5mm solid black;box-sizing:border-box");
-
-        var div=document.createElement("div");
-        div.setAttribute("style","overflow:hidden;min-width:100%;max-width:100%;width:100%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;box-sizing:border-box");
-        var span=document.createElement("span");
-        span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:3.5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
-        span.innerHTML="<b>Finitura lato X: </b>"+data.finitura_lato_x;
-        div.appendChild(span);
-        var span=document.createElement("span");
-        span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:3.5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
-        span.innerHTML="<b>Finitura lato Y: </b>"+data.finitura_lato_y;
-        div.appendChild(span);
-        row.appendChild(div);
-
-        innerContainer.appendChild(row);
-
-        var row=document.createElement("div");
-        row.setAttribute("style","min-width:100%;max-width:100%;width:100%;min-height:9%;max-height:9%;height:9%;display: flex;flex-direction: row;align-items: center;justify-content: flex-start;border-bottom:.5mm solid black;box-sizing:border-box");
-
-        var div=document.createElement("div");
-        div.setAttribute("style","overflow:hidden;min-width:50%;max-width:50%;width:50%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box");
-        var span=document.createElement("span");
-        span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:3.5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
-        span.innerHTML="<b>Codice certificato: </b>"+data.codice_certificato;
-        div.appendChild(span);
-        row.appendChild(div);
-
-        var div=document.createElement("div");
-        div.setAttribute("style","overflow:hidden;min-width:50%;max-width:50%;width:50%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box");
-        var span=document.createElement("span");
-        span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:3.5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
-        span.innerHTML="<b>Classe: </b>"+data.classe;
-        div.appendChild(span);
-        row.appendChild(div);
-
-        innerContainer.appendChild(row);
-
-        var row=document.createElement("div");
-        row.setAttribute("style","min-width:100%;max-width:100%;width:100%;min-height:15%;max-height:15%;height:15%;display: flex;flex-direction: row;align-items: center;justify-content: flex-start;box-sizing:border-box");
-
-        var div=document.createElement("div");
-        div.setAttribute("style","overflow:hidden;min-width:100%;max-width:100%;width:100%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;box-sizing:border-box");
-        var span=document.createElement("span");
-        span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:3.5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
-        span.innerHTML="<b>Id materiale: </b>"+data.id_materiale;
-        div.appendChild(span);
-        var span=document.createElement("span");
-        span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:3.5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
-        span.innerHTML="<b>Lotto di prod.: </b>"+data.lotto;
-        div.appendChild(span);
-        row.appendChild(div);
-
-        innerContainer.appendChild(row);
-
-        outerContainer.appendChild(innerContainer);
-
-        var img=document.createElement("img");
-        img.setAttribute("style","min-width:10%;max-width:10%;width:10%;min-height:100%;max-height:100%;height:100%;box-sizing:border-box");
-        img.setAttribute("src","http://"+server_adress+":"+server_port+"/dw_incollaggio/images/alto.png");
-        outerContainer.appendChild(img);
-
-        printWindow.document.body.appendChild(outerContainer);
-        */
     }
 }
 async function getPopupRaggruppamentoTraversine()
@@ -1750,8 +1950,9 @@ function getRaggruppamentoTraversine(kit)
                     try {
                         resolve(JSON.parse(response));
                     } catch (error) {
-                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
-                        console.log(response);
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
                         resolve([]);
                     }
                 }
@@ -1787,9 +1988,10 @@ function checkRegistrazioniKitStazioni()
                     try {
                         resolve(JSON.parse(response));
                     } catch (error) {
-                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
-                        console.log(response);
-                        resolve(false);
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
+                        resolve([]);
                     }
                 }
             }
@@ -1798,6 +2000,140 @@ function checkRegistrazioniKitStazioni()
                 Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
                 console.log(response);
                 resolve(false);
+            }
+        });
+    });
+}
+function getTestiEtichetta()
+{
+    return new Promise(function (resolve, reject) 
+    {
+        $.get("getTestiEtichettaCarrello.php",
+        function(response, status)
+        {
+            if(status=="success")
+            {
+                if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+                {
+                    Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    console.log(response);
+                    resolve([]);
+                }
+                else
+                {
+                    try {
+                        resolve(JSON.parse(response));
+                    } catch (error) {
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
+                        resolve([]);
+                    }
+                }
+            }
+            else
+                resolve([]);
+        });
+    });
+}
+function getCarrelloCabinaCommessa(numero_cabina,commessa)
+{
+    return new Promise(function (resolve, reject) 
+    {
+        $.get("getCarrelloCabinaCommessa.php",{numero_cabina,commessa},
+        function(response, status)
+        {
+            if(status=="success")
+            {
+                if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+                {
+                    Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    console.log(response);
+                    resolve("");
+                }
+                else
+                    resolve(response);
+            }
+        });
+    });
+}
+function getDescrizioneCarrello(carrello)
+{
+    return new Promise(function (resolve, reject) 
+    {
+        $.get("getDescrizioneCarrelloStampaEtichetta.php",{carrello},
+        function(response, status)
+        {
+            if(status=="success")
+            {
+                if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+                {
+                    Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    console.log(response);
+                    resolve("");
+                }
+                else
+                    resolve(response);
+            }
+        });
+    });
+}
+function getDescrizioniCarrelli(commessa_breve)
+{
+    return new Promise(function (resolve, reject) 
+    {
+        $.get("getDescrizioniCarrelliStampaEtichetta.php",{commessa_breve},
+        function(response, status)
+        {
+            if(status=="success")
+            {
+                if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+                {
+                    Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    console.log(response);
+                    resolve([]);
+                }
+                else
+                {
+                    try {
+                        resolve(JSON.parse(response));
+                    } catch (error) {
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
+                        resolve([]);
+                    }
+                }
+            }
+        });
+    });
+}
+function getCabineCarrello(carrello)
+{
+    return new Promise(function (resolve, reject) 
+    {
+        $.get("getCabineCarrelloStampaEtichetta.php",{carrello},
+        function(response, status)
+        {
+            if(status=="success")
+            {
+                if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+                {
+                    Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    console.log(response);
+                    resolve([]);
+                }
+                else
+                {
+                    try {
+                        resolve(JSON.parse(response));
+                    } catch (error) {
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
+                        resolve([]);
+                    }
+                }
             }
         });
     });

@@ -15,6 +15,20 @@ var intervalOverflowPdf2;
 
 window.addEventListener("load", async function(event)
 {
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
     id_utente=await getSessionValue("id_utente");
 
     frequenza_aggiornamento_dati_linea=await getParametro("frequenza_aggiornamento_dati_linea");
@@ -50,11 +64,12 @@ window.addEventListener("load", async function(event)
 
     var username=await getSessionValue("username");
     document.getElementById("usernameContainer").innerHTML=username+'<i class="fad fa-user" style="margin-left:10px"></i>';
-
-    getListLotti();
     
     //interval = setInterval(checkLists, frequenza_aggiornamento_dati_linea);
-
+    
+    Swal.close();
+    
+    getListLotti();
 });
 function getParametro(nome)
 {
@@ -102,7 +117,14 @@ function getAnagraficaLinee()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -118,7 +140,14 @@ function getAnagraficaStazioni()
         {
             if(status=="success")
             {
-                resolve(JSON.parse(response));
+                try {
+                    resolve(JSON.parse(response));
+                } catch (error) {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                    resolve([]);
+                }
             }
             else
                 reject({status});
@@ -131,12 +160,26 @@ function checkLists()
     {
         case "lotti":getListLotti();break;
         case "carrelli":getListCarrelli();break;
-        /*case "kit":if(mostraMisureTraversine=="false"){getListKit(false)};break;*/
+        case "componenti":getListComponenti();break;
         default:break;
     }
 }
 async function getListLotti()
 {
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
     view="lotti";
 
     document.getElementById("totaliChecklistLabel").style.display="none";
@@ -176,6 +219,8 @@ async function getListLotti()
 
         i++;
     });
+
+    Swal.close();
 }
 function getLotti()
 {
@@ -197,8 +242,9 @@ function getLotti()
                     try {
                         resolve(JSON.parse(response));
                     } catch (error) {
-                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
-                        console.log(response);
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
                         resolve([]);
                     }
                 }
@@ -215,6 +261,20 @@ function selectLotto(id_lotto)
 }
 async function getListCarrelli()
 {
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
     view="carrelli";
 
     document.getElementById("totaliChecklistLabel").style.display="none";
@@ -252,6 +312,8 @@ async function getListCarrelli()
 
         i++;
     });
+
+    Swal.close();
 }
 function getCarrelli(lotto,commessa)
 {
@@ -273,8 +335,9 @@ function getCarrelli(lotto,commessa)
                     try {
                         resolve(JSON.parse(response));
                     } catch (error) {
-                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
-                        console.log(response);
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
                         resolve([]);
                     }
                 }
@@ -291,6 +354,20 @@ function selectCarrello(id_CODCAR)
 }
 async function getListComponenti()
 {
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
     view="componenti";
 
     document.getElementById("totaliChecklistLabel").style.display="";
@@ -386,6 +463,8 @@ async function getListComponenti()
     });
 
     document.getElementById("totaliChecklistLabel").innerHTML=nComponentiChecked+"/"+componenti.length;
+
+    Swal.close();
 }
 function disableCheckboxComponente(event)
 {
@@ -446,8 +525,9 @@ function getComponenti(CODCAR,lotto)
                     try {
                         resolve(JSON.parse(response));
                     } catch (error) {
-                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
-                        console.log(response);
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
                         resolve([]);
                     }
                 }
