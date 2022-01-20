@@ -24,6 +24,8 @@ var shownPdf;
 var raggruppamentoTraversine="LUNG";
 var popupRaggruppamentoTraversine=false;
 var printList=[];
+var mi_kit_linea_params;
+var socket;
 
 window.addEventListener("load", async function(event)
 {
@@ -40,6 +42,8 @@ window.addEventListener("load", async function(event)
         showCancelButton:false,
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
+ 
+    mi_kit_linea_params = await getMiKitLineaParams();
 
     id_utente=await getSessionValue("id_utente");
 
@@ -104,6 +108,16 @@ window.addEventListener("load", async function(event)
     console.log(funzioniTasti)
     
     interval = setInterval(checkLists, frequenza_aggiornamento_dati_linea);
+
+    socket = io(`${mi_kit_linea_params.node_websocket_server_info.protocol}://${mi_kit_linea_params.node_websocket_server_info.ip}:${mi_kit_linea_params.node_websocket_server_info.port}`);
+    
+    socket.on('message', message =>
+    {
+        if(stazione.nome=="montaggio" && message.linea == linea.nome)
+        {
+            stampaEtichettaKit(message.printList);
+        }
+    });
 
     Swal.close();
 
@@ -319,12 +333,15 @@ window.addEventListener("keydown", async function(event)
         case 55:setNumber(event.key);break;//7
         case 56:setNumber(event.key);break;//8
         case 57:setNumber(event.key);break;//9
-        case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","stampa_etichetta").valore):
+        case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","stampa_etichetta_kit").valore):
             event.preventDefault();
-            if(stazione.nome=="montaggio")
-                stampaEtichettaKit();
+            if(stazione.nome=="caricamento")
+                sendStampaEtichettaKit();
+        break;
+        case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","stampa_etichetta_carrello").valore):
+            event.preventDefault();
             if(stazione.nome=="caricamento" && cabina_corridoioSelezionato != null)
-                stampaEtichettaCarrelo();
+                stampaEtichettaCarrello();
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","apri_popup_raggruppamento_traversine").valore):
             event.preventDefault();
@@ -683,7 +700,15 @@ async function confermaKit(number)
             }
             else
             {
-                //getListKit(true);
+                var printObj=
+                {
+                    kit:kitSelezionato.kit,
+                    numero_cabina:cabina_corridoioSelezionato.numero_cabina,
+                    posizione:kitSelezionato.posizione
+                }
+                printList.push(printObj);
+                if(printList.length==3)
+                    sendStampaEtichettaKit();
                 if(filtroAvanzamento=="inattivo")
                 {
                     try {
@@ -1322,15 +1347,6 @@ function chiudiKit()
             }
             else
             {
-                var printObj=
-                {
-                    kit:kitSelezionato.kit,
-                    numero_cabina:cabina_corridoioSelezionato.numero_cabina,
-                    posizione:kitSelezionato.posizione
-                }
-                printList.push(printObj);
-                if(printList.length==3)
-                    stampaEtichettaKit();
                 getListKit(true);
             }
         }
@@ -1348,7 +1364,7 @@ function chiudiKit()
         }
     });
 }
-async function stampaEtichettaCarrelo()
+async function stampaEtichettaCarrello()
 {
     Swal.fire
     ({
@@ -1626,9 +1642,9 @@ async function stampaEtichettaCarrelo()
         Swal.close();
     }
 }
-async function stampaEtichettaKit()
+async function stampaEtichettaKit(printListLcl)
 {
-    if(printList.length>0)
+    if(printListLcl.length>0)
     {
         var server_adress=await getServerValue("SERVER_ADDR");
         var server_port=await getServerValue("SERVER_PORT");
@@ -1655,7 +1671,7 @@ async function stampaEtichettaKit()
         link.setAttribute("rel","stylesheet");
         printWindow.document.head.appendChild(link);
         
-        printList.forEach(printObj =>
+        printListLcl.forEach(printObj =>
         {
             var outerContainer=document.createElement("div");
             outerContainer.setAttribute("style","display: flex;flex-direction: row;align-items: flex-start;justify-content: flex-start;height: "+item_height+"cm;width: "+width+"cm;border:.5mm solid black;box-sizing:border-box;margin-bottom:"+item_margin_bottom+"cm");
@@ -1752,7 +1768,6 @@ async function stampaEtichettaKit()
     
             printWindow.document.body.appendChild(outerContainer);
         });
-        printList=[];
     }
 }
 async function getPopupRaggruppamentoTraversine()
@@ -2137,4 +2152,16 @@ function getCabineCarrello(carrello)
             }
         });
     });
+}
+function sendStampaEtichettaKit()
+{
+    var message = 
+    {
+        linea:linea.nome,
+        printList:printList
+    }
+
+    socket.emit('message', message);
+
+    printList=[];
 }

@@ -301,11 +301,17 @@ async function getListCarrelli()
     {
         var item=document.createElement("button");
         item.setAttribute("class","carrelli-item");
+        item.setAttribute("style","flex-direction: column;align-items: flex-start;justify-content: space-evenly;height: 50px;min-height: 50px;");
         item.setAttribute("onclick","selectCarrello('"+carrello.id_CODCAR+"')");
         item.setAttribute("id","carrelliItem"+carrello.id_CODCAR);
 
         var span=document.createElement("span");
         span.innerHTML=carrello.CODCAR;
+        item.appendChild(span);
+
+        var span=document.createElement("span");
+        span.setAttribute("style","text-align:left;width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;font-weight:normal");
+        span.innerHTML=carrello.cabine.join(",");
         item.appendChild(span);
 
         container.appendChild(item);
