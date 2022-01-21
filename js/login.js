@@ -243,6 +243,7 @@ async function login(number)
 }
 function checkPasswordCambiaLineaStazione()
 {
+    popupCheckPassword=false;
     var password=codiceCambiaLineaStazione;
     $.post("checkPasswordCambiaLineaStazione.php",
     {
@@ -285,6 +286,24 @@ function checkPasswordCambiaLineaStazione()
         }
     });
 }
+function setNumber(key)
+{
+    var checkLength=document.getElementById("loginInputNumber").value.length;
+    if(checkLength==2)
+        document.getElementById("loginInputNumber").value="";
+    var oldValue=document.getElementById("loginInputNumber").value;
+    var newValue=oldValue+key;
+    document.getElementById("loginInputNumber").value=newValue;
+    var length=document.getElementById("loginInputNumber").value.length;
+    if(length==2)
+    {
+        if(document.getElementById("loginUserItem"+newValue)!=null)
+        {
+            document.getElementById("loginUserItem"+newValue).focus();
+            focused=newValue;
+        }
+    }
+}
 window.addEventListener("keydown", function(event)
 {
     var keyCode=event.keyCode;
@@ -297,16 +316,16 @@ window.addEventListener("keydown", function(event)
                 login(focused);
             }
         break;
-        case 48:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("0")};break;
-        case 49:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("1")};break;
-        case 50:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("2")};break;
-        case 51:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("3")};break;
-        case 52:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("4")};break;
-        case 53:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("5")};break;
-        case 54:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("6")};break;
-        case 55:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("7")};break;
-        case 56:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("8")};break;
-        case 57:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("9")};break;
+        case 48:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("0")}else{setNumber(event.key)};break;
+        case 49:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("1")}else{setNumber(event.key)};break;
+        case 50:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("2")}else{setNumber(event.key)};break;
+        case 51:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("3")}else{setNumber(event.key)};break;
+        case 52:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("4")}else{setNumber(event.key)};break;
+        case 53:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("5")}else{setNumber(event.key)};break;
+        case 54:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("6")}else{setNumber(event.key)};break;
+        case 55:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("7")}else{setNumber(event.key)};break;
+        case 56:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("8")}else{setNumber(event.key)};break;
+        case 57:if(popupCheckPassword){clickNumpadButtonPopupCheckPassword("9")}else{setNumber(event.key)};break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","scorri_sinistra_di_1").valore):
             event.preventDefault();
             if(passwordCambiaLineaStazione==false)
@@ -488,7 +507,6 @@ window.addEventListener("keydown", function(event)
             event.preventDefault();
         break;
     }
-    console.log(keyCode);
 });
 function setFocusLineaStazione()
 {
@@ -675,7 +693,9 @@ function clickNumpadButtonPopupCheckPassword(n)
     {
         nClickNumpadButtonPopupCheckPassword++;
         codiceCambiaLineaStazione+=n;
-        document.getElementsByClassName("popup-cambia-linea-stazione-fake-input-container")[0].getElementsByTagName("i")[(nClickNumpadButtonPopupCheckPassword-1)].className="fas fa-circle";
+        try {
+            document.getElementsByClassName("popup-cambia-linea-stazione-fake-input-container")[0].getElementsByTagName("i")[(nClickNumpadButtonPopupCheckPassword-1)].className="fas fa-circle";
+        } catch (error) {}
     }
     if(nClickNumpadButtonPopupCheckPassword==4)
     {

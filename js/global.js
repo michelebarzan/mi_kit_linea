@@ -106,3 +106,15 @@ function arrayCompare(array1,array2)
 
 	return equals;
 }
+function getMiKitLineaParams()
+{
+    return new Promise(function (resolve, reject) 
+    {
+        $.get("getMiKitLineaParams.php",
+        function(response, status)
+        {
+            if(status=="success")
+                resolve(JSON.parse(response));
+        });
+    });
+}
