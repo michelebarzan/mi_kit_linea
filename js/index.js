@@ -1028,6 +1028,7 @@ async function getListLotti(cleanFocused)
 
     var i=1;
     lotti=await getLotti();
+	console.log(lotti);
     lotti.forEach(function (lotto)
     {
         if(i<10)
@@ -1125,7 +1126,7 @@ async function getListCabineECorridoi(cleanFocused)
         var item=document.createElement("button");
         item.setAttribute("class","cabine_corridoi-item");
         if(cabina_corridoio.tipo=="cabina")
-            item.setAttribute("onfocus","getPdf('cabine_corridoi','"+cabina_corridoio.numero_cabina+"')");
+            item.setAttribute("onfocus","getPdf('cabine_corridoi','"+cabina_corridoio.disegno_cabina+"')");
         item.setAttribute("id","cabine_corridoiItem"+cabina_corridoio.number);
 
         var div=document.createElement("div");
