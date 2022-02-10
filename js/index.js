@@ -394,29 +394,11 @@ window.addEventListener("keydown", async function(event)
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","scorri_giu_di_1").valore):
             event.preventDefault();
-            if(focused==null)
-                focused=numbers_array[view][0];
-            else
-            {
-                focused=numbers_array[view][(numbers_array[view].indexOf(focused))+1];
-                if(focused==undefined)
-                    focused=numbers_array[view][0];
-            }
-            document.getElementById(view+"Item"+focused).focus();   
-            document.getElementById("inputNumber").value=focused;    
+			scorri_giu_di_1();
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","scorri_su_di_1").valore):
             event.preventDefault();
-            if(focused==null)
-                focused=numbers_array[view][numbers_array[view].length-1];
-            else
-            {
-                focused=numbers_array[view][(numbers_array[view].indexOf(focused))-1];
-                if(focused==undefined)
-                    focused=numbers_array[view][numbers_array[view].length-1];
-            }
-            document.getElementById(view+"Item"+focused).focus();   
-            document.getElementById("inputNumber").value=focused;
+			scorri_su_di_1();
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","conferma").valore):
             event.preventDefault();
@@ -545,6 +527,32 @@ window.addEventListener("keydown", async function(event)
     }
     interval = setInterval(checkLists, frequenza_aggiornamento_dati_linea);
 });
+function scorri_su_di_1()
+{
+	if(focused==null)
+		focused=numbers_array[view][numbers_array[view].length-1];
+	else
+	{
+		focused=numbers_array[view][(numbers_array[view].indexOf(focused))-1];
+		if(focused==undefined)
+			focused=numbers_array[view][numbers_array[view].length-1];
+	}
+	document.getElementById(view+"Item"+focused).focus();   
+	document.getElementById("inputNumber").value=focused;
+}
+function scorri_giu_di_1()
+{
+	if(focused==null)
+		focused=numbers_array[view][0];
+	else
+	{
+		focused=numbers_array[view][(numbers_array[view].indexOf(focused))+1];
+		if(focused==undefined)
+			focused=numbers_array[view][0];
+	}
+	document.getElementById(view+"Item"+focused).focus();   
+	document.getElementById("inputNumber").value=focused;    
+}
 function zoomin()
 {
     try
@@ -1794,21 +1802,6 @@ async function getPopupRaggruppamentoTraversine()
     var tableContainer=document.createElement("div");
     tableContainer.setAttribute("class","raggruppamento-traversine-table-container");
 
-    /*var headers=
-    [
-        {
-            value:raggruppamentoTraversine,
-            label:raggruppamentoTraversine
-        },
-        {
-            value:"n_kit",
-            label:"N. kit"
-        },
-        {
-            value:"kit",
-            label:"Kit"
-        }
-    ];*/
     var headers=
     [
         {
@@ -1876,7 +1869,6 @@ async function getPopupRaggruppamentoTraversine()
     Swal.fire
     ({
         html: outerContainer.outerHTML,
-        //showConfirmButton:true,
         showConfirmButton:false,
         width:"70%",
         showCloseButton:false,
@@ -1887,46 +1879,29 @@ async function getPopupRaggruppamentoTraversine()
                     document.getElementsByClassName("swal2-title")[0].remove();
                     document.getElementsByClassName("swal2-popup")[0].style.padding="0px";
                     document.getElementsByClassName("swal2-popup")[0].style.borderRadius="4px";
-
-                    /*$('.swal2-actions').insertBefore('.swal2-content');
-                    document.getElementsByClassName("swal2-confirm")[0].focus();
-
-                    document.getElementsByClassName("swal2-actions")[0].style.margin="0px";
-                    document.getElementsByClassName("swal2-actions")[0].style.backgroundColor="#404040";
-                    document.getElementsByClassName("swal2-actions")[0].style.display="flex";
-                    document.getElementsByClassName("swal2-actions")[0].style.flexDirection="row";
-                    document.getElementsByClassName("swal2-actions")[0].style.alignItems="center";
-                    document.getElementsByClassName("swal2-actions")[0].style.justifyContent="flex-start";
-
-                    document.getElementsByClassName("swal2-confirm")[0].style.padding="10px";
-                    document.getElementsByClassName("swal2-confirm")[0].style.margin="5px";
-                    document.getElementsByClassName("swal2-confirm")[0].style.display="flex";
-                    document.getElementsByClassName("swal2-confirm")[0].style.alignItems="center";
-                    document.getElementsByClassName("swal2-confirm")[0].style.justifyContent="center";
-                    document.getElementsByClassName("swal2-confirm")[0].style.backgroundColor="transparent";
-                    document.getElementsByClassName("swal2-confirm")[0].style.border="none";
-                    document.getElementsByClassName("swal2-confirm")[0].innerHTML="";
-                    var span=document.createElement("span");
-                    span.setAttribute("style","font-family:'Questrial',sans-serif;font-size:14px");
-                    span.innerHTML="Raggruppamento: "+raggruppamentoTraversine;
-                    document.getElementsByClassName("swal2-confirm")[0].appendChild(span);
-                    document.getElementsByClassName("swal2-confirm")[0].style.outline="none";*/
+					
+					try
+					{
+						document.getElementsByClassName("swal2-popup")[0].addEventListener("keydown", async function(event)
+						{
+							var keyCode=event.keyCode;
+							switch (keyCode) 
+							{
+								case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","scorri_giu_di_1").valore):
+									event.preventDefault();
+									document.getElementsByClassName("raggruppamento-traversine-table-container")[0].scroll(0,document.getElementsByClassName("raggruppamento-traversine-table-container")[0].scrollTop+50)
+								break;
+								case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","scorri_su_di_1").valore):
+									event.preventDefault();
+									document.getElementsByClassName("raggruppamento-traversine-table-container")[0].scroll(0,document.getElementsByClassName("raggruppamento-traversine-table-container")[0].scrollTop-50)
+								break;
+							}
+						});
+					} catch (error) {}
                 }
     }).then((result) => 
     {
-        /*if(result.value)
-        {
-            if(view=="kit" && stazione.nome=="traversine" && popupRaggruppamentoTraversine)
-            {
-                if(raggruppamentoTraversine=="LUNG")
-                    raggruppamentoTraversine="CODMAT";
-                else
-                    raggruppamentoTraversine="LUNG";
-                getPopupRaggruppamentoTraversine();
-            }
-        }
-        else*/
-            popupRaggruppamentoTraversine=false;
+        popupRaggruppamentoTraversine=false;
     });
 }
 function fixTableRaggruppamentoTraversine()
