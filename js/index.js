@@ -420,7 +420,24 @@ window.addEventListener("keydown", async function(event)
                         {
                             if(stazione.nome=="montaggio")
                             {
+                                Swal.fire
+                                ({
+                                    width:"100%",
+                                    background:"transparent",
+                                    title:"Caricamento in corso...",
+                                    html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+                                    allowOutsideClick:false,
+                                    showCloseButton:false,
+                                    showConfirmButton:false,
+                                    allowEscapeKey:false,
+                                    showCancelButton:false,
+                                    onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+                                });
+
                                 var kitRegistrato=await checkRegistrazioniKitStazioni();
+
+                                Swal.close();
+
                                 if(kitRegistrato)
                                     chiudiKit();
                                 else
@@ -820,22 +837,28 @@ async function getListKit(cleanFocused,callback)
 
     var i=1;
     kit=await getKit(lottoSelezionato.lotto,lottoSelezionato.commessa,cabina_corridoioSelezionato.numero_cabina);
-    if(stazione.nome=="traversine")
+    //console.log(kit);
+    /*if(stazione.nome=="traversine")
     {
+        if(mostraMisureTraversine=="true")
+            var which_columns = ["posizione","appartenenza","chiuso","posizione","qnt","registrato","traversine"];
+        else
+            var which_columns = ["posizione","appartenenza","chiuso","posizione","qnt","registrato"];
+
         var kit_gb=new groupByJS
         ({
             data:kit,
             group_by_columns:["kit"],
             operator:"WHICH",
             column:"kit",
-            which_column:"posizione",
-            which_join_separator:", ",
-            label:"posizione"
+            which_columns,
+            which_join_separator:", "
         });
         kit=kit_gb;
+        //console.log(kit_gb);
     }
 
-    console.log(kit);
+    console.log(kit);*/
 
     if(mostraMisureTraversine=="true")
         container.innerHTML="";
@@ -897,7 +920,7 @@ async function getListKit(cleanFocused,callback)
             table.setAttribute("class","misure-traversine-table");
 
             var tr=document.createElement("tr");
-                
+
             var th=document.createElement("th");
             th.innerHTML="CODMAT";
             tr.appendChild(th);
