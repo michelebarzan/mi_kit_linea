@@ -8,7 +8,7 @@
 
     $cabine=[];
     
-    $q="SELECT mi_db_tecnico.dbo.carrelli.n_cab AS NCAB, mi_db_tecnico.dbo.cabine.codice_cabina AS CODCAB, mi_db_tecnico.dbo.cabine_carrelli.qnt AS QNT
+    $q="SELECT DISTINCT mi_db_tecnico.dbo.cabine_carrelli.n_cab AS NCAB, mi_db_tecnico.dbo.cabine.codice_cabina AS CODCAB, mi_db_tecnico.dbo.cabine_carrelli.qnt AS QNT
         FROM mi_db_tecnico.dbo.cabine INNER JOIN mi_db_tecnico.dbo.cabine_carrelli ON mi_db_tecnico.dbo.cabine.id_cabina = mi_db_tecnico.dbo.cabine_carrelli.id_cabina INNER JOIN mi_db_tecnico.dbo.carrelli ON mi_db_tecnico.dbo.cabine_carrelli.id_carrello = mi_db_tecnico.dbo.carrelli.id_carrello
         WHERE (mi_db_tecnico.dbo.carrelli.codice_carrello = '$carrello')";
     $r=sqlsrv_query($conn,$q);

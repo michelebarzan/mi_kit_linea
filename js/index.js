@@ -26,6 +26,7 @@ var popupRaggruppamentoTraversine=false;
 var printList=[];
 var mi_kit_linea_params;
 var socket;
+var items_transition_time = 150;
 
 window.addEventListener("load", async function(event)
 {
@@ -105,7 +106,6 @@ window.addEventListener("load", async function(event)
     document.getElementById("usernameContainer").innerHTML=username+'<i class="fad fa-user" style="margin-left:10px"></i>';
 
     funzioniTasti=await getFunzioniTasti();
-    console.log(funzioniTasti)
     
     interval = setInterval(checkLists, frequenza_aggiornamento_dati_linea);
 
@@ -376,7 +376,6 @@ window.addEventListener("keydown", async function(event)
                     ordinamentoKit="posizione";
                 else
                     ordinamentoKit="kit";
-                //setOrdinamentoKitLabel();
                 getListKit(false);
             }
         break;
@@ -402,6 +401,7 @@ window.addEventListener("keydown", async function(event)
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","conferma").valore):
             event.preventDefault();
+            console.log(focused,view)//delete
             if(focused!=null)
             {
                 switch (view)
@@ -415,6 +415,7 @@ window.addEventListener("keydown", async function(event)
                     case "kit":
                         shownPdf=null;
                         kitSelezionato=getFirstObjByPropValue(kit,"number",focused);
+                        console.log(kitSelezionato)//delete
                         if(!kitSelezionato.chiuso && !kitSelezionato.registrato)
                         {
                             if(stazione.nome=="montaggio")
@@ -450,7 +451,7 @@ window.addEventListener("keydown", async function(event)
                             else
                                 confermaKit(focused);
                         }
-                        break;
+                    break;
                 }
             }
         break;
@@ -540,6 +541,10 @@ function scorri_su_di_1()
 	document.getElementById(view+"Item"+focused).focus();   
 	document.getElementById("inputNumber").value=focused;
 }
+function timeout_scorri_su_di_1(time)
+{
+    setTimeout(() => {scorri_su_di_1();}, time);
+}
 function scorri_giu_di_1()
 {
 	if(focused==null)
@@ -550,8 +555,12 @@ function scorri_giu_di_1()
 		if(focused==undefined)
 			focused=numbers_array[view][0];
 	}
-	document.getElementById(view+"Item"+focused).focus();   
+    document.getElementById(view+"Item"+focused).focus();   
 	document.getElementById("inputNumber").value=focused;    
+}
+function timeout_scorri_giu_di_1(time)
+{
+    setTimeout(() => {scorri_giu_di_1();}, time);
 }
 function zoomin()
 {
@@ -634,7 +643,6 @@ async function eliminaRegistrazioneAvanzamentoKit(number)
             }
             else
             {
-                //getListKit(true);
                 try {
                     document.getElementById("iconCheckKit"+number).remove();
                 } catch (error) {}
@@ -669,10 +677,6 @@ async function confermaKit(number)
         showCancelButton:false,
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
-
-    //console.clear();
-
-    //kitSelezionato=getFirstObjByPropValue(kit,"number",number);
 
     var lotto=lottoSelezionato.lotto;
     var cabina=cabina_corridoioSelezionato.numero_cabina;
@@ -731,6 +735,10 @@ async function confermaKit(number)
                         document.getElementById("kitItem"+number).appendChild(fa);
                     else
                         document.getElementById("kitItem"+number).insertBefore(fa, document.getElementById("kitItem"+number).getElementsByTagName("table")[0]);
+
+                    setTimeout(() => {
+                        scorri_giu_di_1();
+                    }, 300);
                 }
                 else
                     getListKit(false)
@@ -760,7 +768,7 @@ function selectCabinaCorridoio(number)
 
     getListKit(true);
 }
-async function getListKit(cleanFocused)
+async function getListKit(cleanFocused,callback)
 {
     Swal.fire
     ({
@@ -804,9 +812,6 @@ async function getListKit(cleanFocused)
 
     kitSelezionato=null;
 
-    /*document.getElementById("pdfContainer").innerHTML="";
-    iframe=null;*/
-
     var container=document.getElementById("listInnerContainer");
     container.innerHTML="";
 
@@ -815,6 +820,22 @@ async function getListKit(cleanFocused)
 
     var i=1;
     kit=await getKit(lottoSelezionato.lotto,lottoSelezionato.commessa,cabina_corridoioSelezionato.numero_cabina);
+    if(stazione.nome=="traversine")
+    {
+        var kit_gb=new groupByJS
+        ({
+            data:kit,
+            group_by_columns:["kit"],
+            operator:"WHICH",
+            column:"kit",
+            which_column:"posizione",
+            which_join_separator:", ",
+            label:"posizione"
+        });
+        kit=kit_gb;
+    }
+
+    console.log(kit);
 
     if(mostraMisureTraversine=="true")
         container.innerHTML="";
@@ -947,6 +968,11 @@ async function getListKit(cleanFocused)
     }
 
     Swal.close();
+
+    if(callback!=null && callback!=undefined)
+    {
+        callback();
+    }
 }
 function getKit(lotto,commessa,numero_cabina)
 {
@@ -1036,7 +1062,6 @@ async function getListLotti(cleanFocused)
 
     var i=1;
     lotti=await getLotti();
-	console.log(lotti);
     lotti.forEach(function (lotto)
     {
         if(i<10)
@@ -1167,7 +1192,7 @@ async function getListCabineECorridoi(cleanFocused)
 }
 async function getPdf(folder,fileName)
 {
-    if(fileName != shownPdf)
+    /*if(fileName != shownPdf)//delete
     {
         shownPdf=fileName;
         var container=document.getElementById("pdfContainer");
@@ -1181,7 +1206,7 @@ async function getPdf(folder,fileName)
         var server_port=await getServerValue("SERVER_PORT");
         iframe.setAttribute("src","http://"+server_adress+":"+server_port+"/mi_kit_pdf/pdf.js/web/viewer.html?file=pdf/"+folder+"/"+fileName+".pdf");
         container.appendChild(iframe);
-    }
+    }*/
 }
 function fixPdf(iframe)
 {
@@ -1356,7 +1381,7 @@ function chiudiKit()
             }
             else
             {
-                getListKit(true);
+                getListKit(false,timeout_scorri_giu_di_1(300));
             }
         }
         else
@@ -1394,7 +1419,6 @@ async function stampaEtichettaCarrello()
     const carrello = await getCarrelloCabinaCommessa(cabina_corridoioSelezionato.numero_cabina,lottoSelezionato.commessa.substring(2, 6));
     var commessa_breve=carrello.substring(0, 4);
     var descrizioneCarrello=await getDescrizioniCarrelli(commessa_breve);
-    //contorlla length descrizioneCarrello
     if(descrizioneCarrello.length==0)
     {
         Swal.fire

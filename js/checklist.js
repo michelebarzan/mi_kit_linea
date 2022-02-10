@@ -428,6 +428,7 @@ async function getListComponenti()
         row.setAttribute("style","display:flex;flex-direction:row;align-items:center;justify-content:flex-start;width:100%;height:50%");
 
         var span=document.createElement("span");
+        span.setAttribute("style","margin-right:10px");
         span.innerHTML=componente.codice_componente;
         row.appendChild(span);
 

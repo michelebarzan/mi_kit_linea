@@ -31,7 +31,7 @@
 
     if($filtroStazione=="attivo")
     {
-        $query2="SELECT t.commessa, t.lotto, t.numero_cabina, t.disegno_cabina, t.kit, t.posizione, t.qnt, dbo.kit_linea.stazione, dbo.kit_linea.linea,t.tipo
+        $query2="SELECT t.commessa, t.lotto, t.numero_cabina, t.disegno_cabina, t.kit, t.posizione, t.qnt, dbo.kit_linea.stazione, dbo.kit_linea.linea,t.tipo,LEN($ordinamentoKit)
                 FROM (SELECT DISTINCT commessa, lotto, numero_cabina, disegno_cabina, kit, posizione, qnt,'corridoio' AS tipo
                     FROM dbo.[".$view_corridoi."]
                     WHERE (lotto = '$lotto') AND (commessa = '$commessa') AND (numero_cabina = '$numero_cabina')
@@ -40,7 +40,7 @@
                     FROM dbo.[".$view_cabine."]
                     WHERE (lotto = '$lotto') AND (commessa = '$commessa') AND (numero_cabina = '$numero_cabina')) AS t INNER JOIN
                     dbo.kit_linea ON t.lotto = dbo.kit_linea.lotto AND t.numero_cabina = dbo.kit_linea.cabina AND t.kit = dbo.kit_linea.kit AND t.posizione = dbo.kit_linea.posizione
-                WHERE (dbo.kit_linea.stazione = $id_stazione_precedente) AND (dbo.kit_linea.linea = $id_linea) ORDER BY $ordinamentoKit";	
+                WHERE (dbo.kit_linea.stazione = $id_stazione_precedente) AND (dbo.kit_linea.linea = $id_linea) ORDER BY LEN($ordinamentoKit), $ordinamentoKit";	
         $result2=sqlsrv_query($conn,$query2);
         if($result2==TRUE)
         {
@@ -54,7 +54,7 @@
     }
     else
     {
-        $query1="SELECT DISTINCT * FROM dbo.[".$view_cabine."] WHERE lotto='$lotto' AND commessa='$commessa' AND numero_cabina='$numero_cabina' ORDER BY $ordinamentoKit";
+        $query1="SELECT DISTINCT *,LEN($ordinamentoKit) FROM dbo.[".$view_cabine."] WHERE lotto='$lotto' AND commessa='$commessa' AND numero_cabina='$numero_cabina' ORDER BY LEN($ordinamentoKit), $ordinamentoKit";
         $result1=sqlsrv_query($conn,$query1);
         if($result1==TRUE)
         {
@@ -66,7 +66,7 @@
         else
             die("error".$query1);
 
-        $query2="SELECT DISTINCT * FROM dbo.[".$view_corridoi."] WHERE lotto='$lotto' AND commessa='$commessa' AND numero_cabina='$numero_cabina' ORDER BY $ordinamentoKit";
+        $query2="SELECT DISTINCT *,LEN($ordinamentoKit) FROM dbo.[".$view_corridoi."] WHERE lotto='$lotto' AND commessa='$commessa' AND numero_cabina='$numero_cabina' ORDER BY LEN($ordinamentoKit), $ordinamentoKit";
         $result2=sqlsrv_query($conn,$query2);
         if($result2==TRUE)
         {

@@ -118,3 +118,101 @@ function getMiKitLineaParams()
         });
     });
 }
+function groupByJS(arguments)
+{
+    var self=this;
+    this.og_data=arguments.data;
+    this.group_by_columns=arguments.group_by_columns;
+    this.operator=arguments.operator;
+    this.column=arguments.column;
+    this.label=arguments.label;
+    this.which_column=arguments.which_column;
+    this.which_join_separator=arguments.which_join_separator;
+
+    this.data=[];
+
+    var group_by_data=[];
+    this.og_data.forEach(row =>
+    {
+        var group_by_columns_obj={};
+        this.group_by_columns.forEach(column =>
+        {
+            group_by_columns_obj[column]=row[column]
+        });
+        group_by_data.push(group_by_columns_obj);
+    });
+
+    group_by_data=objArrayUnique(group_by_data);
+    
+    group_by_data.forEach(group_by_row =>
+    {
+        var n=0;
+        this.og_data.forEach(row =>
+        {
+            var equals=true;
+            for (var key in group_by_row)
+            {
+                if (group_by_row.hasOwnProperty(key))
+                {
+                    if(group_by_row[key] !== row[key])
+                        equals=false;
+                }
+            }
+            if(equals)
+            {
+                switch (this.operator)
+                {
+                    case "SUM":
+                        n+=row[this.column];
+                    break;
+                    case "COUNT":
+                        n++;
+                    break;
+                    case "WHICH":
+                        var which_array = [];
+                        this.og_data.forEach(rowLcl =>
+                        {
+                            if(rowLcl[this.column] == row[this.column])
+                                which_array.push(rowLcl[this.which_column]);
+                        });
+                        n = which_array.join(this.which_join_separator);
+                    break;
+                }
+            }
+        });
+
+        var new_row = $.extend( true, {}, group_by_row );
+
+        new_row[this.label]=n;
+
+        this.data.push(new_row);
+    });
+
+    return this.data;
+    
+    function objArrayUnique(array)
+    {
+        var array_unique=[];
+        array.forEach(element =>
+        {
+            var push=true;
+            array_unique.forEach(element_unique =>
+            {
+                var equals=true;
+                for (var key in element_unique)
+                {
+                    if (element_unique.hasOwnProperty(key))
+                    {
+                        if(element_unique[key] !== element[key])
+                            equals=false;
+                    }
+                }
+                if(equals)
+                    push=false;
+            });
+            if(push)
+                array_unique.push(element);
+        });
+        return array_unique;
+    }
+}
