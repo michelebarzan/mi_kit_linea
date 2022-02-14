@@ -729,15 +729,18 @@ async function confermaKit(number)
             }
             else
             {
-                var printObj=
+                if(stazione.nome=="caricamento")
                 {
-                    kit:kitSelezionato.kit,
-                    numero_cabina:cabina_corridoioSelezionato.numero_cabina,
-                    posizione:kitSelezionato.posizione
+                    var printObj=
+                    {
+                        kit:kitSelezionato.kit,
+                        numero_cabina:cabina_corridoioSelezionato.numero_cabina,
+                        posizione:kitSelezionato.posizione
+                    }
+                    printList.push(printObj);
+                    if(printList.length==3)
+                        sendStampaEtichettaKit();
                 }
-                printList.push(printObj);
-                if(printList.length==3)
-                    sendStampaEtichettaKit();
                 if(filtroAvanzamento=="inattivo")
                 {
                     try {
