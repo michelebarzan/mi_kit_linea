@@ -118,3 +118,131 @@ function getMiKitLineaParams()
         });
     });
 }
+function groupByJS(arguments)
+{
+    var self=this;
+    this.og_data=arguments.data;
+    this.group_by_columns=arguments.group_by_columns;
+    this.operator=arguments.operator;
+    this.column=arguments.column;
+    this.label=arguments.label;
+    this.which_columns=arguments.which_columns;
+    this.which_join_separator=arguments.which_join_separator;
+
+    this.data=[];
+
+    var group_by_data=[];
+    this.og_data.forEach(row =>
+    {
+        var group_by_columns_obj={};
+        this.group_by_columns.forEach(column =>
+        {
+            group_by_columns_obj[column]=row[column]
+        });
+        group_by_data.push(group_by_columns_obj);
+    });
+
+    group_by_data=objArrayUnique(group_by_data);
+    
+    group_by_data.forEach(group_by_row =>
+    {
+        //console.log(group_by_row)
+        var n=0;
+        var n_obj={};
+        this.which_columns.forEach(column =>
+        {
+            n_obj[column]=[];
+        });
+
+        this.og_data.forEach(row =>
+        {
+            var equals=true;
+            for (var key in group_by_row)
+            {
+                if (group_by_row.hasOwnProperty(key))
+                {
+                    if(group_by_row[key] !== row[key])
+                        equals=false;
+                }
+            }
+            if(equals)
+            {
+                switch (this.operator)
+                {
+                    case "SUM":
+                        n+=row[this.column];
+                    break;
+                    case "COUNT":
+                        n++;
+                    break;
+                    case "WHICH":
+                        for (let index = 0; index < this.which_columns.length; index++)
+                        {
+                            const column = this.which_columns[index];
+                            n_obj[column].push(row[column]);
+                        }
+                    break;
+                }
+            }
+        });
+
+        var new_row = $.extend( true, {}, group_by_row );
+
+        //console.log(n_obj);
+        switch (this.operator)
+        {
+            case "SUM":
+                new_row[this.label]=n;
+            break;
+            case "COUNT":
+                new_row[this.label]=n;
+            break;
+            case "WHICH":
+                this.which_columns.forEach(column =>
+                {
+                    var values = [...new Set(n_obj[column])];
+                    var value;
+                    
+                    if (typeof values[0] === 'string' || values[0] instanceof String)
+                        value = values.join(this.which_join_separator);
+                    else
+                    {
+                        value=values[0];
+                    }
+
+                    new_row[column]=value;
+                });
+            break;
+        }
+
+        this.data.push(new_row);
+    });
+
+    return this.data;
+    
+    function objArrayUnique(array)
+    {
+        var array_unique=[];
+        array.forEach(element =>
+        {
+            var push=true;
+            array_unique.forEach(element_unique =>
+            {
+                var equals=true;
+                for (var key in element_unique)
+                {
+                    if (element_unique.hasOwnProperty(key))
+                    {
+                        if(element_unique[key] !== element[key])
+                            equals=false;
+                    }
+                }
+                if(equals)
+                    push=false;
+            });
+            if(push)
+                array_unique.push(element);
+        });
+        return array_unique;
+    }
+}
