@@ -1218,7 +1218,7 @@ async function getListCabineECorridoi(cleanFocused)
 }
 async function getPdf(folder,fileName)
 {
-    /*if(fileName != shownPdf)//delete
+    if(fileName != shownPdf)//delete
     {
         shownPdf=fileName;
         var container=document.getElementById("pdfContainer");
@@ -1232,7 +1232,7 @@ async function getPdf(folder,fileName)
         var server_port=await getServerValue("SERVER_PORT");
         iframe.setAttribute("src","http://"+server_adress+":"+server_port+"/mi_kit_pdf/pdf.js/web/viewer.html?file=pdf/"+folder+"/"+fileName+".pdf");
         container.appendChild(iframe);
-    }*/
+    }
 }
 function fixPdf(iframe)
 {
