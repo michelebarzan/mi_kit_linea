@@ -64,6 +64,7 @@ window.addEventListener("load", async function(event)
     linea=getFirstObjByPropValue(linee,"nome",nome_linea);
 
     ordinamentoKit=await getCookie("ordinamentoKit");
+    console.log(ordinamentoKit)
     if(ordinamentoKit=="")
         ordinamentoKit="kit";
     //setOrdinamentoKitLabel();
@@ -189,7 +190,7 @@ function setFiltroLineaLabel()
 {
     document.getElementById("filtroLineaContainer").innerHTML="Filtro linea "+filtroLinea;
     if(filtroLinea=="attivo")
-        document.getElementById("filtroLineaContainer").style.color="#4C91CB";
+        document.getElementById("filtroLineaContainer").style.color="#548CFF";
     if(filtroLinea=="inattivo")
         document.getElementById("filtroLineaContainer").style.color="#DA6969";
 }
@@ -197,7 +198,7 @@ function setFiltroStazioneLabel()
 {
     document.getElementById("filtroStazioneContainer").innerHTML="Filtro stazione "+filtroStazione;
     if(filtroStazione=="attivo")
-        document.getElementById("filtroStazioneContainer").style.color="#4C91CB";
+        document.getElementById("filtroStazioneContainer").style.color="#548CFF";
     if(filtroStazione=="inattivo")
         document.getElementById("filtroStazioneContainer").style.color="#DA6969";
 }
@@ -205,7 +206,7 @@ function setFiltroAvanzamentoLabel()
 {
     document.getElementById("filtroAvanzamentoContainer").innerHTML="Filtro avanzamento "+filtroAvanzamento;
     if(filtroAvanzamento=="attivo")
-        document.getElementById("filtroAvanzamentoContainer").style.color="#4C91CB";
+        document.getElementById("filtroAvanzamentoContainer").style.color="#548CFF";
     if(filtroAvanzamento=="inattivo")
         document.getElementById("filtroAvanzamentoContainer").style.color="#DA6969";
 }
@@ -337,6 +338,11 @@ window.addEventListener("keydown", async function(event)
             event.preventDefault();
             if(stazione.nome=="caricamento")
                 sendStampaEtichettaKit();
+            if(stazione.nome=="montaggio")
+            {
+                if(printList[(printList.length-1)] != undefined)
+                    stampaEtichettaKit([printList[(printList.length-1)]]);
+            }
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","stampa_etichetta_carrello").valore):
             event.preventDefault();
@@ -729,7 +735,7 @@ async function confermaKit(number)
             }
             else
             {
-                if(stazione.nome=="caricamento")
+                if(stazione.nome=="caricamento" || stazione.nome=="montaggio")
                 {
                     var printObj=
                     {
@@ -1407,6 +1413,17 @@ function chiudiKit()
             }
             else
             {
+                
+                if(stazione.nome=="caricamento" || stazione.nome=="montaggio")
+                {
+                    var printObj=
+                    {
+                        kit:kitSelezionato.kit,
+                        numero_cabina:cabina_corridoioSelezionato.numero_cabina,
+                        posizione:kitSelezionato.posizione
+                    }
+                    printList.push(printObj);
+                }
                 getListKit(false,timeout_scorri_giu_di_1(300));
             }
         }
@@ -1779,7 +1796,7 @@ async function stampaEtichettaKit(printListLcl)
             var div=document.createElement("div");
             div.setAttribute("style","overflow:hidden;min-width:100%;max-width:100%;width:100%;min-height:80%;max-height:80%;height:80%;display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box");
             var span=document.createElement("span");
-            span.setAttribute("style","text-align:center;font-family: 'Questrial', sans-serif;font-size:15mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
+            span.setAttribute("style","text-align:center;font-family: 'Questrial', sans-serif;font-size:9mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);margin-left:5px;margin-right:5px;white-space: nowrap;overflow: hidden;text-overflow: clip;");
             span.innerHTML=printObj.posizione;
             div.appendChild(span);
             column.appendChild(div);
