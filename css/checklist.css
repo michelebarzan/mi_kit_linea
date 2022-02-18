@@ -80,7 +80,8 @@ body
 }
 .structure-header-button:active
 {
-    color:#4C91CB;
+    color:#548CFF;
+    text-shadow: 2px 4px 3px rgb(0 0 0 / 30%);
 }
 .info-filters-container
 {
@@ -246,7 +247,8 @@ body
 }
 .action-button:active
 {
-    color:#4C91CB;
+    color:#548CFF;
+    text-shadow: 2px 4px 3px rgb(0 0 0 / 30%);
 }
 .lotti-item,.carrelli-item
 {
@@ -273,15 +275,16 @@ body
 .lotti-item span,.carrelli-item span,.componenti-item span
 {
     font-family: 'Questrial', sans-serif;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: bold;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
 }
 .lotti-item:focus,.carrelli-item:focus,.componenti-item:focus
 {
     box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
     background-color: #494949;
-    color:#4C91CB;
+    color:#548CFF;
+    text-shadow: 2px 4px 3px rgb(0 0 0 / 30%);
 }
 .componenti-item
 {
@@ -306,19 +309,15 @@ body
 .componenti-item span
 {
     font-family: 'Questrial', sans-serif;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: bold;
     letter-spacing: 1px;
 }
-.componenti-item:focus
-{
-    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-    background-color: #494949;
-    color:#4C91CB;
-}
 #labelLottoSelezionato b,#labelCarrelloSelezionato b
 {
-    color:#4C91CB;
+    letter-spacing: 1px;
+    text-shadow: 2px 4px 3px rgb(0 0 0 / 30%);
+    color:#548CFF;
 }
 .pdf-outer-container
 {
@@ -445,7 +444,8 @@ body
 }
 .listButtonIndietro:active
 {
-    color:#4C91CB;
+    color:#548CFF;
+    text-shadow: 2px 4px 3px rgb(0 0 0 / 30%);
 }
 #totaliChecklistLabel
 {

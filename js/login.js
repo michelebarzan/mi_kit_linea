@@ -309,6 +309,9 @@ window.addEventListener("keydown", function(event)
     var keyCode=event.keyCode;
     switch (keyCode) 
     {
+        case 116:
+            //F4
+        break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","conferma").valore):
             event.preventDefault();
             if(focused!=null)
