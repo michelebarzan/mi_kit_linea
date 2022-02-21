@@ -407,7 +407,6 @@ window.addEventListener("keydown", async function(event)
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","conferma").valore):
             event.preventDefault();
-            console.log(focused,view)//delete
             if(focused!=null)
             {
                 switch (view)
@@ -421,7 +420,6 @@ window.addEventListener("keydown", async function(event)
                     case "kit":
                         shownPdf=null;
                         kitSelezionato=getFirstObjByPropValue(kit,"number",focused);
-                        console.log(kitSelezionato)//delete
                         if(!kitSelezionato.chiuso && !kitSelezionato.registrato)
                         {
                             if(stazione.nome=="montaggio")
@@ -640,13 +638,15 @@ async function eliminaRegistrazioneAvanzamentoKit(number)
     var lotto=lottoSelezionato.lotto;
     var cabina=cabina_corridoioSelezionato.numero_cabina;
     var id_stazione=stazione.id_stazione;
+    var id_linea=linea.id_linea;
 
     $.get("eliminaRegistrazioneAvanzamentoKit.php",
     {
         lotto,
         cabina,
         posizione:kitSelezionato.posizione,
-        id_stazione
+        id_stazione,
+        id_linea
     },
     function(response, status)
     {
@@ -666,6 +666,7 @@ async function eliminaRegistrazioneAvanzamentoKit(number)
             }
             else
             {
+                console.log(response);
                 try {
                     document.getElementById("iconCheckKit"+number).remove();
                 } catch (error) {}
@@ -885,7 +886,7 @@ async function getListKit(cleanFocused,callback)
 
         var item=document.createElement("button");
         item.setAttribute("class","kit-item");
-        item.setAttribute("onfocus","getPdf('kit','"+codiceKit+"')");
+        item.setAttribute("onfocus","checkScroll(this,event);getPdf('kit','"+codiceKit+"')");
         item.setAttribute("id","kitItem"+kitItem.number);
 
         var div=document.createElement("div");
@@ -1106,7 +1107,7 @@ async function getListLotti(cleanFocused)
         var item=document.createElement("button");
         item.setAttribute("class","lotti-item");
         item.setAttribute("id","lottiItem"+lotto.number);
-        //item.setAttribute("onclick","selectLotto("+lotto.number+")");
+        item.setAttribute("onfocus","checkScroll(this,event)");
 
         var div=document.createElement("div");
         div.innerHTML=number;
@@ -1191,7 +1192,7 @@ async function getListCabineECorridoi(cleanFocused)
         var item=document.createElement("button");
         item.setAttribute("class","cabine_corridoi-item");
         if(cabina_corridoio.tipo=="cabina")
-            item.setAttribute("onfocus","getPdf('cabine_corridoi','"+cabina_corridoio.disegno_cabina+"')");
+            item.setAttribute("onfocus","checkScroll(this,event);getPdf('cabine_corridoi','"+cabina_corridoio.disegno_cabina+"')");
         item.setAttribute("id","cabine_corridoiItem"+cabina_corridoio.number);
 
         var div=document.createElement("div");
@@ -1224,7 +1225,7 @@ async function getListCabineECorridoi(cleanFocused)
 }
 async function getPdf(folder,fileName)
 {
-    if(fileName != shownPdf)//delete
+    /*if(fileName != shownPdf)//delete
     {
         shownPdf=fileName;
         var container=document.getElementById("pdfContainer");
@@ -1238,7 +1239,7 @@ async function getPdf(folder,fileName)
         var server_port=await getServerValue("SERVER_PORT");
         iframe.setAttribute("src","http://"+server_adress+":"+server_port+"/mi_kit_pdf/pdf.js/web/viewer.html?file=pdf/"+folder+"/"+fileName+".pdf");
         container.appendChild(iframe);
-    }
+    }*/
 }
 function fixPdf(iframe)
 {
@@ -2208,3 +2209,31 @@ function sendStampaEtichettaKit()
 
     printList=[];
 }
+function checkScroll(item,event)
+{
+    /*var childPos = $(item).offset();
+    var parentPos = $(item).parent().offset();
+    var childOffset =
+    {
+        top: childPos.top - parentPos.top,
+        left: childPos.left - parentPos.left
+    }
+
+    element.scrollTo(0,childOffset.top);*/
+    console.log(isVisible(item,item.parentElement));
+}
+const isVisible = function (ele, container) {
+    const eleTop = ele.offsetTop;
+    const eleBottom = eleTop + ele.clientHeight;
+
+    const containerTop = container.scrollTop;
+    const containerBottom = containerTop + container.clientHeight;
+
+    // The element is fully visible in the container
+    return (
+        (eleTop >= containerTop && eleBottom <= containerBottom) ||
+        // Some part of the element is visible in the container
+        (eleTop < containerTop && containerTop < eleBottom) ||
+        (eleTop < containerBottom && containerBottom < eleBottom)
+    );
+};
