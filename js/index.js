@@ -2220,10 +2220,10 @@ function checkScroll(item,event)
     }
 
     element.scrollTo(0,childOffset.top);*/
-    console.log(isVisible(item,item.parentElement));
+    //console.log(isVisible(item,item.parentElement));
 }
 const isVisible = function (ele, container) {
-    const eleTop = ele.offsetTop;
+    /*const eleTop = ele.offsetTop;
     const eleBottom = eleTop + ele.clientHeight;
 
     const containerTop = container.scrollTop;
@@ -2235,5 +2235,5 @@ const isVisible = function (ele, container) {
         // Some part of the element is visible in the container
         (eleTop < containerTop && containerTop < eleBottom) ||
         (eleTop < containerBottom && containerBottom < eleBottom)
-    );
+    );*/
 };
