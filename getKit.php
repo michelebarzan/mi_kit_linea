@@ -55,15 +55,6 @@
     else
     {
         $query1="SELECT DISTINCT *,LEN($ordinamentoKit) FROM dbo.[".$view_cabine."] WHERE lotto='$lotto' AND commessa='$commessa' AND numero_cabina='$numero_cabina' ORDER BY LEN($ordinamentoKit), $ordinamentoKit";
-        /*
-        SELECT DISTINCT 
-                         TOP (100) PERCENT commessa, lotto, numero_cabina, disegno_cabina, kit, qnt, REPLACE(posizione, SUBSTRING(posizione, PATINDEX('%[0-9]%', posizione), LEN(posizione)), '') AS lettera, SUBSTRING(posizione, 
-                         PATINDEX('%[0-9]%', posizione), LEN(posizione)) AS numero, { fn CONCAT(REPLACE(posizione, SUBSTRING(posizione, PATINDEX('%[0-9]%', posizione), LEN(posizione)), ''), SUBSTRING(posizione, PATINDEX('%[0-9]%', 
-                         posizione), LEN(posizione))) } AS posizione
-FROM            dbo.view_cabine
-WHERE        (lotto = '6298N217') AND (commessa = '006298') AND (numero_cabina = '11104')
-ORDER BY numero, lettera
-        */
         $result1=sqlsrv_query($conn,$query1);
         if($result1==TRUE)
         {
@@ -219,6 +210,9 @@ ORDER BY numero, lettera
             $kit_in.="'$codiceKit',";
             
             array_push($kit,$kitItem);
+            /*array_push($kit,$kitItem);
+            array_push($kit,$kitItem);
+            array_push($kit,$kitItem);*/
         }
     }
 
