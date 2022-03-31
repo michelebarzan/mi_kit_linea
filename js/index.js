@@ -10,15 +10,11 @@ var view;
 var iframe;
 var ordinamentoKit;
 var mostraMisureTraversine="false";
-var filtroLinea;
-var filtroStazione;
 var filtroAvanzamento;
 var turno;
 var linea;
 var stazione;
 var id_utente;
-var interval;
-var frequenza_aggiornamento_dati_linea
 var dot;
 var shownPdf;
 var raggruppamentoTraversine="LUNG";
@@ -48,9 +44,6 @@ window.addEventListener("load", async function(event)
 
     id_utente=await getSessionValue("id_utente");
 
-    frequenza_aggiornamento_dati_linea=await getParametro("frequenza_aggiornamento_dati_linea");
-    frequenza_aggiornamento_dati_linea=parseInt(frequenza_aggiornamento_dati_linea);
-
     var nome_turno=await getSessionValue("turno");
     var nome_linea=await getSessionValue("linea");
     var nome_stazione=await getSessionValue("stazione");
@@ -64,7 +57,6 @@ window.addEventListener("load", async function(event)
     linea=getFirstObjByPropValue(linee,"nome",nome_linea);
 
     ordinamentoKit=await getCookie("ordinamentoKit");
-    console.log(ordinamentoKit)
     if(ordinamentoKit=="")
         ordinamentoKit="kit";
     //setOrdinamentoKitLabel();
@@ -77,19 +69,9 @@ window.addEventListener("load", async function(event)
         //setMostraMisureTraversineLabel();
     }
 
-    filtroLinea=await getCookie("filtroLinea");
-    if(filtroLinea=="")
-        filtroLinea="attivo";
-    setFiltroLineaLabel();
-
-    filtroStazione=await getCookie("filtroStazione");
-    if(filtroStazione=="")
-        filtroStazione="attivo";
-    setFiltroStazioneLabel();
-
     filtroAvanzamento=await getCookie("filtroAvanzamento");
     if(filtroAvanzamento=="")
-        filtroAvanzamento="attivo";
+        filtroAvanzamento="inattivo";
     setFiltroAvanzamentoLabel();
 
     dot=document.title;
@@ -107,8 +89,6 @@ window.addEventListener("load", async function(event)
     document.getElementById("usernameContainer").innerHTML=username+'<i class="fad fa-user" style="margin-left:10px"></i>';
 
     funzioniTasti=await getFunzioniTasti();
-    
-    interval = setInterval(checkLists, frequenza_aggiornamento_dati_linea);
 
     socket = io(`${mi_kit_linea_params.node_websocket_server_info.protocol}://${mi_kit_linea_params.node_websocket_server_info.ip}:${mi_kit_linea_params.node_websocket_server_info.port}`);
     
@@ -147,31 +127,6 @@ function getFunzioniTasti()
         });
     });
 }
-async function checkLists()
-{
-    switch (view)
-    {
-        case "lotti":
-            var checkLotti=await getLotti();
-            if(!arrayCompare(lotti,checkLotti))
-                getListLotti(false);
-        break;
-        case "cabine_corridoi":
-            var checkCabine_corridoi=await getCabineECorridoi(lottoSelezionato.lotto,lottoSelezionato.commessa);
-            if(!arrayCompare(cabine_corridoi,checkCabine_corridoi))
-                getListCabineECorridoi(false);
-        break;
-        case "kit":
-            if(mostraMisureTraversine=="false")
-            {
-                var checkKit=await getKit(lottoSelezionato.lotto,lottoSelezionato.commessa,cabina_corridoioSelezionato.numero_cabina);
-                if(!arrayCompare(kit,checkKit))
-                    getListKit(false);
-            };
-        break;
-        default:break;
-    }
-}
 function setOrdinamentoKitLabel()
 {
     if(ordinamentoKit=="kit")
@@ -186,22 +141,6 @@ function setMostraMisureTraversineLabel()
     if(mostraMisureTraversine=="false")
         document.getElementById("mostraMisureTraversineContainer").innerHTML="Nascondi misure traversine";
 }
-function setFiltroLineaLabel()
-{
-    document.getElementById("filtroLineaContainer").innerHTML="Filtro linea "+filtroLinea;
-    if(filtroLinea=="attivo")
-        document.getElementById("filtroLineaContainer").style.color="#548CFF";
-    if(filtroLinea=="inattivo")
-        document.getElementById("filtroLineaContainer").style.color="#DA6969";
-}
-function setFiltroStazioneLabel()
-{
-    document.getElementById("filtroStazioneContainer").innerHTML="Filtro stazione "+filtroStazione;
-    if(filtroStazione=="attivo")
-        document.getElementById("filtroStazioneContainer").style.color="#548CFF";
-    if(filtroStazione=="inattivo")
-        document.getElementById("filtroStazioneContainer").style.color="#DA6969";
-}
 function setFiltroAvanzamentoLabel()
 {
     document.getElementById("filtroAvanzamentoContainer").innerHTML="Filtro avanzamento "+filtroAvanzamento;
@@ -209,34 +148,6 @@ function setFiltroAvanzamentoLabel()
         document.getElementById("filtroAvanzamentoContainer").style.color="#548CFF";
     if(filtroAvanzamento=="inattivo")
         document.getElementById("filtroAvanzamentoContainer").style.color="#DA6969";
-}
-function toggleFiltroLinea()
-{
-    if(filtroLinea=="attivo")
-        filtroLinea="inattivo";
-    else
-        filtroLinea="attivo";
-
-    setCookie("filtroLinea",filtroLinea);
-    setFiltroLineaLabel();
-
-    if(view=="cabine_corridoi" || view=="kit")
-        getListCabineECorridoi(true);
-}
-function toggleFiltroStazione()
-{
-    if(filtroStazione=="attivo")
-        filtroStazione="inattivo";
-    else
-        filtroStazione="attivo";
-
-    setCookie("filtroStazione",filtroStazione);
-    setFiltroStazioneLabel();
-
-    if(view=="kit")
-        getListKit(true);
-    if(view=="cabine_corridoi")
-        getListCabineECorridoi(true);
 }
 function toggleFiltroAvanzamento()
 {
@@ -318,7 +229,6 @@ function setNumber(key)
 }
 window.addEventListener("keydown", async function(event)
 {
-    clearInterval(interval);
     var keyCode=event.keyCode;
     /*console.log(keyCode);
     console.log(event.key);*/
@@ -387,11 +297,9 @@ window.addEventListener("keydown", async function(event)
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_filtro_linea").valore):
             event.preventDefault();
-            toggleFiltroLinea();
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_filtro_stazione").valore):
             event.preventDefault();
-            toggleFiltroStazione();
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_filtro_avanzamento").valore):
             event.preventDefault();
@@ -420,7 +328,8 @@ window.addEventListener("keydown", async function(event)
                     case "kit":
                         shownPdf=null;
                         kitSelezionato=getFirstObjByPropValue(kit,"number",focused);
-                        if(!kitSelezionato.chiuso && !kitSelezionato.registrato)
+                        confermaKit(focused);
+                        /*if(!kitSelezionato.chiuso && !kitSelezionato.registrato)
                         {
                             if(stazione.nome=="montaggio")
                             {
@@ -471,7 +380,7 @@ window.addEventListener("keydown", async function(event)
                             }
                             else
                                 confermaKit(focused);
-                        }
+                        }*/
                     break;
                 }
             }
@@ -547,7 +456,6 @@ window.addEventListener("keydown", async function(event)
             event.preventDefault();
         break;
     }
-    interval = setInterval(checkLists, frequenza_aggiornamento_dati_linea);
 });
 function scorri_su_di_1()
 {
@@ -746,29 +654,9 @@ async function confermaKit(number)
                     }
                     printList.push(printObj);
                     if(printList.length==3)
-                        sendStampaEtichettaKit();
+                        sendStampaEtichettaKit();//controlla perche è qua dentro... dovrebbe essere solo se la stazione e caricamento (penso)
                 }
-                if(filtroAvanzamento=="inattivo")
-                {
-                    try {
-                        document.getElementById("iconCheckKit"+number).remove();
-                    } catch (error) {}
-
-                    var fa=document.createElement("i");
-                    fa.setAttribute("class","fad fa-check-circle");
-                    fa.setAttribute("id","iconCheckKit"+number);
-                    fa.setAttribute("style","color:#70B085;margin-left:auto;margin-top:5px;margin-right:5px;font-size:15px");
-                    if(document.getElementById("kitItem"+number).getElementsByTagName("table")[0]==null)
-                        document.getElementById("kitItem"+number).appendChild(fa);
-                    else
-                        document.getElementById("kitItem"+number).insertBefore(fa, document.getElementById("kitItem"+number).getElementsByTagName("table")[0]);
-
-                    setTimeout(() => {
-                        scorri_giu_di_1();
-                    }, 300);
-                }
-                else
-                    getListKit(false)
+                getListKit(false);
             }
         }
         else
@@ -847,28 +735,6 @@ async function getListKit(cleanFocused,callback)
 
     var i=1;
     kit=await getKit(lottoSelezionato.lotto,lottoSelezionato.commessa,cabina_corridoioSelezionato.numero_cabina);
-    //console.log(kit);
-    /*if(stazione.nome=="traversine")
-    {
-        if(mostraMisureTraversine=="true")
-            var which_columns = ["posizione","appartenenza","chiuso","posizione","qnt","registrato","traversine"];
-        else
-            var which_columns = ["posizione","appartenenza","chiuso","posizione","qnt","registrato"];
-
-        var kit_gb=new groupByJS
-        ({
-            data:kit,
-            group_by_columns:["kit"],
-            operator:"WHICH",
-            column:"kit",
-            which_columns,
-            which_join_separator:", "
-        });
-        kit=kit_gb;
-        //console.log(kit_gb);
-    }
-
-    console.log(kit);*/
 
     if(mostraMisureTraversine=="true")
         container.innerHTML="";
@@ -886,7 +752,8 @@ async function getListKit(cleanFocused,callback)
 
         var item=document.createElement("button");
         item.setAttribute("class","kit-item");
-        item.setAttribute("onfocus","checkScroll(this,event);getPdf('kit','"+codiceKit+"')");
+        item.setAttribute("onfocus","getPdf('kit','"+codiceKit+"')");
+        item.setAttribute("onfocusin","checkItemScroll(event,this);");
         item.setAttribute("id","kitItem"+kitItem.number);
 
         var div=document.createElement("div");
@@ -903,24 +770,13 @@ async function getListKit(cleanFocused,callback)
 
         if(filtroAvanzamento=="inattivo")
         {
-            if(kitItem.chiuso)
+            if(kitItem.registrato)
             {
                 var fa=document.createElement("i");
                 fa.setAttribute("class","fad fa-check-circle");
                 fa.setAttribute("id","iconCheckKit"+kitItem.number);
-                fa.setAttribute("style","color:#DA6969;margin-left:auto;margin-top:5px;margin-right:5px;font-size:15px");
+                fa.setAttribute("style","color:#70B085;margin-left:auto;margin-top:5px;margin-right:5px;font-size:15px");
                 item.appendChild(fa);
-            }
-            else
-            {
-                if(kitItem.registrato)
-                {
-                    var fa=document.createElement("i");
-                    fa.setAttribute("class","fad fa-check-circle");
-                    fa.setAttribute("id","iconCheckKit"+kitItem.number);
-                    fa.setAttribute("style","color:#70B085;margin-left:auto;margin-top:5px;margin-right:5px;font-size:15px");
-                    item.appendChild(fa);
-                }
             }
         }
 
@@ -1013,16 +869,19 @@ function getKit(lotto,commessa,numero_cabina)
     {
         var id_linea=linea.id_linea;
         var id_stazione=stazione.id_stazione;
-        var id_stazione_precedente=stazione.stazione_precedente;
-        $.get("getKit.php",
+
+        var url;
+        if(stazione.nome=="traversine")
+            url = "getkitTraversine.php";
+        else
+            url = "getKit.php";
+        $.get(url,
         {
             lotto,
             commessa,
             numero_cabina,
-            filtroStazione,
             id_linea,
             id_stazione,
-            id_stazione_precedente,
             filtroAvanzamento,
             ordinamentoKit,
             mostraMisureTraversine
@@ -1107,7 +966,7 @@ async function getListLotti(cleanFocused)
         var item=document.createElement("button");
         item.setAttribute("class","lotti-item");
         item.setAttribute("id","lottiItem"+lotto.number);
-        item.setAttribute("onfocus","checkScroll(this,event)");
+        item.setAttribute("onfocusin","checkItemScroll(event,this);");
 
         var div=document.createElement("div");
         div.innerHTML=number;
@@ -1192,7 +1051,8 @@ async function getListCabineECorridoi(cleanFocused)
         var item=document.createElement("button");
         item.setAttribute("class","cabine_corridoi-item");
         if(cabina_corridoio.tipo=="cabina")
-            item.setAttribute("onfocus","checkScroll(this,event);getPdf('cabine_corridoi','"+cabina_corridoio.disegno_cabina+"')");
+            item.setAttribute("onfocus","getPdf('cabine_corridoi','"+cabina_corridoio.disegno_cabina+"')");
+        item.setAttribute("onfocusin","checkItemScroll(event,this);");
         item.setAttribute("id","cabine_corridoiItem"+cabina_corridoio.number);
 
         var div=document.createElement("div");
@@ -1271,16 +1131,12 @@ function getCabineECorridoi(lotto,commessa)
     {
         var id_turno=turno.id_turno;
         var id_linea=linea.id_linea;
-        var id_stazione_precedente=stazione.stazione_precedente;
         $.get("getCabineECorridoi.php",
         {
             lotto,
             commessa,
-            filtroLinea,
-            filtroStazione,
             id_turno,
             id_linea,
-            id_stazione_precedente,
             filtroAvanzamento
         },
         function(response, status)
@@ -2209,29 +2065,26 @@ function sendStampaEtichettaKit()
 
     printList=[];
 }
-function checkScroll(item,event)
+function checkItemScroll(event,item)
 {
+    event.preventDefault();
 
+    var container = item.parentElement;
+
+    var oldScroll = container.scrollTop;
+    item.focus();
+    container.oldScroll = oldScroll;
+
+    console.log(isElementInViewport(item))
 }
-const isVisible = function (ele, container)
+function isElementInViewport(el)
 {
-    const eleTop = ele.offsetTop;
-    const eleBottom = eleTop + ele.clientHeight;
+    var rect = el.getBoundingClientRect();
 
-    const containerTop = container.scrollTop;
-    const containerBottom = containerTop + container.clientHeight;
-
-    // The element is fully visible in the container
     return (
-        (eleTop >= containerTop && eleBottom <= containerBottom) ||
-        // Some part of the element is visible in the container
-        (eleTop < containerTop && containerTop < eleBottom) ||
-        (eleTop < containerBottom && containerBottom < eleBottom)
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
     );
-};
-function checkContainerScroll(container,event)
-{
-    //console.log(event)
-    /*document.getElementById(view+"Item"+focused).scrollIntoView();
-    container.scrollTop = container.scrollTop -= 10;*/
 }

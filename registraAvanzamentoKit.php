@@ -15,21 +15,8 @@
     $result0=sqlsrv_query($conn,$query0);
     if($result0==TRUE)
     {
-        $query1="SELECT COUNT(*) AS numero FROM dbo.kit_linea WHERE linea=$id_linea";	
-        $result1=sqlsrv_query($conn,$query1);
-        if($result1==TRUE)
-        {
-            while($row1=sqlsrv_fetch_array($result1))
-            {
-                $numero=$row1['numero']+1;
-            }
-        }
-        else
-            die("error");
-
         $query2="INSERT INTO [dbo].[kit_linea]
-                    ([numero]
-                    ,[lotto]
+                    ([lotto]
                     ,[cabina]
                     ,[kit]
                     ,[stazione]
@@ -38,8 +25,7 @@
                     ,[dataOra]
                     ,[posizione])
                 VALUES
-                    ($numero
-                    ,'$lotto'
+                    ('$lotto'
                     ,'$cabina'
                     ,'$kit'
                     ,$id_stazione
@@ -48,11 +34,7 @@
                     ,GETDATE()
                     ,'$posizione')";	
         $result2=sqlsrv_query($conn,$query2);
-        if($result2==TRUE)
-        {
-            echo "ok";
-        }
-        else
+        if (!$result2)
             die("error");
     }
     else
