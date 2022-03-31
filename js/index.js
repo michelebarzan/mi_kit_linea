@@ -2211,19 +2211,11 @@ function sendStampaEtichettaKit()
 }
 function checkScroll(item,event)
 {
-    /*var childPos = $(item).offset();
-    var parentPos = $(item).parent().offset();
-    var childOffset =
-    {
-        top: childPos.top - parentPos.top,
-        left: childPos.left - parentPos.left
-    }
 
-    element.scrollTo(0,childOffset.top);*/
-    //console.log(isVisible(item,item.parentElement));
 }
-const isVisible = function (ele, container) {
-    /*const eleTop = ele.offsetTop;
+const isVisible = function (ele, container)
+{
+    const eleTop = ele.offsetTop;
     const eleBottom = eleTop + ele.clientHeight;
 
     const containerTop = container.scrollTop;
@@ -2235,5 +2227,11 @@ const isVisible = function (ele, container) {
         // Some part of the element is visible in the container
         (eleTop < containerTop && containerTop < eleBottom) ||
         (eleTop < containerBottom && containerBottom < eleBottom)
-    );*/
+    );
 };
+function checkContainerScroll(container,event)
+{
+    //console.log(event)
+    /*document.getElementById(view+"Item"+focused).scrollIntoView();
+    container.scrollTop = container.scrollTop -= 10;*/
+}
