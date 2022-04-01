@@ -12,6 +12,16 @@
     $id_stazione=$_REQUEST['id_stazione'];
     
     $kit=[];
+
+    /*
+    SELECT        TOP (100) PERCENT commessa, lotto, numero_cabina, disegno_cabina, kit, posizione, qnt, LEN(posizione) AS len, 
+                         REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(posizione, '0', ''), '1', ''), '2', ''), '3', ''), '4', ''), '5', ''), '6', ''), '7', ''), '8', ''), '9', '') AS lettera, REPLACE(posizione, 
+                         REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(posizione, '0', ''), '1', ''), '2', ''), '3', ''), '4', ''), '5', ''), '6', ''), '7', ''), '8', ''), '9', ''), '') AS numero, LEN(REPLACE(posizione, 
+                         REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(posizione, '0', ''), '1', ''), '2', ''), '3', ''), '4', ''), '5', ''), '6', ''), '7', ''), '8', ''), '9', ''), '')) AS len_numero
+FROM            dbo.view_cabine
+WHERE        (numero_cabina = '13808') AND (lotto = '6298N218')
+ORDER BY len_numero, numero, lettera
+    */
     
     $query1="SELECT DISTINCT 
     t.commessa, t.lotto, t.numero_cabina, t.disegno_cabina, t.kit, t.posizione, t.qnt, t.appartenenza, LEN(t.$ordinamentoKit) AS Expr1, CASE WHEN kit_linea.id_kit_linea IS NULL 

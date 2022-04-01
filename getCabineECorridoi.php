@@ -23,6 +23,7 @@
             $cabina_corridoio["tipo"]=$row1['tipo'];
             $cabina_corridoio["numero_cabina"]=$row1['numero_cabina'];
             $cabina_corridoio["disegno_cabina"]=$row1['disegno_cabina'];
+            $cabina_corridoio["chiusa"]=filter_var($row1['chiusa'], FILTER_VALIDATE_BOOLEAN);
 
             if($filtroAvanzamento=="attivo")
             {

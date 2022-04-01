@@ -119,17 +119,30 @@ function getFunzioniTasti()
         {
             if(status=="success")
             {
-                try {
-                    resolve(JSON.parse(response));
-                } catch (error) {
-                    setTimeout(() => {
-                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
-                    }, 500);
+                if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+                {
+                    Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                    console.log(response);
                     resolve([]);
+                }
+                else
+                {
+                    try {
+                        resolve(JSON.parse(response));
+                    } catch (error) {
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
+                        resolve([]);
+                    }
                 }
             }
             else
-                reject({status});
+            {
+                Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                console.log(response);
+                resolve([]);
+            }
         });
     });
 }
@@ -202,17 +215,30 @@ function getParametriByHelp(help)
         {
             if(status=="success")
             {
-                try {
-                    resolve(JSON.parse(response));
-                } catch (error) {
-                    setTimeout(() => {
-                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
-                    }, 500);
+                if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+                {
+                    Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                    console.log(response);
                     resolve([]);
+                }
+                else
+                {
+                    try {
+                        resolve(JSON.parse(response));
+                    } catch (error) {
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
+                        resolve([]);
+                    }
                 }
             }
             else
-                reject({status});
+            {
+                Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                console.log(response);
+                resolve([]);
+            }
         });
     });
 }
@@ -1143,18 +1169,30 @@ function getKit(lotto,commessa,numero_cabina)
         {
             if(status=="success")
             {
-                try {
-                    resolve(JSON.parse(response));
-                } catch (error) {
+                if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+                {
+                    Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
                     console.log(response);
-                    setTimeout(() => {
-                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
-                    }, 500);
                     resolve([]);
+                }
+                else
+                {
+                    try {
+                        resolve(JSON.parse(response));
+                    } catch (error) {
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
+                        resolve([]);
+                    }
                 }
             }
             else
-                reject({status});
+            {
+                Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                console.log(response);
+                resolve([]);
+            }
         });
     });
 }
@@ -1323,6 +1361,17 @@ async function getListCabineECorridoi(cleanFocused)
             span.innerHTML=cabina_corridoio.disegno_cabina;
             item.appendChild(span);
         }
+        
+        if(filtroAvanzamento=="inattivo")
+        {
+            if(cabina_corridoio.chiusa)
+            {
+                var fa=document.createElement("i");
+                fa.setAttribute("class","fad fa-check-circle");
+                fa.setAttribute("style","color:#70B085;margin-left:auto;margin-right:5px;font-size:15px");
+                item.appendChild(fa);
+            }
+        }
 
         container.appendChild(item);
 
@@ -1397,17 +1446,30 @@ function getCabineECorridoi(lotto,commessa)
         {
             if(status=="success")
             {
-                try {
-                    resolve(JSON.parse(response));
-                } catch (error) {
-                    setTimeout(() => {
-                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
-                    }, 500);
+                if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+                {
+                    Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                    console.log(response);
                     resolve([]);
+                }
+                else
+                {
+                    try {
+                        resolve(JSON.parse(response));
+                    } catch (error) {
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
+                        resolve([]);
+                    }
                 }
             }
             else
-                reject({status});
+            {
+                Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                console.log(response);
+                resolve([]);
+            }
         });
     });
 }
@@ -1420,17 +1482,30 @@ function getLotti()
         {
             if(status=="success")
             {
-                try {
-                    resolve(JSON.parse(response));
-                } catch (error) {
-                    setTimeout(() => {
-                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
-                    }, 500);
+                if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+                {
+                    Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                    console.log(response);
                     resolve([]);
+                }
+                else
+                {
+                    try {
+                        resolve(JSON.parse(response));
+                    } catch (error) {
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
+                        resolve([]);
+                    }
                 }
             }
             else
-                reject({status});
+            {
+                Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                console.log(response);
+                resolve([]);
+            }
         });
     });
 }
@@ -1477,17 +1552,30 @@ function getAnagraficaStazioni()
         {
             if(status=="success")
             {
-                try {
-                    resolve(JSON.parse(response));
-                } catch (error) {
-                    setTimeout(() => {
-                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
-                    }, 500);
+                if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+                {
+                    Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                    console.log(response);
                     resolve([]);
+                }
+                else
+                {
+                    try {
+                        resolve(JSON.parse(response));
+                    } catch (error) {
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
+                        resolve([]);
+                    }
                 }
             }
             else
-                reject({status});
+            {
+                Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                console.log(response);
+                resolve([]);
+            }
         });
     });
 }
