@@ -164,10 +164,23 @@ function setFiltroAvanzamentoLabel()
 }
 function toggleFiltroAvanzamento()
 {
-    if(filtroAvanzamento=="attivo")
-        filtroAvanzamento="inattivo";
+    if(stazione.nome == "traversine" && view=="kit")
+    {
+        if(raggruppaKit=="false")
+        {
+            if(filtroAvanzamento=="attivo")
+                filtroAvanzamento="inattivo";
+            else
+                filtroAvanzamento="attivo";
+        }
+    }
     else
-        filtroAvanzamento="attivo";
+    {
+        if(filtroAvanzamento=="attivo")
+            filtroAvanzamento="inattivo";
+        else
+            filtroAvanzamento="attivo";
+    }
 
     setCookie("filtroAvanzamento",filtroAvanzamento);
     setFiltroAvanzamentoLabel();
@@ -283,7 +296,15 @@ window.addEventListener("keydown", async function(event)
             event.preventDefault();
             if(view=="kit")
             {
-                eliminaRegistrazioneAvanzamentoKit(focused);
+                if(stazione.nome == "traversine")
+                {
+                    if(raggruppaKit=="true")
+                        eliminaRegistrazioneAvanzamentoKitRaggruppati(focused);
+                    else
+                        eliminaRegistrazioneAvanzamentoKit(focused);
+                }
+                else
+                    eliminaRegistrazioneAvanzamentoKit(focused);
             }
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_mostra_misure_traversine").valore):
@@ -307,8 +328,12 @@ window.addEventListener("keydown", async function(event)
                 {
                     raggruppaKit="true";
                     ordinamentoKit="kit";
+                    filtroAvanzamento="inattivo";
+
+                    setCookie("filtroAvanzamento",filtroAvanzamento);
+                    setFiltroAvanzamentoLabel();
                 }
-                getListKit(false);
+                getListKit(true);
             }
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_ordinamento").valore):
@@ -368,30 +393,44 @@ window.addEventListener("keydown", async function(event)
                     case "kit":
                         shownPdf=null;
                         kitSelezionato=getFirstObjByPropValue(kit,"number",focused);
-                        if(stazione.nome=="montaggio" && !kitSelezionato.registrato_caricamento)
+                        switch (stazione.nome)
                         {
-                            Swal.fire
-                            ({
-                                icon:"warning",
-                                title: 'Il kit '+kitSelezionato.kit+' non è stato registrato in tutte le stazioni precedenti',
-                                showCloseButton: false,
-                                showConfirmButton:true,
-                                showCancelButton:true,
-                                confirmButtonText:"Continua [INVIO]",
-                                cancelButtonText:"Annulla [ESC]",
-                                background:"#353535",
-                                onOpen : function()
-                                        {
-                                            document.getElementsByClassName("swal2-close")[0].style.outline="none";
-                                        },
-                            }).then((result) => 
-                            {
-                                if(result.value)
+                            case "caricamento":
+                                confermaKit(focused);
+                            break;
+                            case "montaggio":
+                                if(!kitSelezionato.registrato_caricamento)
+                                {
+                                    Swal.fire
+                                    ({
+                                        icon:"warning",
+                                        title: 'Il kit '+kitSelezionato.kit+' non è stato registrato in tutte le stazioni precedenti',
+                                        showCloseButton: false,
+                                        showConfirmButton:true,
+                                        showCancelButton:true,
+                                        confirmButtonText:"Continua [INVIO]",
+                                        cancelButtonText:"Annulla [ESC]",
+                                        background:"#353535",
+                                        onOpen : function()
+                                                {
+                                                    document.getElementsByClassName("swal2-close")[0].style.outline="none";
+                                                },
+                                    }).then((result) => 
+                                    {
+                                        if(result.value)
+                                            confermaKit(focused);
+                                    });
+                                }
+                                else
                                     confermaKit(focused);
-                            });
+                            break;
+                            case "traversine":
+                                if(raggruppaKit=="true")
+                                    confermaKitRaggruppati(focused);
+                                else
+                                    confermaKit(focused);
+                            break;
                         }
-                        else
-                            confermaKit(focused);
                     break;
                 }
             }
@@ -498,9 +537,9 @@ function scorri_giu_di_1()
     document.getElementById(view+"Item"+focused).focus();   
 	document.getElementById("inputNumber").value=focused;    
 }
-function timeout_scorri_giu_di_1(time)
+function timeout_scorri_giu_di_1()
 {
-    setTimeout(() => {scorri_giu_di_1();}, time);
+    setTimeout(() => {scorri_giu_di_1();}, 300);
 }
 function zoomin()
 {
@@ -550,6 +589,56 @@ function scrollright()
             iframe.contentWindow.document.getElementById("viewerContainer").scrollLeft+=50;
     } catch (error) {}
 }
+function eliminaRegistrazioneAvanzamentoKitRaggruppati(number)
+{
+    kitSelezionato=getFirstObjByPropValue(kit,"number",number);
+
+    var lotto=lottoSelezionato.lotto;
+    var cabina=cabina_corridoioSelezionato.numero_cabina;
+    var id_stazione=stazione.id_stazione;
+    var id_linea=linea.id_linea;
+
+    $.get("eliminaRegistrazioneAvanzamentoKitRaggruppati.php",
+    {
+        lotto,
+        cabina,
+        posizioni:kitSelezionato.posizioni,
+        id_stazione,
+        id_linea
+    },
+    function(response, status)
+    {
+        if(status=="success")
+        {
+            if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+            {
+                Swal.fire
+                ({
+                    background:"#404040",
+                    icon: 'error',
+                    title: "Errore. Se il problema persiste contatta l' amministratore",
+                    showConfirmButton:false,
+                    showCloseButton:true
+                });
+                console.log(response);
+            }
+            else
+                getListKit(false,timeout_scorri_giu_di_1);
+        }
+        else
+        {
+            Swal.fire
+            ({
+                background:"#404040",
+                icon: 'error',
+                title: "Errore. Se il problema persiste contatta l' amministratore",
+                showConfirmButton:false,
+                showCloseButton:true
+            });
+            console.log(status);
+        }
+    });
+}
 async function eliminaRegistrazioneAvanzamentoKit(number)
 {
     kitSelezionato=getFirstObjByPropValue(kit,"number",number);
@@ -586,10 +675,75 @@ async function eliminaRegistrazioneAvanzamentoKit(number)
             else
             {
                 if(filtroAvanzamento=="inattivo")
-                    getListKit(false,timeout_scorri_giu_di_1(300));
+                    getListKit(false,timeout_scorri_giu_di_1);
                 else
                     getListKit(false);
             }
+        }
+        else
+        {
+            Swal.fire
+            ({
+                background:"#404040",
+                icon: 'error',
+                title: "Errore. Se il problema persiste contatta l' amministratore",
+                showConfirmButton:false,
+                showCloseButton:true
+            });
+            console.log(status);
+        }
+    });
+}
+function confermaKitRaggruppati(number)
+{
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
+    var lotto=lottoSelezionato.lotto;
+    var cabina=cabina_corridoioSelezionato.numero_cabina;
+    var id_stazione=stazione.id_stazione;
+    var id_linea=linea.id_linea;
+
+    $.get("registraAvanzamentoKitRaggruppati.php",
+    {
+        lotto,
+        cabina,
+        kit:kitSelezionato.kit,
+        posizioni:kitSelezionato.posizioni,
+        id_stazione,
+        id_linea,
+        id_utente
+    },
+    function(response, status)
+    {
+        if(status=="success")
+        {
+            Swal.close();
+            if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+            {
+                Swal.fire
+                ({
+                    background:"#404040",
+                    icon: 'error',
+                    title: "Errore. Se il problema persiste contatta l' amministratore",
+                    showConfirmButton:false,
+                    showCloseButton:true
+                });
+                console.log(response);
+            }
+            else
+                getListKit(false,timeout_scorri_giu_di_1);
         }
         else
         {
@@ -668,7 +822,7 @@ async function confermaKit(number)
                         sendStampaEtichettaKit();
                 }
                 if(filtroAvanzamento=="inattivo")
-                    getListKit(false,timeout_scorri_giu_di_1(300));
+                    getListKit(false,timeout_scorri_giu_di_1);
                 else
                     getListKit(false);
             }
@@ -728,7 +882,13 @@ async function getListKit(cleanFocused,callback)
         setCookie("raggruppaKit",raggruppaKit);
 
         if(raggruppaKit=="true")
+        {
             ordinamentoKit="kit";
+
+            filtroAvanzamento="inattivo";
+            setCookie("filtroAvanzamento",filtroAvanzamento);
+            setFiltroAvanzamentoLabel();
+        }
     }
     else
     {
@@ -799,63 +959,100 @@ async function getListKit(cleanFocused,callback)
                 span.innerHTML="<u>Qnt:</u> "+kitItem["n"];
                 item.appendChild(span);
 
-                var span=document.createElement("span");
-                span.setAttribute("style","width: calc(100% - 80px);margin-right: 40px;margin-left: 40px;margin-top: 5px;text-align:left;height:auto");
-                span.setAttribute("class","container-posizioni-kit-raggruppato");
+                var containerPosizioniKitRaggruppato=document.createElement("div");
+                containerPosizioniKitRaggruppato.setAttribute("style","width: calc(100% - 80px);max-width: calc(100% - 80px);overflow:hidden;margin-right: 40px;margin-left: 40px;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;flex-wrap:wrap;height:auto;background-color:transparent;box-sizing:border-box;padding-left:0px;padding-right:0px;line-height:auto");
+                containerPosizioniKitRaggruppato.setAttribute("class","container-posizioni-kit-raggruppato");
+                var span = document.createElement("span");
+                span.setAttribute("style","margin:0px;height:auto;line-height:auto");
                 span.innerHTML="<u>Pos:</u> ";
+                containerPosizioniKitRaggruppato.appendChild(span);
                 kitItem.posizioni.forEach(posizione =>
                 {
-                    span.innerHTML += posizione.posizione + ", ";
+                    var span = document.createElement("span");
+                    span.setAttribute("style","margin:0px;height:auto;line-height:auto;margin-left:10px;");
+                    if(kitItem.posizioni[0].posizione == posizione.posizione)
+                        span.innerHTML=posizione.posizione;
+                    else
+                        span.innerHTML="- " + posizione.posizione;
+                    containerPosizioniKitRaggruppato.appendChild(span);
+
+                    if(posizione.registrato)
+                    {
+                        var fa=document.createElement("i");
+                        fa.setAttribute("class","fad fa-check-circle");
+                        fa.setAttribute("style","color:#70B085;font-size:15px;margin-left:5px;");
+                        containerPosizioniKitRaggruppato.appendChild(fa);
+                    }
                 });
+                item.appendChild(containerPosizioniKitRaggruppato);
+            }
+            else
+            {
+                var span=document.createElement("span");
+                span.innerHTML="<u>Pos:</u> "+kitItem["posizione"];
                 item.appendChild(span);
+        
+                if(filtroAvanzamento=="inattivo")
+                {
+                    if(kitItem.registrato)
+                    {
+                        var fa=document.createElement("i");
+                        fa.setAttribute("class","fad fa-check-circle");
+                        fa.setAttribute("style","color:#70B085;margin-left:auto;margin-top:5px;margin-right:5px;font-size:15px");
+                        item.appendChild(fa);
+                    }
+                }
             }
             if(mostraMisureTraversine=="true")
             {
                 var table=document.createElement("table");
                 table.setAttribute("class","misure-traversine-table");
     
-                var tr=document.createElement("tr");
-    
-                var th=document.createElement("th");
-                th.innerHTML="CODMAT";
-                tr.appendChild(th);
-    
-                var th=document.createElement("th");
-                th.innerHTML="LUNG";
-                tr.appendChild(th);
-    
-                var th=document.createElement("th");
-                th.innerHTML="POS";
-                tr.appendChild(th);
-    
-                table.appendChild(tr);
-    
-                var j=0;
-                kitItem.traversine.forEach(traversina => 
+                if(kitItem.traversine.length > 0)
                 {
                     var tr=document.createElement("tr");
-                    
-                    var td=document.createElement("td");
-                    if(j==kitItem.traversine.length-1)
-                        td.setAttribute("style","border-bottom:none");
-                    td.innerHTML=traversina.CODMAT;
-                    tr.appendChild(td);
-    
-                    var td=document.createElement("td");
-                    if(j==kitItem.traversine.length-1)
-                        td.setAttribute("style","border-bottom:none");
-                    td.innerHTML=traversina.LUNG;
-                    tr.appendChild(td);
-    
-                    var td=document.createElement("td");
-                    if(j==kitItem.traversine.length-1)
-                        td.setAttribute("style","border-bottom:none");
-                    td.innerHTML=traversina.posizione_traversina;
-                    tr.appendChild(td);
-    
+        
+                    var th=document.createElement("th");
+                    th.innerHTML="CODMAT";
+                    tr.appendChild(th);
+        
+                    var th=document.createElement("th");
+                    th.innerHTML="LUNG";
+                    tr.appendChild(th);
+        
+                    var th=document.createElement("th");
+                    th.innerHTML="POS";
+                    tr.appendChild(th);
+        
                     table.appendChild(tr);
-                    j++;
-                });
+        
+                    var j=0;
+                    kitItem.traversine.forEach(traversina => 
+                    {
+                        var tr=document.createElement("tr");
+                        
+                        var td=document.createElement("td");
+                        if(j==kitItem.traversine.length-1)
+                            td.setAttribute("style","border-bottom:none");
+                        td.innerHTML=traversina.CODMAT;
+                        tr.appendChild(td);
+        
+                        var td=document.createElement("td");
+                        if(j==kitItem.traversine.length-1)
+                            td.setAttribute("style","border-bottom:none");
+                        td.innerHTML=traversina.LUNG;
+                        tr.appendChild(td);
+        
+                        var td=document.createElement("td");
+                        if(j==kitItem.traversine.length-1)
+                            td.setAttribute("style","border-bottom:none");
+                        td.innerHTML=traversina.posizione_traversina;
+                        tr.appendChild(td);
+        
+                        table.appendChild(tr);
+                        j++;
+                    });
+                }
     
                 item.appendChild(table);
             }
@@ -872,7 +1069,6 @@ async function getListKit(cleanFocused,callback)
                 {
                     var fa=document.createElement("i");
                     fa.setAttribute("class","fad fa-check-circle");
-                    fa.setAttribute("id","iconCheckKit"+kitItem.number);
                     fa.setAttribute("style","color:#70B085;margin-left:auto;margin-top:5px;margin-right:5px;font-size:15px");
                     item.appendChild(fa);
                 }
@@ -894,9 +1090,9 @@ async function getListKit(cleanFocused,callback)
             const kitItem = kitItems[index];
             var height=kitItem.offsetHeight;
             if(mostraMisureTraversine=="true")
-                height+=kitItem.getElementsByClassName("misure-traversine-table")[0].offsetHeight+10;
+                height+=kitItem.getElementsByClassName("misure-traversine-table")[0].offsetHeight;
             if(raggruppaKit=="true")
-                height+=kitItem.getElementsByClassName("container-posizioni-kit-raggruppato")[0].offsetHeight+5;
+                height+=kitItem.getElementsByClassName("container-posizioni-kit-raggruppato")[0].offsetHeight;
             kitItem.style.minHeight=height+"px";
             kitItem.style.height=height+"px";
             kitItem.style.maxHeight=height+"px";
