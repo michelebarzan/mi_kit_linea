@@ -9,7 +9,8 @@ var numbers_array=
 var view;
 var iframe;
 var ordinamentoKit;
-var mostraMisureTraversine="false";
+var mostraMisureTraversine;
+var raggruppaKit;
 var filtroAvanzamento;
 var turno;
 var linea;
@@ -59,14 +60,19 @@ window.addEventListener("load", async function(event)
     ordinamentoKit=await getCookie("ordinamentoKit");
     if(ordinamentoKit=="")
         ordinamentoKit="kit";
-    //setOrdinamentoKitLabel();
 
-    if(stazione=="traversine")
+    if(stazione.nome=="traversine")
     {
         mostraMisureTraversine=await getCookie("mostraMisureTraversine");
         if(mostraMisureTraversine=="")
-            mostraMisureTraversine="false";
-        //setMostraMisureTraversineLabel();
+            mostraMisureTraversine="true";
+    }
+
+    if(stazione.nome=="traversine")
+    {
+        raggruppaKit=await getCookie("raggruppaKit");
+        if(raggruppaKit=="")
+            raggruppaKit="true";
     }
 
     filtroAvanzamento=await getCookie("filtroAvanzamento");
@@ -140,6 +146,13 @@ function setMostraMisureTraversineLabel()
         document.getElementById("mostraMisureTraversineContainer").innerHTML="Mostra misure traversine";
     if(mostraMisureTraversine=="false")
         document.getElementById("mostraMisureTraversineContainer").innerHTML="Nascondi misure traversine";
+}
+function setRaggruppaKitLabel()
+{
+    if(raggruppaKit=="true")
+        document.getElementById("raggruppaKitContainer").innerHTML="Raggruppa kit uguali";
+    if(raggruppaKit=="false")
+        document.getElementById("raggruppaKitContainer").innerHTML="Esplodi kit";
 }
 function setFiltroAvanzamentoLabel()
 {
@@ -284,14 +297,41 @@ window.addEventListener("keydown", async function(event)
                 getListKit(false);
             }
         break;
+        case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_raggruppa_kit").valore):
+            event.preventDefault();
+            if(view=="kit" && stazione.nome=="traversine")
+            {
+                if(raggruppaKit=="true")
+                    raggruppaKit="false";
+                else
+                {
+                    raggruppaKit="true";
+                    ordinamentoKit="kit";
+                }
+                getListKit(false);
+            }
+        break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_ordinamento").valore):
             event.preventDefault();
             if(view=="kit")
             {
-                if(ordinamentoKit=="kit")
-                    ordinamentoKit="posizione";
+                if(stazione.nome!="traversine")
+                {
+                    if(ordinamentoKit=="kit")
+                        ordinamentoKit="posizione";
+                    else
+                        ordinamentoKit="kit";
+                }
                 else
-                    ordinamentoKit="kit";
+                {
+                    if(raggruppaKit=="false")
+                    {
+                        if(ordinamentoKit=="kit")
+                            ordinamentoKit="posizione";
+                        else
+                            ordinamentoKit="kit";
+                    }
+                }
                 getListKit(false);
             }
         break;
@@ -328,59 +368,30 @@ window.addEventListener("keydown", async function(event)
                     case "kit":
                         shownPdf=null;
                         kitSelezionato=getFirstObjByPropValue(kit,"number",focused);
-                        confermaKit(focused);
-                        /*if(!kitSelezionato.chiuso && !kitSelezionato.registrato)
+                        if(stazione.nome=="montaggio" && !kitSelezionato.registrato_caricamento)
                         {
-                            if(stazione.nome=="montaggio")
-                            {
-                                Swal.fire
-                                ({
-                                    width:"100%",
-                                    background:"transparent",
-                                    title:"Caricamento in corso...",
-                                    html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
-                                    allowOutsideClick:false,
-                                    showCloseButton:false,
-                                    showConfirmButton:false,
-                                    allowEscapeKey:false,
-                                    showCancelButton:false,
-                                    onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
-                                });
-
-                                var kitRegistrato=await checkRegistrazioniKitStazioni();
-
-                                Swal.close();
-
-                                if(kitRegistrato)
-                                    chiudiKit();
-                                else
-                                {
-                                    Swal.fire
-                                    ({
-                                        icon:"warning",
-                                        title: 'Il kit '+kitSelezionato.kit+' non è stato registrato in tutte le stazioni precedenti',
-                                        showCloseButton: false,
-                                        showConfirmButton:true,
-                                        showCancelButton:true,
-                                        confirmButtonText:"Continua [INVIO]",
-                                        cancelButtonText:"Annulla [ESC]",
-                                        background:"#353535",
-                                        onOpen : function()
-                                                {
-                                                    document.getElementsByClassName("swal2-close")[0].style.outline="none";
-                                                },
-                                    }).then((result) => 
-                                    {
-                                        if(result.value)
+                            Swal.fire
+                            ({
+                                icon:"warning",
+                                title: 'Il kit '+kitSelezionato.kit+' non è stato registrato in tutte le stazioni precedenti',
+                                showCloseButton: false,
+                                showConfirmButton:true,
+                                showCancelButton:true,
+                                confirmButtonText:"Continua [INVIO]",
+                                cancelButtonText:"Annulla [ESC]",
+                                background:"#353535",
+                                onOpen : function()
                                         {
-                                            chiudiKit();
-                                        }
-                                    });
-                                }
-                            }
-                            else
-                                confermaKit(focused);
-                        }*/
+                                            document.getElementsByClassName("swal2-close")[0].style.outline="none";
+                                        },
+                            }).then((result) => 
+                            {
+                                if(result.value)
+                                    confermaKit(focused);
+                            });
+                        }
+                        else
+                            confermaKit(focused);
                     break;
                 }
             }
@@ -574,10 +585,10 @@ async function eliminaRegistrazioneAvanzamentoKit(number)
             }
             else
             {
-                console.log(response);
-                try {
-                    document.getElementById("iconCheckKit"+number).remove();
-                } catch (error) {}
+                if(filtroAvanzamento=="inattivo")
+                    getListKit(false,timeout_scorri_giu_di_1(300));
+                else
+                    getListKit(false);
             }
         }
         else
@@ -653,10 +664,13 @@ async function confermaKit(number)
                         posizione:kitSelezionato.posizione
                     }
                     printList.push(printObj);
-                    if(printList.length==3)
-                        sendStampaEtichettaKit();//controlla perche è qua dentro... dovrebbe essere solo se la stazione e caricamento (penso)
+                    if(stazione.nome=="caricamento" && printList.length==3)
+                        sendStampaEtichettaKit();
                 }
-                getListKit(false);
+                if(filtroAvanzamento=="inattivo")
+                    getListKit(false,timeout_scorri_giu_di_1(300));
+                else
+                    getListKit(false);
             }
         }
         else
@@ -701,20 +715,31 @@ async function getListKit(cleanFocused,callback)
 
     view="kit";
 
-    document.getElementById("ordinamentoContainer").style.display="";
-    setOrdinamentoKitLabel();
-
-    setCookie("ordinamentoKit",ordinamentoKit);
-
     if(stazione.nome=="traversine")
     {
         document.getElementById("mostraMisureTraversineContainer").style.display="";
         setMostraMisureTraversineLabel();
 
         setCookie("mostraMisureTraversine",mostraMisureTraversine);
+
+        document.getElementById("raggruppaKitContainer").style.display="";
+        setRaggruppaKitLabel();
+
+        setCookie("raggruppaKit",raggruppaKit);
+
+        if(raggruppaKit=="true")
+            ordinamentoKit="kit";
     }
     else
+    {
+        document.getElementById("raggruppaKitContainer").style.display="none";
         document.getElementById("mostraMisureTraversineContainer").style.display="none";
+    }
+
+    document.getElementById("ordinamentoContainer").style.display="";
+    setOrdinamentoKitLabel();
+
+    setCookie("ordinamentoKit",ordinamentoKit);
     
     if(cleanFocused)
     {
@@ -728,16 +753,19 @@ async function getListKit(cleanFocused,callback)
     kitSelezionato=null;
 
     var container=document.getElementById("listInnerContainer");
-    container.innerHTML="";
 
-    if(mostraMisureTraversine=="true")
-        container.innerHTML='<div id="listInnerContainerSpinner"><i class="fad fa-spinner fa-spin"></i><span>Caricamento in corso...</span></div>'
+    var oldScrollTop;
+    try
+    {
+        oldScrollTop = container.scrollTop;
+    } catch (error) {
+        oldScrollTop = 0;
+    }
+
+    container.innerHTML="";
 
     var i=1;
     kit=await getKit(lottoSelezionato.lotto,lottoSelezionato.commessa,cabina_corridoioSelezionato.numero_cabina);
-
-    if(mostraMisureTraversine=="true")
-        container.innerHTML="";
 
     kit.forEach(function (kitItem)
     {
@@ -752,8 +780,7 @@ async function getListKit(cleanFocused,callback)
 
         var item=document.createElement("button");
         item.setAttribute("class","kit-item");
-        item.setAttribute("onfocus","getPdf('kit','"+codiceKit+"')");
-        item.setAttribute("onfocusin","checkItemScroll(event,this);");
+        item.setAttribute("onfocus","checkItemScroll(event,this);getPdf('kit','"+codiceKit+"')");
         item.setAttribute("id","kitItem"+kitItem.number);
 
         var div=document.createElement("div");
@@ -764,71 +791,92 @@ async function getListKit(cleanFocused,callback)
         span.innerHTML=kitItem["kit"];
         item.appendChild(span);
 
-        var span=document.createElement("span");
-        span.innerHTML="<u>Pos:</u> "+kitItem["posizione"];
-        item.appendChild(span);
-
-        if(filtroAvanzamento=="inattivo")
+        if(stazione.nome=="traversine")
         {
-            if(kitItem.registrato)
+            if(raggruppaKit=="true")
             {
-                var fa=document.createElement("i");
-                fa.setAttribute("class","fad fa-check-circle");
-                fa.setAttribute("id","iconCheckKit"+kitItem.number);
-                fa.setAttribute("style","color:#70B085;margin-left:auto;margin-top:5px;margin-right:5px;font-size:15px");
-                item.appendChild(fa);
+                var span=document.createElement("span");
+                span.innerHTML="<u>Qnt:</u> "+kitItem["n"];
+                item.appendChild(span);
+
+                var span=document.createElement("span");
+                span.setAttribute("style","width: calc(100% - 80px);margin-right: 40px;margin-left: 40px;margin-top: 5px;text-align:left;height:auto");
+                span.setAttribute("class","container-posizioni-kit-raggruppato");
+                span.innerHTML="<u>Pos:</u> ";
+                kitItem.posizioni.forEach(posizione =>
+                {
+                    span.innerHTML += posizione.posizione + ", ";
+                });
+                item.appendChild(span);
+            }
+            if(mostraMisureTraversine=="true")
+            {
+                var table=document.createElement("table");
+                table.setAttribute("class","misure-traversine-table");
+    
+                var tr=document.createElement("tr");
+    
+                var th=document.createElement("th");
+                th.innerHTML="CODMAT";
+                tr.appendChild(th);
+    
+                var th=document.createElement("th");
+                th.innerHTML="LUNG";
+                tr.appendChild(th);
+    
+                var th=document.createElement("th");
+                th.innerHTML="POS";
+                tr.appendChild(th);
+    
+                table.appendChild(tr);
+    
+                var j=0;
+                kitItem.traversine.forEach(traversina => 
+                {
+                    var tr=document.createElement("tr");
+                    
+                    var td=document.createElement("td");
+                    if(j==kitItem.traversine.length-1)
+                        td.setAttribute("style","border-bottom:none");
+                    td.innerHTML=traversina.CODMAT;
+                    tr.appendChild(td);
+    
+                    var td=document.createElement("td");
+                    if(j==kitItem.traversine.length-1)
+                        td.setAttribute("style","border-bottom:none");
+                    td.innerHTML=traversina.LUNG;
+                    tr.appendChild(td);
+    
+                    var td=document.createElement("td");
+                    if(j==kitItem.traversine.length-1)
+                        td.setAttribute("style","border-bottom:none");
+                    td.innerHTML=traversina.posizione_traversina;
+                    tr.appendChild(td);
+    
+                    table.appendChild(tr);
+                    j++;
+                });
+    
+                item.appendChild(table);
             }
         }
-
-        if(stazione.nome=="traversine" && mostraMisureTraversine=="true")
+        else
         {
-            var table=document.createElement("table");
-            table.setAttribute("class","misure-traversine-table");
-
-            var tr=document.createElement("tr");
-
-            var th=document.createElement("th");
-            th.innerHTML="CODMAT";
-            tr.appendChild(th);
-
-            var th=document.createElement("th");
-            th.innerHTML="LUNG";
-            tr.appendChild(th);
-
-            var th=document.createElement("th");
-            th.innerHTML="POS";
-            tr.appendChild(th);
-
-            table.appendChild(tr);
-
-            var j=0;
-            kitItem.traversine.forEach(traversina => 
+            var span=document.createElement("span");
+            span.innerHTML="<u>Pos:</u> "+kitItem["posizione"];
+            item.appendChild(span);
+    
+            if(filtroAvanzamento=="inattivo")
             {
-                var tr=document.createElement("tr");
-                
-                var td=document.createElement("td");
-                if(j==kitItem.traversine.length-1)
-                    td.setAttribute("style","border-bottom:none");
-                td.innerHTML=traversina.CODMAT;
-                tr.appendChild(td);
-
-                var td=document.createElement("td");
-                if(j==kitItem.traversine.length-1)
-                    td.setAttribute("style","border-bottom:none");
-                td.innerHTML=traversina.LUNG;
-                tr.appendChild(td);
-
-                var td=document.createElement("td");
-                if(j==kitItem.traversine.length-1)
-                    td.setAttribute("style","border-bottom:none");
-                td.innerHTML=traversina.posizione_traversina;
-                tr.appendChild(td);
-
-                table.appendChild(tr);
-                j++;
-            });
-
-            item.appendChild(table);
+                if(kitItem.registrato)
+                {
+                    var fa=document.createElement("i");
+                    fa.setAttribute("class","fad fa-check-circle");
+                    fa.setAttribute("id","iconCheckKit"+kitItem.number);
+                    fa.setAttribute("style","color:#70B085;margin-left:auto;margin-top:5px;margin-right:5px;font-size:15px");
+                    item.appendChild(fa);
+                }
+            }
         }
 
         container.appendChild(item);
@@ -837,15 +885,21 @@ async function getListKit(cleanFocused,callback)
 
         i++;
     });
-    if(stazione.nome=="traversine" && mostraMisureTraversine=="true")
+
+    if(stazione.nome=="traversine" && (mostraMisureTraversine=="true" || raggruppaKit=="true"))
     {
         var kitItems=document.getElementsByClassName("kit-item");
         for (let index = 0; index < kitItems.length; index++)
         {
             const kitItem = kitItems[index];
-            var table=kitItem.getElementsByTagName("table")[0];
-            var height=table.offsetHeight+35;
+            var height=kitItem.offsetHeight;
+            if(mostraMisureTraversine=="true")
+                height+=kitItem.getElementsByClassName("misure-traversine-table")[0].offsetHeight+10;
+            if(raggruppaKit=="true")
+                height+=kitItem.getElementsByClassName("container-posizioni-kit-raggruppato")[0].offsetHeight+5;
             kitItem.style.minHeight=height+"px";
+            kitItem.style.height=height+"px";
+            kitItem.style.maxHeight=height+"px";
         }
     }
 
@@ -855,6 +909,8 @@ async function getListKit(cleanFocused,callback)
             document.getElementById(view+"Item"+focused).focus();   
         } catch (error) {}
     }
+    else
+        container.scrollTop = oldScrollTop;
 
     Swal.close();
 
@@ -884,7 +940,8 @@ function getKit(lotto,commessa,numero_cabina)
             id_stazione,
             filtroAvanzamento,
             ordinamentoKit,
-            mostraMisureTraversine
+            mostraMisureTraversine,
+            raggruppaKit
         },
         function(response, status)
         {
@@ -933,6 +990,7 @@ async function getListLotti(cleanFocused)
 
     document.getElementById("ordinamentoContainer").style.display="none";
     document.getElementById("mostraMisureTraversineContainer").style.display="none";
+    document.getElementById("raggruppaKitContainer").style.display="none";
     
     if(cleanFocused)
     {
@@ -966,7 +1024,7 @@ async function getListLotti(cleanFocused)
         var item=document.createElement("button");
         item.setAttribute("class","lotti-item");
         item.setAttribute("id","lottiItem"+lotto.number);
-        item.setAttribute("onfocusin","checkItemScroll(event,this);");
+        item.setAttribute("onfocus","checkItemScroll(event,this);");
 
         var div=document.createElement("div");
         div.innerHTML=number;
@@ -1018,6 +1076,7 @@ async function getListCabineECorridoi(cleanFocused)
 
     document.getElementById("ordinamentoContainer").style.display="none";
     document.getElementById("mostraMisureTraversineContainer").style.display="none";
+    document.getElementById("raggruppaKitContainer").style.display="none";
 
     if(cleanFocused)
     {
@@ -1051,8 +1110,7 @@ async function getListCabineECorridoi(cleanFocused)
         var item=document.createElement("button");
         item.setAttribute("class","cabine_corridoi-item");
         if(cabina_corridoio.tipo=="cabina")
-            item.setAttribute("onfocus","getPdf('cabine_corridoi','"+cabina_corridoio.disegno_cabina+"')");
-        item.setAttribute("onfocusin","checkItemScroll(event,this);");
+            item.setAttribute("onfocus","checkItemScroll(event,this);getPdf('cabine_corridoi','"+cabina_corridoio.disegno_cabina+"')");
         item.setAttribute("id","cabine_corridoiItem"+cabina_corridoio.number);
 
         var div=document.createElement("div");
@@ -1235,67 +1293,6 @@ function getAnagraficaStazioni()
             else
                 reject({status});
         });
-    });
-}
-function chiudiKit()
-{
-    var lotto=lottoSelezionato.lotto;
-    var cabina=cabina_corridoioSelezionato.numero_cabina;
-
-    $.get("chiudiKit.php",
-    {
-        lotto,
-        cabina,
-        kit:kitSelezionato.kit,
-        posizione:kitSelezionato.posizione,
-        id_utente,
-        linea:linea.id_linea,
-        stazione:stazione.id_stazione
-    },
-    function(response, status)
-    {
-        if(status=="success")
-        {
-            if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
-            {
-                Swal.fire
-                ({
-                    background:"#404040",
-                    icon: 'error',
-                    title: "Errore. Se il problema persiste contatta l' amministratore",
-                    showConfirmButton:false,
-                    showCloseButton:true
-                });
-                console.log(response);
-            }
-            else
-            {
-                
-                if(stazione.nome=="caricamento" || stazione.nome=="montaggio")
-                {
-                    var printObj=
-                    {
-                        kit:kitSelezionato.kit,
-                        numero_cabina:cabina_corridoioSelezionato.numero_cabina,
-                        posizione:kitSelezionato.posizione
-                    }
-                    printList.push(printObj);
-                }
-                getListKit(false,timeout_scorri_giu_di_1(300));
-            }
-        }
-        else
-        {
-            Swal.fire
-            ({
-                background:"#404040",
-                icon: 'error',
-                title: "Errore. Se il problema persiste contatta l' amministratore",
-                showConfirmButton:false,
-                showCloseButton:true
-            });
-            console.log(status);
-        }
     });
 }
 async function stampaEtichettaCarrello()
@@ -2067,7 +2064,7 @@ function sendStampaEtichettaKit()
 }
 function checkItemScroll(event,item)
 {
-    event.preventDefault();
+    /*event.preventDefault();
 
     var container = item.parentElement;
 
@@ -2075,7 +2072,7 @@ function checkItemScroll(event,item)
     item.focus();
     container.oldScroll = oldScroll;
 
-    console.log(isElementInViewport(item))
+    console.log(isElementInViewport(item))*/
 }
 function isElementInViewport(el)
 {
