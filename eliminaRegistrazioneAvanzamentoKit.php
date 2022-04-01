@@ -10,11 +10,7 @@
 
     $query0="DELETE FROM dbo.kit_linea WHERE lotto='$lotto' AND cabina='$cabina' AND posizione='$posizione' AND stazione=$id_stazione";	
     $result0=sqlsrv_query($conn,$query0);
-    if($result0==TRUE)
-    {
-        echo "ok";
-    }
-    else
+    if (!$result0)
         die("error");
 
 ?>
