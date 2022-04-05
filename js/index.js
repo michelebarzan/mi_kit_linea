@@ -18,7 +18,6 @@ var stazione;
 var id_utente;
 var dot;
 var shownPdf;
-var raggruppamentoTraversine="LUNG";
 var popupRaggruppamentoTraversine=false;
 var printList=[];
 var mi_kit_linea_params;
@@ -27,6 +26,7 @@ var items_transition_time = 150;
 var keys_pressed = [];
 var old_focused_lotti;
 var old_focused_cabine_corridoi;
+var ordinamentoRaggruppamentoTraversineTable = 0;
 
 window.addEventListener("load", async function(event)
 {
@@ -2539,7 +2539,7 @@ async function getPopupRaggruppamentoTraversine()
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="white";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";document.getElementsByClassName("swal2-close")[0].style.outline="none";}
     });
 
-    var data=await getRaggruppamentoTraversine(kit);
+    var data=await getRaggruppamentoTraversine();
 
     var outerContainer=document.createElement("div");
     outerContainer.setAttribute("class","raggruppamento-traversine-outer-container");
@@ -2550,6 +2550,10 @@ async function getPopupRaggruppamentoTraversine()
     var headers=
     [
         {
+            value:"posizione",
+            label:"POS"
+        },
+        {
             value:"LUNG",
             label:"LUNG"
         },
@@ -2558,12 +2562,12 @@ async function getPopupRaggruppamentoTraversine()
             label:"CODMAT"
         },
         {
-            value:"n_kit",
-            label:"N. kit"
+            value:"CODKIT",
+            label:"CODKIT"
         },
         {
-            value:"kit",
-            label:"Kit"
+            value:"qnt",
+            label:"QNT"
         }
     ];
     
@@ -2572,12 +2576,16 @@ async function getPopupRaggruppamentoTraversine()
 
     var thead=document.createElement("thead");
     var tr=document.createElement("tr");
+    var i = 0;
     headers.forEach(function (header)
     {
         var th=document.createElement("th");
         th.setAttribute("class","raggruppamentoTraversineTableCell"+header.value);
+        if(ordinamentoRaggruppamentoTraversineTable==i)
+            th.setAttribute("style","text-decoration:underline;color:#548CFF");
         th.innerHTML=header.label;
         tr.appendChild(th);
+        i++;
     });
     thead.appendChild(tr);
     raggruppamentoTraversineTable.appendChild(thead);
@@ -2591,15 +2599,7 @@ async function getPopupRaggruppamentoTraversine()
         {
             var td=document.createElement("td");
             td.setAttribute("class","raggruppamentoTraversineTableCell"+header.value);
-            if(raggruppamentoTraversine=="LUNG" && header.value=="LUNG")
-                td.innerHTML=row[header.value].toFixed(2);
-            else
-            {
-                if(header.value=="kit")
-                    td.innerHTML=row[header.value].join(", ");
-                else
-                    td.innerHTML=row[header.value];
-            }
+            td.innerHTML=row[header.value];
             tr.appendChild(td);
         });
         tbody.appendChild(tr);
@@ -2624,6 +2624,8 @@ async function getPopupRaggruppamentoTraversine()
                     document.getElementsByClassName("swal2-title")[0].remove();
                     document.getElementsByClassName("swal2-popup")[0].style.padding="0px";
                     document.getElementsByClassName("swal2-popup")[0].style.borderRadius="4px";
+
+                    sortRaggruppamentoTraversineTable();
 					
 					try
 					{
@@ -2640,7 +2642,17 @@ async function getPopupRaggruppamentoTraversine()
 									event.preventDefault();
 									document.getElementsByClassName("raggruppamento-traversine-table-container")[0].scroll(0,document.getElementsByClassName("raggruppamento-traversine-table-container")[0].scrollTop-50)
 								break;
-							}
+                                case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_ordinamento").valore):
+                                    event.preventDefault();
+                                    
+                                    if((ordinamentoRaggruppamentoTraversineTable) == (headers.length - 1))
+                                        ordinamentoRaggruppamentoTraversineTable = 0;
+                                    else
+                                        ordinamentoRaggruppamentoTraversineTable++;
+
+                                    sortRaggruppamentoTraversineTable();
+                                break;
+                            }
 						});
 					} catch (error) {}
                 }
@@ -2648,6 +2660,42 @@ async function getPopupRaggruppamentoTraversine()
     {
         popupRaggruppamentoTraversine=false;
     });
+}
+function sortRaggruppamentoTraversineTable()
+{
+    var table, rows, switching, i, x, y, shouldSwitch;
+    table = document.getElementById("raggruppamentoTraversineTable");
+    switching = true;
+    while (switching)
+    {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++)
+        {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[ordinamentoRaggruppamentoTraversineTable];
+            y = rows[i + 1].getElementsByTagName("TD")[ordinamentoRaggruppamentoTraversineTable];
+            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase())
+            {
+                shouldSwitch = true;
+                break;
+            }
+        }
+        if (shouldSwitch)
+        {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+        }
+    }
+
+    for (let index = 0; index < table.getElementsByTagName("tr")[0].childNodes.length; index++)
+    {
+        const th = table.getElementsByTagName("tr")[0].childNodes[index];
+        th.style.textDecoration = "";
+        th.style.color = "";
+    }
+    table.getElementsByTagName("tr")[0].childNodes[ordinamentoRaggruppamentoTraversineTable].style.textDecoration = "underline";
+    table.getElementsByTagName("tr")[0].childNodes[ordinamentoRaggruppamentoTraversineTable].style.color = "#548CFF";
 }
 function fixTableRaggruppamentoTraversine()
 {
@@ -2660,15 +2708,16 @@ function fixTableRaggruppamentoTraversine()
         $("#raggruppamentoTraversineTable td").css({"width":tableColWidth+"px"});
     } catch (error) {}
 }
-function getRaggruppamentoTraversine(kit)
+function getRaggruppamentoTraversine()
 {
     return new Promise(function (resolve, reject) 
     {
         var JSONkit=JSON.stringify(kit);
         $.post("getRaggruppamentoTraversine.php",
         {
-            JSONkit/*,
-            raggruppamentoTraversine*/
+            JSONkit,
+            lotto:lottoSelezionato.lotto,
+            cabina:cabina_corridoioSelezionato.numero_cabina
         },
         function(response, status)
         {
