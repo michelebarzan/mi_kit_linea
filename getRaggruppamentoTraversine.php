@@ -16,14 +16,23 @@
     }
     $kit_in="'".implode("','",$kit)."'";
 
-    $query3="SELECT   t2.posizione, t.LUNG, t.CODMAT, t.CODKIT, COUNT(*) AS qnt, t.posizione_traversina
-    FROM         (SELECT   commessa, lotto, numero_cabina, disegno_cabina, kit, posizione, qnt
-                               FROM         dbo.view_cabine
-                               WHERE     (lotto = '$lotto') AND (numero_cabina = '$cabina')
-                               UNION
-                               SELECT   commessa, lotto, numero_cabina, disegno_cabina, kit, posizione, qnt
+    $query3="SELECT   t2.posizione, t.LUNG, t.CODMAT, t.CODKIT, t.posizione_traversina, t2.lotto, t3.qnt_kit_lotto, t3.cabine_lotto
+    FROM         (SELECT   lotto, kit, posizione, COUNT(kit) AS qnt_kit_lotto, STRING_AGG(numero_cabina, ', ') AS cabine_lotto
                                FROM         dbo.view_corridoi
-                               WHERE     (lotto = '$lotto') AND (numero_cabina = '$cabina')) AS t2 INNER JOIN
+                               WHERE     (lotto = '$lotto')
+                               GROUP BY lotto, kit, posizione
+                               UNION
+                               SELECT   lotto, kit, posizione, COUNT(kit) AS qnt_kit_lotto, STRING_AGG(numero_cabina, ',') AS cabine_lotto
+                               FROM         dbo.view_cabine
+                               WHERE     (lotto = '$lotto')
+                               GROUP BY lotto, kit, posizione) AS t3 INNER JOIN
+                                 (SELECT   commessa, lotto, numero_cabina, disegno_cabina, kit, posizione, qnt
+                                    FROM         dbo.view_cabine AS view_cabine_1
+                                    WHERE     (lotto = '$lotto') AND (numero_cabina = '$cabina')
+                                    UNION
+                                    SELECT   commessa, lotto, numero_cabina, disegno_cabina, kit, posizione, qnt
+                                    FROM         dbo.view_corridoi AS view_corridoi_1
+                                    WHERE     (lotto = '$lotto') AND (numero_cabina = '$cabina')) AS t2 INNER JOIN
                                  (SELECT   mi_db_tecnico.dbo.kit.codice_kit AS CODKIT, mi_db_tecnico.dbo.materie_prime.codice_materia_prima AS CODMAT, mi_db_tecnico.dbo.traversine_superiori.lung AS LUNG, 
                                                              'superiore' AS posizione_traversina
                                     FROM         mi_db_tecnico.dbo.traversine_superiori INNER JOIN
@@ -40,23 +49,23 @@
                                                              mi_db_tecnico.dbo.traversine_inferiori.id_traversina_inferiore = mi_db_tecnico.dbo.traversine_inferiori_kit.id_traversina_inferiore INNER JOIN
                                                              mi_db_tecnico.dbo.kit AS kit_1 ON mi_db_tecnico.dbo.traversine_inferiori_kit.id_kit = kit_1.id_kit INNER JOIN
                                                              mi_db_tecnico.dbo.materie_prime AS materie_prime_1 ON mi_db_tecnico.dbo.traversine_inferiori.id_materia_prima = materie_prime_1.id_materia_prima
-                                    WHERE     (mi_db_tecnico.dbo.traversine_inferiori.lung > 0)) AS t ON t2.kit = t.CODKIT COLLATE SQL_Latin1_General_CP1_CI_AS
-    GROUP BY t2.posizione, t.LUNG, t.CODMAT, t.CODKIT, t.posizione_traversina
-            HAVING (CODKIT IN ($kit_in))";
+                                    WHERE     (mi_db_tecnico.dbo.traversine_inferiori.lung > 0)) AS t ON t2.kit = t.CODKIT COLLATE SQL_Latin1_General_CP1_CI_AS ON t3.kit = t2.kit AND t3.posizione = t2.posizione
+    WHERE     (t.CODKIT IN ($kit_in))";
     $result3=sqlsrv_query($conn,$query3);
     if($result3==TRUE)
     {
         while($row3=sqlsrv_fetch_array($result3))
         {
-            $rowKit["posizione"]=utf8_encode($row3['posizione']);
+            $rowKit["POS"]=utf8_encode($row3['posizione']);
             $lung = str_replace(".","",$row3["LUNG"]);
             $lung = str_replace(",",".",$lung);
             $lung = floatval($lung);
             $rowKit["LUNG"]=$lung;
             $rowKit["CODMAT"]=utf8_encode($row3['CODMAT']);
             $rowKit["CODKIT"]=utf8_encode($row3['CODKIT']);
-            $rowKit["qnt"]=$row3['qnt'];
-            $rowKit["posizione_traversina"]=$row3['posizione_traversina'];
+            $rowKit["LOTTO"]=$row3['lotto'];
+            $rowKit["QNT_CABINE"]=$row3['qnt_kit_lotto'];
+            $rowKit["CABINE"]=$row3['cabine_lotto'];
 
             array_push($data,$rowKit);
         }

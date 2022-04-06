@@ -2541,38 +2541,26 @@ async function getPopupRaggruppamentoTraversine()
 
     var data=await getRaggruppamentoTraversine();
 
-    var outerContainer=document.createElement("div");
-    outerContainer.setAttribute("class","raggruppamento-traversine-outer-container");
-
     var tableContainer=document.createElement("div");
     tableContainer.setAttribute("class","raggruppamento-traversine-table-container");
 
     var headers=
     [
-        {
-            value:"posizione",
-            label:"POS"
-        },
-        {
-            value:"LUNG",
-            label:"LUNG"
-        },
-        {
-            value:"CODMAT",
-            label:"CODMAT"
-        },
-        {
-            value:"CODKIT",
-            label:"CODKIT"
-        },
-        {
-            value:"qnt",
-            label:"QNT"
-        }
+        "POS",
+        "LUNG",
+        "CODMAT",
+        "CODKIT",
+        "LOTTO",
+        "QNT_CABINE",
+        "CABINE"
     ];
+
+    var table_width = 1710;
+    var col_widths = [((table_width - 30) * 5)/100,((table_width - 30) * 5)/100,((table_width - 30) * 10)/100,((table_width - 30) * 10)/100,((table_width - 30) * 10)/100,((table_width - 30) * 10)/100,((table_width - 30) * 50)/100];
     
     var raggruppamentoTraversineTable=document.createElement("table");
     raggruppamentoTraversineTable.setAttribute("id","raggruppamentoTraversineTable");
+    raggruppamentoTraversineTable.setAttribute("style","width:"+table_width+"px");
 
     var thead=document.createElement("thead");
     var tr=document.createElement("tr");
@@ -2580,10 +2568,12 @@ async function getPopupRaggruppamentoTraversine()
     headers.forEach(function (header)
     {
         var th=document.createElement("th");
-        th.setAttribute("class","raggruppamentoTraversineTableCell"+header.value);
+        th.setAttribute("class","raggruppamentoTraversineTableCell"+header);
         if(ordinamentoRaggruppamentoTraversineTable==i)
-            th.setAttribute("style","text-decoration:underline;color:#548CFF");
-        th.innerHTML=header.label;
+            th.setAttribute("style","text-decoration:underline;color:#548CFF;width:"+col_widths[i]+"px");
+        else
+            th.setAttribute("style","width:"+col_widths[i]+"px");
+        th.innerHTML=header;
         tr.appendChild(th);
         i++;
     });
@@ -2595,12 +2585,15 @@ async function getPopupRaggruppamentoTraversine()
     data.forEach(function (row)
     {
         var tr=document.createElement("tr");
+        var j = 0;
         headers.forEach(function (header)
         {
             var td=document.createElement("td");
-            td.setAttribute("class","raggruppamentoTraversineTableCell"+header.value);
-            td.innerHTML=row[header.value];
+            td.setAttribute("class","raggruppamentoTraversineTableCell"+header);
+            td.setAttribute("style","width:"+col_widths[j]+"px");
+            td.innerHTML=row[header];
             tr.appendChild(td);
+            j++;
         });
         tbody.appendChild(tr);
         i++;
@@ -2609,13 +2602,10 @@ async function getPopupRaggruppamentoTraversine()
 
     tableContainer.appendChild(raggruppamentoTraversineTable);
 
-    outerContainer.appendChild(tableContainer);
-
     Swal.fire
     ({
-        html: outerContainer.outerHTML,
+        html: tableContainer.outerHTML,
         showConfirmButton:false,
-        width:"70%",
         showCloseButton:false,
         allowEscapeKey:true,
         allowOutsideClick:true,
@@ -2624,6 +2614,7 @@ async function getPopupRaggruppamentoTraversine()
                     document.getElementsByClassName("swal2-title")[0].remove();
                     document.getElementsByClassName("swal2-popup")[0].style.padding="0px";
                     document.getElementsByClassName("swal2-popup")[0].style.borderRadius="4px";
+                    document.getElementsByClassName("swal2-popup")[0].style.width=table_width+"px";
 
                     sortRaggruppamentoTraversineTable();
 					
@@ -2636,11 +2627,11 @@ async function getPopupRaggruppamentoTraversine()
 							{
 								case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","scorri_giu_di_1").valore):
 									event.preventDefault();
-									document.getElementsByClassName("raggruppamento-traversine-table-container")[0].scroll(0,document.getElementsByClassName("raggruppamento-traversine-table-container")[0].scrollTop+50)
+									document.getElementById("raggruppamentoTraversineTable").getElementsByTagName("tbody")[0].scroll(0,document.getElementById("raggruppamentoTraversineTable").getElementsByTagName("tbody")[0].scrollTop+50)
 								break;
 								case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","scorri_su_di_1").valore):
 									event.preventDefault();
-									document.getElementsByClassName("raggruppamento-traversine-table-container")[0].scroll(0,document.getElementsByClassName("raggruppamento-traversine-table-container")[0].scrollTop-50)
+									document.getElementById("raggruppamentoTraversineTable").getElementsByTagName("tbody")[0].scroll(0,document.getElementById("raggruppamentoTraversineTable").getElementsByTagName("tbody")[0].scrollTop-50)
 								break;
                                 case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_ordinamento").valore):
                                     event.preventDefault();
