@@ -48,17 +48,21 @@ window.addEventListener("load", async function(event)
 
     id_utente=await getSessionValue("id_utente");
 
-    var nome_turno=await getSessionValue("turno");
-    var nome_linea=await getSessionValue("linea");
-    var nome_stazione=await getSessionValue("stazione");
-
     var turni=await getAnagraficaTurni();
     var linee=await getAnagraficaLinee();
     var stazioni=await getAnagraficaStazioni();
 
+    var nome_turno=await getSessionValue("turno");
     turno=getFirstObjByPropValue(turni,"nome",nome_turno);
+
+    var nome_linea=await getSessionValue("linea");
+    if(nome_linea=="")
+        linea="";
+    else
+        linea=getFirstObjByPropValue(linee,"nome",nome_linea);
+    var nome_stazione=await getSessionValue("stazione");
+
     stazione=getFirstObjByPropValue(stazioni,"nome",nome_stazione);
-    linea=getFirstObjByPropValue(linee,"nome",nome_linea);
 
     ordinamentoKit=await getCookie("ordinamentoKit");
     if(ordinamentoKit=="")
@@ -84,11 +88,27 @@ window.addEventListener("load", async function(event)
     setFiltroAvanzamentoLabel();
 
     dot=document.title;
-    document.title=linea.label + " " + dot + " " + stazione.label;
+    if(linea=="")
+        document.title=stazione.label;
+    else
+        document.title=linea.label + " " + dot + " " + stazione.label;
 
-    document.getElementById("infoLineaContainer").innerHTML=linea.label;
-    document.getElementById("infoLineaContainer").setAttribute("nome",linea.nome);
-    document.getElementById("infoLineaContainer").setAttribute("id_linea",linea.id_linea);
+    if(linea=="")
+    {
+        document.getElementById("infoLineaContainer").style.visibility="hidden";
+        document.getElementById("infoLineaContainer").innerHTML="";
+        document.getElementById("infoLineaContainer").setAttribute("nome","");
+        document.getElementById("infoLineaContainer").setAttribute("id_linea","");
+    }
+    else
+    {
+        document.getElementById("infoLineaContainer").style.visibility="visible";
+        document.getElementById("infoLineaContainer").innerHTML=linea.label;
+        document.getElementById("infoLineaContainer").setAttribute("nome",linea.nome);
+        document.getElementById("infoLineaContainer").setAttribute("id_linea",linea.id_linea);
+    }
+
+    //cerca linea
     
     document.getElementById("infoStazioneContainer").innerHTML=stazione.label;
     document.getElementById("infoStazioneContainer").setAttribute("nome",stazione.nome);
@@ -168,9 +188,9 @@ function setMostraMisureTraversineLabel()
 function setRaggruppaKitLabel()
 {
     if(raggruppaKit=="true")
-        document.getElementById("raggruppaKitContainer").innerHTML="Raggruppa kit uguali";
+        document.getElementById("raggruppaKitContainer").innerHTML="Kit raggruppati";
     if(raggruppaKit=="false")
-        document.getElementById("raggruppaKitContainer").innerHTML="Esplodi kit";
+        document.getElementById("raggruppaKitContainer").innerHTML="Kit esplosi";
 }
 function setFiltroAvanzamentoLabel()
 {
@@ -927,7 +947,7 @@ window.addEventListener("keydown", async function(event)
                         switch (stazione.nome)
                         {
                             case "caricamento":
-                                confermaKit(focused);
+                                confermaKit([cabina_corridoioSelezionato.numero_cabina]);
                             break;
                             case "montaggio":
                                 if(!kitSelezionato.registrato_caricamento)
@@ -941,25 +961,62 @@ window.addEventListener("keydown", async function(event)
                                         showCancelButton:true,
                                         confirmButtonText:"Continua [INVIO]",
                                         cancelButtonText:"Annulla [ESC]",
+                                        cancelButtonColor:"gray",
                                         background:"#353535",
                                         onOpen : function()
                                                 {
                                                     document.getElementsByClassName("swal2-close")[0].style.outline="none";
+                                                    document.getElementsByClassName("swal2-title")[0].style.fontSize="18px";
                                                 },
                                     }).then((result) => 
                                     {
                                         if(result.value)
-                                            confermaKit(focused);
+                                            confermaKit([cabina_corridoioSelezionato.numero_cabina]);
                                     });
                                 }
                                 else
-                                    confermaKit(focused);
+                                    confermaKit([cabina_corridoioSelezionato.numero_cabina]);
                             break;
                             case "traversine":
-                                if(raggruppaKit=="true")
-                                    confermaKitRaggruppati(focused);
-                                else
-                                    confermaKit(focused);
+                                Swal.fire
+                                ({
+                                    icon:"question",
+                                    title: 'Vuoi registrare il kit '+kitSelezionato.kit+' per tutte le cabine del lotto '+lottoSelezionato.lotto+'?',
+                                    showCloseButton: false,
+                                    showConfirmButton:true,
+                                    showCancelButton:true,
+                                    width:"40%",
+                                    confirmButtonText:"Tutte le cabine [INVIO]",
+                                    cancelButtonText:"Solo la cabina "+cabina_corridoioSelezionato.numero_cabina+" [ESC]",
+                                    cancelButtonColor:"gray",
+                                    background:"#353535",
+                                    onOpen : function()
+                                            {
+                                                document.getElementsByClassName("swal2-close")[0].style.outline="none";
+                                                document.getElementsByClassName("swal2-title")[0].style.fontSize="18px";
+                                            },
+                                }).then((result) => 
+                                {
+                                    if(result.value)
+                                    {
+                                        var cabine_lcl = [];
+                                        cabine_corridoi.forEach(cabina_lcl =>
+                                        {
+                                            cabine_lcl.push(cabina_lcl.numero_cabina);
+                                        });
+                                        if(raggruppaKit=="true")
+                                            confermaKitRaggruppati(cabine_lcl);
+                                        else
+                                            confermaKit(cabine_lcl);
+                                    }
+                                    else
+                                    {
+                                        if(raggruppaKit=="true")
+                                            confermaKitRaggruppati([cabina_corridoioSelezionato.numero_cabina]);
+                                        else
+                                            confermaKit([cabina_corridoioSelezionato.numero_cabina]);
+                                    }
+                                });
                             break;
                         }
                     break;
@@ -1225,7 +1282,7 @@ async function eliminaRegistrazioneAvanzamentoKit(number)
         }
     });
 }
-function confermaKitRaggruppati(number)
+function confermaKitRaggruppati(cabine_lcl)
 {
     Swal.fire
     ({
@@ -1249,7 +1306,7 @@ function confermaKitRaggruppati(number)
     $.get("registraAvanzamentoKitRaggruppati.php",
     {
         lotto,
-        cabina,
+        cabine:cabine_lcl,
         kit:kitSelezionato.kit,
         posizioni:kitSelezionato.posizioni,
         id_stazione,
@@ -1290,7 +1347,7 @@ function confermaKitRaggruppati(number)
         }
     });
 }
-async function confermaKit(number)
+async function confermaKit(cabine_lcl)
 {
     Swal.fire
     ({
@@ -1314,7 +1371,7 @@ async function confermaKit(number)
     $.get("registraAvanzamentoKit.php",
     {
         lotto,
-        cabina,
+        cabine:cabine_lcl,
         kit:kitSelezionato.kit,
         posizione:kitSelezionato.posizione,
         id_stazione,

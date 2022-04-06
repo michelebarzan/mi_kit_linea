@@ -23,24 +23,36 @@ window.addEventListener("load", async function(event)
     turno=await getCookie("turno");
     if(turno=="")
         turno='{"id_turno":"*","nome":"*","label":"Tutti"}';
-    linea=await getCookie("linea");
-    if(linea=="")
-        linea=JSON.stringify(linee[0]);
     stazione=await getCookie("stazione");
     if(stazione=="")
         stazione=JSON.stringify(stazioni[0]);
 
-    funzioniTasti=await getFunzioniTasti();
-
     turno=JSON.parse(turno);
-    linea=JSON.parse(linea);
     stazione=JSON.parse(stazione);
+
+    if(stazione.nome=="traversine")
+    {
+        linea = "";
+        document.getElementById("loginLineaContainer").style.visibility="hidden";
+        document.getElementById("loginLineaContainer").value="";
+        document.getElementById("loginLineaContainer").innerHTML="";
+    }
+    else
+    {
+        document.getElementById("loginLineaContainer").style.visibility="visible";
+        linea=await getCookie("linea");
+        if(linea=="")
+            linea=JSON.stringify(linee[0]);
+        linea=JSON.parse(linea);
+
+        document.getElementById("loginLineaContainer").value=linea.nome;
+        document.getElementById("loginLineaContainer").innerHTML=linea.label;
+    }
+
+    funzioniTasti=await getFunzioniTasti();
 
     document.getElementById("loginTurnoContainer").value=turno.nome;
     document.getElementById("loginTurnoContainer").innerHTML=turno.label;
-
-    document.getElementById("loginLineaContainer").value=linea.nome;
-    document.getElementById("loginLineaContainer").innerHTML=linea.label;
 
     document.getElementById("loginStazioneContainer").value=stazione.nome;
     document.getElementById("loginStazioneContainer").innerHTML=stazione.label;
@@ -197,6 +209,8 @@ async function login(number)
     var nomeStazione=stazione.nome;
     var linea=document.getElementById("loginLineaContainer").value;
 
+    console.log(linea)
+
     button.innerHTML='<i class="fad fa-spinner-third fa-spin"></i>';
     $.post("login.php",
     {
@@ -304,7 +318,7 @@ function setNumber(key)
         }
     }
 }
-window.addEventListener("keydown", function(event)
+window.addEventListener("keydown", async function(event)
 {
     var keyCode=event.keyCode;
     switch (keyCode) 
@@ -337,14 +351,14 @@ window.addEventListener("keydown", function(event)
             {
                 if(focused2==null)
                 {
-                    document.getElementById("loginLineaContainer").focus();
-                    focused2="loginLineaContainer";
+                    document.getElementById("loginStazioneContainer").focus();
+                    focused2="loginStazioneContainer";
                 }
                 if(focused2=="loginLineaContainer")
                 {
                     document.getElementById("loginLineaContainer").focus();
                     focused2="loginLineaContainer";
-                    if(linee.length>0)
+                    if(linea!="")
                     {
                         var nome=document.getElementById("loginLineaContainer").value;
                         var linea=getFirstObjByPropValue(linee,"nome",nome);
@@ -385,6 +399,25 @@ window.addEventListener("keydown", function(event)
                         document.getElementById("loginStazioneContainer").value=new_stazione.nome;
                         document.getElementById("loginStazioneContainer").innerHTML=new_stazione.label;
                         setCookie("stazione",JSON.stringify(new_stazione));
+                    }
+
+                    if(stazione.nome=="traversine")
+                    {
+                        linea = "";
+                        document.getElementById("loginLineaContainer").style.visibility="hidden";
+                        document.getElementById("loginLineaContainer").value="";
+                        document.getElementById("loginLineaContainer").innerHTML="";
+                    }
+                    else
+                    {
+                        document.getElementById("loginLineaContainer").style.visibility="visible";
+                        linea=await getCookie("linea");
+                        if(linea=="")
+                            linea=JSON.stringify(linee[0]);
+                        linea=JSON.parse(linea);
+
+                        document.getElementById("loginLineaContainer").value=linea.nome;
+                        document.getElementById("loginLineaContainer").innerHTML=linea.label;
                     }
                 }
             }
@@ -397,14 +430,14 @@ window.addEventListener("keydown", function(event)
             {
                 if(focused2==null)
                 {
-                    document.getElementById("loginLineaContainer").focus();
-                    focused2="loginLineaContainer";
+                    document.getElementById("loginStazioneContainer").focus();
+                    focused2="loginStazioneContainer";
                 }
                 if(focused2=="loginLineaContainer")
                 {
                     document.getElementById("loginLineaContainer").focus();
                     focused2="loginLineaContainer";
-                    if(linee.length>0)
+                    if(linea!="")
                     {
                         var nome=document.getElementById("loginLineaContainer").value;
                         var linea=getFirstObjByPropValue(linee,"nome",nome);
@@ -445,6 +478,25 @@ window.addEventListener("keydown", function(event)
                         document.getElementById("loginStazioneContainer").value=new_stazione.nome;
                         document.getElementById("loginStazioneContainer").innerHTML=new_stazione.label;
                         setCookie("stazione",JSON.stringify(new_stazione));
+                    }
+
+                    if(stazione.nome=="traversine")
+                    {
+                        linea = "";
+                        document.getElementById("loginLineaContainer").style.visibility="hidden";
+                        document.getElementById("loginLineaContainer").value="";
+                        document.getElementById("loginLineaContainer").innerHTML="";
+                    }
+                    else
+                    {
+                        document.getElementById("loginLineaContainer").style.visibility="visible";
+                        linea=await getCookie("linea");
+                        if(linea=="")
+                            linea=JSON.stringify(linee[0]);
+                        linea=JSON.parse(linea);
+
+                        document.getElementById("loginLineaContainer").value=linea.nome;
+                        document.getElementById("loginLineaContainer").innerHTML=linea.label;
                     }
                 }
             }
@@ -515,20 +567,23 @@ function setFocusLineaStazione()
 {
     if(focused2==null)
     {
-        document.getElementById("loginLineaContainer").focus();
-        focused2="loginLineaContainer";
+        document.getElementById("loginStazioneContainer").focus();
+        focused2="loginStazioneContainer";
     }
     else
     {
-        if(focused2=="loginLineaContainer")
+        if(linea!="")
         {
-            document.getElementById("loginStazioneContainer").focus();
-            focused2="loginStazioneContainer";
-        }
-        else
-        {
-            document.getElementById("loginLineaContainer").focus();
-            focused2="loginLineaContainer";
+            if(focused2=="loginLineaContainer")
+            {
+                document.getElementById("loginStazioneContainer").focus();
+                focused2="loginStazioneContainer";
+            }
+            else
+            {
+                document.getElementById("loginLineaContainer").focus();
+                focused2="loginLineaContainer";
+            }
         }
     }
 }
@@ -584,27 +639,25 @@ function clickCambiaLinea()
     {
         document.getElementById("loginLineaContainer").focus();
         focused2="loginLineaContainer";
-        if(linee.length>0)
-        {
-            var nome=document.getElementById("loginLineaContainer").value;
-            var linea=getFirstObjByPropValue(linee,"nome",nome);
 
-            var index=linee.indexOf(linea);
-            var new_index=index-1;
-            if(linee.indexOf(new_index)==-1)
-                var new_index=index+1;
-            if(new_index==linee.length)
-                var new_index=0;
-            //console.log(new_index)
-            var new_linea=linee[new_index];
+        var nome=document.getElementById("loginLineaContainer").value;
+        var linea=getFirstObjByPropValue(linee,"nome",nome);
 
-            document.getElementById("loginLineaContainer").value=new_linea.nome;
-            document.getElementById("loginLineaContainer").innerHTML=new_linea.label;
-            setCookie("linea",JSON.stringify(new_linea));
-        }
+        var index=linee.indexOf(linea);
+        var new_index=index-1;
+        if(linee.indexOf(new_index)==-1)
+            var new_index=index+1;
+        if(new_index==linee.length)
+            var new_index=0;
+        //console.log(new_index)
+        var new_linea=linee[new_index];
+
+        document.getElementById("loginLineaContainer").value=new_linea.nome;
+        document.getElementById("loginLineaContainer").innerHTML=new_linea.label;
+        setCookie("linea",JSON.stringify(new_linea));
     }
 }
-function clickCambiaStazione()
+async function clickCambiaStazione()
 {
     if(passwordCambiaLineaStazione==false)
         getPopupCheckPassword();
@@ -630,6 +683,25 @@ function clickCambiaStazione()
             document.getElementById("loginStazioneContainer").value=new_stazione.nome;
             document.getElementById("loginStazioneContainer").innerHTML=new_stazione.label;
             setCookie("stazione",JSON.stringify(new_stazione));
+        }
+
+        if(stazione.nome=="traversine")
+        {
+            linea = "";
+            document.getElementById("loginLineaContainer").style.visibility="hidden";
+            document.getElementById("loginLineaContainer").value="";
+            document.getElementById("loginLineaContainer").innerHTML="";
+        }
+        else
+        {
+            document.getElementById("loginLineaContainer").style.visibility="visible";
+            linea=await getCookie("linea");
+            if(linea=="")
+                linea=JSON.stringify(linee[0]);
+            linea=JSON.parse(linea);
+
+            document.getElementById("loginLineaContainer").value=linea.nome;
+            document.getElementById("loginLineaContainer").innerHTML=linea.label;
         }
     }
 }
