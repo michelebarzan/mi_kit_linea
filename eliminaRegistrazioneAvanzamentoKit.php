@@ -2,7 +2,6 @@
 
     include "connessione.php";
 
-
     $lotto=$_REQUEST['lotto'];
     $cabina=$_REQUEST['cabina'];
     $id_stazione=$_REQUEST['id_stazione'];

@@ -4,7 +4,6 @@
 
     $lotto=$_REQUEST['lotto'];
     $commessa=$_REQUEST['commessa'];
-    $id_linea=$_REQUEST['id_linea'];
     $filtroAvanzamento=$_REQUEST['filtroAvanzamento'];
     
     $cabine_corridoi=[];
