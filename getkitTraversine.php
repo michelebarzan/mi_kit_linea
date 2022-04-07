@@ -12,14 +12,30 @@
     $mostraMisureTraversine=$_REQUEST['mostraMisureTraversine'];
     $raggruppaKit=$_REQUEST['raggruppaKit'];
     $id_stazione=$_REQUEST['id_stazione'];
+
+    switch ($ordinamentoKit)
+    {
+        case 'posizione':
+            $orderBy = "ORDER BY len_numero, numero, lettera";
+        break;
+        case 'kit':
+            $orderBy = "ORDER BY kit";
+        break;
+        case 'traversine':
+            $orderBy = "";
+        break;
+    }
     
     $kit=[];
     
     if($raggruppaKit=="false")
     {
         $query1="SELECT DISTINCT 
-                    t.commessa, t.lotto, t.numero_cabina, t.disegno_cabina, t.kit, t.posizione, t.qnt, t.appartenenza, LEN(t.$ordinamentoKit) AS Expr1, CASE WHEN id_kit_linea IS NULL 
-                    THEN 'false' ELSE 'true' END AS registrato
+                    t.commessa, t.lotto, t.numero_cabina, t.disegno_cabina, t.kit, t.posizione, t.qnt, t.appartenenza, LEN(t.posizione) AS len, CASE WHEN id_kit_linea IS NULL 
+                    THEN 'false' ELSE 'true' END AS registrato, 
+                         REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(t.posizione, '0', ''), '1', ''), '2', ''), '3', ''), '4', ''), '5', ''), '6', ''), '7', ''), '8', ''), '9', '') AS lettera, REPLACE(t.posizione, 
+                         REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(t.posizione, '0', ''), '1', ''), '2', ''), '3', ''), '4', ''), '5', ''), '6', ''), '7', ''), '8', ''), '9', ''), '') AS numero, LEN(REPLACE(t.posizione, 
+                         REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(t.posizione, '0', ''), '1', ''), '2', ''), '3', ''), '4', ''), '5', ''), '6', ''), '7', ''), '8', ''), '9', ''), '')) AS len_numero
                 FROM (SELECT   commessa, lotto, numero_cabina, disegno_cabina, kit, posizione, qnt, 'cabina' AS appartenenza
                     FROM dbo.view_cabine
                     UNION
@@ -29,7 +45,7 @@
                         FROM dbo.kit_linea AS kit_linea_1
                         WHERE (stazione = $id_stazione)) AS kit_linea ON t.lotto = kit_linea.lotto AND t.kit = kit_linea.kit AND t.numero_cabina = kit_linea.cabina AND t.posizione = kit_linea.posizione
                             WHERE (t.lotto = '$lotto') AND (t.commessa = '$commessa') AND (t.numero_cabina = '$numero_cabina')
-                            ORDER BY LEN(t.$ordinamentoKit), t.$ordinamentoKit";
+                            $orderBy";
         $result1=sqlsrv_query($conn,$query1);
         if($result1==TRUE)
         {
@@ -164,15 +180,35 @@
         foreach($kit as $kitItem)
         {
             $traversinekit=[];
+            $max=0;
             foreach($traversine as $traversina)
             {
                 if($traversina["CODKIT"]==$kitItem["kit"])
                 {
                     array_push($traversinekit,$traversina);
+
+                    $lung = str_replace(".","",$traversina["LUNG"]);
+                    $lung = str_replace(",",".",$lung);
+                    $lung = floatval($lung);
+
+                    if($lung > $max)
+                        $max = $lung;
                 }
             }
             $kit[$i]["traversine"]=$traversinekit;
+            $kit[$i]["traversina_max"]=$max;
             $i++;
+        }
+
+        if($ordinamentoKit == "traversine")
+        {
+            function build_sorter($key) {
+                return function ($a, $b) use ($key) {
+                    return strnatcmp($a[$key], $b[$key]);
+                };
+            }
+            
+            usort($kit, build_sorter('traversina_max'));
         }
     }
 
