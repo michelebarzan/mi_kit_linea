@@ -4,8 +4,8 @@
 
     $lotto=$_REQUEST['lotto'];
     $commessa=$_REQUEST['commessa'];
-    $id_linea=$_REQUEST['id_linea'];
     $filtroAvanzamento=$_REQUEST['filtroAvanzamento'];
+    $stazione=$_REQUEST['stazione'];
     
     $cabine_corridoi=[];
 
@@ -14,7 +14,7 @@
                     UNION
                     SELECT commessa, lotto, numero_cabina, disegno_cabina, kit, posizione, qnt, 'corridoio' AS tipo FROM dbo.view_corridoi) AS t LEFT OUTER JOIN
                 dbo.cabine_chiuse ON t.lotto = dbo.cabine_chiuse.lotto AND t.numero_cabina = dbo.cabine_chiuse.cabina
-            WHERE t.lotto='$lotto' AND t.commessa='$commessa'";
+            WHERE t.lotto='$lotto' AND t.commessa='$commessa' AND (dbo.cabine_chiuse.stazione = $stazione OR dbo.cabine_chiuse.stazione IS NULL)";
     $result1=sqlsrv_query($conn,$query1);
     if($result1==TRUE)
     {
@@ -23,6 +23,7 @@
             $cabina_corridoio["tipo"]=$row1['tipo'];
             $cabina_corridoio["numero_cabina"]=$row1['numero_cabina'];
             $cabina_corridoio["disegno_cabina"]=$row1['disegno_cabina'];
+            $cabina_corridoio["chiusa"]=filter_var($row1['chiusa'], FILTER_VALIDATE_BOOLEAN);
 
             if($filtroAvanzamento=="attivo")
             {
