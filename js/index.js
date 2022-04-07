@@ -1004,43 +1004,56 @@ window.addEventListener("keydown", async function(event)
                                         showConfirmButton:true,
                                         showCancelButton:true,
                                         width:"40%",
-                                        confirmButtonText:"Tutte le cabine [INVIO]",
-                                        cancelButtonText:"Solo la cabina "+cabina_corridoioSelezionato.numero_cabina+" [ESC]",
+                                        confirmButtonText:"Tutte le cabine [BKS]",
+                                        cancelButtonText:"Solo la cabina "+cabina_corridoioSelezionato.numero_cabina+" [CTRL]",
                                         cancelButtonColor:"gray",
                                         background:"#353535",
                                         onOpen : function()
                                                 {
                                                     document.getElementsByClassName("swal2-close")[0].style.outline="none";
                                                     document.getElementsByClassName("swal2-title")[0].style.fontSize="18px";
-                                                },
-                                    }).then((result) => 
-                                    {
-                                        if(result.value)
-                                        {
-                                            if(raggruppaKit=="true")
-                                                confermaKitRaggruppati(cabine_lcl);
-                                            else
-                                                confermaKit(cabine_lcl);
-                                        }
-                                        else
-                                        {
-                                            if(raggruppaKit=="true")
-                                            {
-                                                var cabine_lcl_2=[];
-                                                kitSelezionato.posizioni.forEach(posizione =>
-                                                {
-                                                    var cabina_lcl_2=
+
+                                                    try
                                                     {
-                                                        "numero_cabina":cabina_corridoioSelezionato.numero_cabina,
-                                                        "posizione":posizione.posizione
-                                                    }
-                                                    cabine_lcl_2.push(cabina_lcl_2);
-                                                });
-                                                confermaKitRaggruppati(cabine_lcl_2);
-                                            }
-                                            else
-                                                confermaKit([{numero_cabina:cabina_corridoioSelezionato.numero_cabina}]);
-                                        }
+                                                        document.getElementsByClassName("swal2-popup")[0].addEventListener("keydown", async function(event)
+                                                        {
+                                                            var keyCode=event.keyCode;
+                                                            switch (keyCode) 
+                                                            {
+                                                                case 8://BKS
+                                                                    event.preventDefault();
+                                                                    if(raggruppaKit=="true")
+                                                                        confermaKitRaggruppati(cabine_lcl);
+                                                                    else
+                                                                        confermaKit(cabine_lcl);
+                                                                break;
+                                                                case 17://CTRL
+                                                                    event.preventDefault();
+                                                                    if(raggruppaKit=="true")
+                                                                    {
+                                                                        var cabine_lcl_2=[];
+                                                                        kitSelezionato.posizioni.forEach(posizione =>
+                                                                        {
+                                                                            var cabina_lcl_2=
+                                                                            {
+                                                                                "numero_cabina":cabina_corridoioSelezionato.numero_cabina,
+                                                                                "posizione":posizione.posizione
+                                                                            }
+                                                                            cabine_lcl_2.push(cabina_lcl_2);
+                                                                        });
+                                                                        confermaKitRaggruppati(cabine_lcl_2);
+                                                                    }
+                                                                    else
+                                                                        confermaKit([{numero_cabina:cabina_corridoioSelezionato.numero_cabina}]);
+                                                                break;
+                                                                case 27://ESC
+                                                                    event.preventDefault();
+                                                                    Swal.close();
+                                                                break;
+                                                            }
+                                                        });
+                                                    } catch (error) {}
+                                                },
                                     });
                                 }
                                 else
@@ -2074,7 +2087,8 @@ function getCabineECorridoi(lotto,commessa)
             lotto,
             commessa,
             id_turno,
-            filtroAvanzamento
+            filtroAvanzamento,
+            stazione:stazione.id_stazione
         },
         function(response, status)
         {
