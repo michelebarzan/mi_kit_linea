@@ -2518,7 +2518,10 @@ async function stampaEtichettaKit(printListLcl)
         var body_vertical_padding = 0.15;
         var body_horizontal_padding = 0.35;
 
+			
 		var printWindow = window.open('', '_blank', 'height=1080,width=1920');
+		
+		setTimeout(function(){
 
         printWindow.document.body.setAttribute("onafterprint","window.close();");
 
@@ -2630,6 +2633,8 @@ async function stampaEtichettaKit(printListLcl)
     
             printWindow.document.body.appendChild(outerContainer);
         });
+
+		}, 500);
     }
 }
 async function getPopupRaggruppamentoTraversine()
