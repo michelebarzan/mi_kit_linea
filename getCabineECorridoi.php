@@ -9,12 +9,17 @@
     
     $cabine_corridoi=[];
 
-    $query1="SELECT DISTINCT t.numero_cabina, t.disegno_cabina, CASE WHEN dbo.cabine_chiuse.cabina IS NULL THEN 'false' ELSE 'true' END AS chiusa, t.tipo
-            FROM (SELECT commessa, lotto, numero_cabina, disegno_cabina, kit, posizione, qnt, 'cabina' AS tipo FROM dbo.view_cabine
-                    UNION
-                    SELECT commessa, lotto, numero_cabina, disegno_cabina, kit, posizione, qnt, 'corridoio' AS tipo FROM dbo.view_corridoi) AS t LEFT OUTER JOIN
-                dbo.cabine_chiuse ON t.lotto = dbo.cabine_chiuse.lotto AND t.numero_cabina = dbo.cabine_chiuse.cabina
-            WHERE t.lotto='$lotto' AND t.commessa='$commessa' AND (dbo.cabine_chiuse.stazione = $stazione OR dbo.cabine_chiuse.stazione IS NULL)";
+    $query1="SELECT DISTINCT t.numero_cabina, t.disegno_cabina, CASE WHEN t_1.cabina IS NULL THEN 'false' ELSE 'true' END AS chiusa, t.tipo
+FROM            (SELECT        commessa, lotto, numero_cabina, disegno_cabina, kit, posizione, qnt, 'cabina' AS tipo
+                          FROM            dbo.view_cabine
+                          UNION
+                          SELECT        commessa, lotto, numero_cabina, disegno_cabina, kit, posizione, qnt, 'corridoio' AS tipo
+                          FROM            dbo.view_corridoi) AS t LEFT OUTER JOIN
+                             (SELECT        lotto, cabina, stazione
+                               FROM            dbo.cabine_chiuse
+                               WHERE        (stazione = $stazione) OR
+                                                         (stazione IS NULL)) AS t_1 ON t.lotto = t_1.lotto AND t.numero_cabina = t_1.cabina
+WHERE        (t.lotto = '$lotto') AND (t.commessa = '$commessa')";
     $result1=sqlsrv_query($conn,$query1);
     if($result1==TRUE)
     {
