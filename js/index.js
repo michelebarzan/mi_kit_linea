@@ -2788,7 +2788,7 @@ function sortRaggruppamentoTraversineTable()
             if(!isNaN(value_y))
                 value_y = parseFloat(value_y);
 
-            if (value_x > value_y)
+            if (value_y > value_x)
             {
                 shouldSwitch = true;
                 break;
