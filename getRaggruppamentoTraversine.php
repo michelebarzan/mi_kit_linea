@@ -57,8 +57,7 @@
         while($row3=sqlsrv_fetch_array($result3))
         {
             $rowKit["POS"]=utf8_encode($row3['posizione']);
-            $lung = str_replace(".","",$row3["LUNG"]);
-            $lung = str_replace(",",".",$lung);
+            $lung = $row3["LUNG"];
             $lung = floatval($lung);
             $rowKit["LUNG"]=$lung;
             $rowKit["CODMAT"]=utf8_encode($row3['CODMAT']);

@@ -2779,7 +2779,16 @@ function sortRaggruppamentoTraversineTable()
             shouldSwitch = false;
             x = rows[i].getElementsByTagName("TD")[ordinamentoRaggruppamentoTraversineTable];
             y = rows[i + 1].getElementsByTagName("TD")[ordinamentoRaggruppamentoTraversineTable];
-            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase())
+
+            var value_x = x.innerHTML.toLowerCase();
+            var value_y = y.innerHTML.toLowerCase();
+
+            if(!isNaN(value_x))
+                value_x = parseFloat(value_x);
+            if(!isNaN(value_y))
+                value_y = parseFloat(value_y);
+
+            if (value_y > value_x)
             {
                 shouldSwitch = true;
                 break;
