@@ -209,7 +209,6 @@
             }
             
             usort($kit, build_sorter('traversina_max'));
-			array_reverse($kit);
         }
     }
 
