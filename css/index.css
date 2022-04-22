@@ -111,12 +111,11 @@ body
 }
 #listOuterContainer
 {
-    width:500px;
+    /*width:500px;*/
     height:100%;
     background-color: #333333;
     box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
     display: flex;
-    /*border-radius: 4px;*/
     flex-direction: column;
     box-sizing: border-box;
 }
@@ -293,7 +292,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 #pdfContainer
 {
-    width:calc(100% - 520px); 
+    /*width:calc(100% - calc(500px + 20px));*/
     margin-left: 20px;
     background-image: url("../images/logo.png");
 	background-position: center center;
