@@ -64,6 +64,17 @@ window.addEventListener("load", async function(event)
 
     stazione=getFirstObjByPropValue(stazioni,"nome",nome_stazione);
 
+    if(stazione.nome !== "traversine")
+    {
+        document.getElementById("listOuterContainer").style.width = "350px";
+        document.getElementById("pdfContainer").style.width = "calc(100% - calc(350px + 20px))";
+    }
+    else
+    {
+        document.getElementById("listOuterContainer").style.width = "500px";
+        document.getElementById("pdfContainer").style.width = "calc(100% - calc(500px + 20px))";
+    }
+
     ordinamentoKit=await getCookie("ordinamentoKit");
     if(ordinamentoKit=="")
         ordinamentoKit="kit";
