@@ -30,7 +30,7 @@ window.addEventListener("load", async function(event)
     turno=JSON.parse(turno);
     stazione=JSON.parse(stazione);
 
-    if(stazione.nome=="traversine")
+    if(stazione.nome=="traversine" || stazione.nome=="prelievo")
     {
         linea = "";
         document.getElementById("loginLineaContainer").style.visibility="hidden";
@@ -401,7 +401,7 @@ window.addEventListener("keydown", async function(event)
                         setCookie("stazione",JSON.stringify(new_stazione));
                     }
 
-                    if(stazione.nome=="traversine")
+                    if(stazione.nome=="traversine" || stazione.nome=="prelievo")
                     {
                         linea = "";
                         document.getElementById("loginLineaContainer").style.visibility="hidden";
@@ -480,7 +480,7 @@ window.addEventListener("keydown", async function(event)
                         setCookie("stazione",JSON.stringify(new_stazione));
                     }
 
-                    if(stazione.nome=="traversine")
+                    if(stazione.nome=="traversine" || stazione.nome=="prelievo")
                     {
                         linea = "";
                         document.getElementById("loginLineaContainer").style.visibility="hidden";
@@ -685,7 +685,7 @@ async function clickCambiaStazione()
             setCookie("stazione",JSON.stringify(new_stazione));
         }
 
-        if(stazione.nome=="traversine")
+        if(stazione.nome=="traversine" || stazione.nome=="prelievo")
         {
             linea = "";
             document.getElementById("loginLineaContainer").style.visibility="hidden";

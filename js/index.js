@@ -27,6 +27,44 @@ var keys_pressed = [];
 var old_focused_lotti;
 var old_focused_cabine_corridoi;
 var ordinamentoRaggruppamentoTraversineTable = 0;
+var intervalOverflowPdf1;
+var intervalOverflowPdf2;
+var nZoomIn=
+{
+    "caricamento":
+    {
+        "kit":0,
+        "cabine_corridoi":0
+    },
+    "montaggio":
+    {
+        "kit":0,
+        "cabine_corridoi":0
+    },
+    "traversine":
+    {
+        "kit":0,
+        "cabine_corridoi":0
+    }
+}
+var nScrolldown=
+{
+    "caricamento":
+    {
+        "kit":0,
+        "cabine_corridoi":0
+    },
+    "montaggio":
+    {
+        "kit":0,
+        "cabine_corridoi":0
+    },
+    "traversine":
+    {
+        "kit":0,
+        "cabine_corridoi":0
+    }
+}
 
 window.addEventListener("load", async function(event)
 {
@@ -43,6 +81,20 @@ window.addEventListener("load", async function(event)
         showCancelButton:false,
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
+
+    var adjustZoomHelp = await getParametriByHelp("adjustZoom");
+    nZoomIn["caricamento"]["kit"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nZoomIn.caricamento.kit'})[0].valore);
+    nZoomIn["caricamento"]["cabine_corridoi"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nZoomIn.caricamento.cabine_corridoi'})[0].valore);
+    nZoomIn["montaggio"]["kit"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nZoomIn.montaggio.kit'})[0].valore);
+    nZoomIn["montaggio"]["cabine_corridoi"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nZoomIn.montaggio.cabine_corridoi'})[0].valore);
+    nZoomIn["traversine"]["kit"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nZoomIn.traversine.kit'})[0].valore);
+    nZoomIn["traversine"]["cabine_corridoi"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nZoomIn.traversine.cabine_corridoi'})[0].valore);
+    nScrolldown["caricamento"]["kit"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nScrolldown.caricamento.kit'})[0].valore);
+    nScrolldown["caricamento"]["cabine_corridoi"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nScrolldown.caricamento.cabine_corridoi'})[0].valore);
+    nScrolldown["montaggio"]["kit"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nScrolldown.montaggio.kit'})[0].valore);
+    nScrolldown["montaggio"]["cabine_corridoi"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nScrolldown.montaggio.cabine_corridoi'})[0].valore);
+    nScrolldown["traversine"]["kit"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nScrolldown.traversine.kit'})[0].valore);
+    nScrolldown["traversine"]["cabine_corridoi"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nScrolldown.traversine.cabine_corridoi'})[0].valore);
  
     mi_kit_linea_params = await getMiKitLineaParams();
 
@@ -1135,6 +1187,10 @@ window.addEventListener("keydown", async function(event)
             event.preventDefault();
             zoomout()
         break;
+        case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","reset_zoom").valore):
+            event.preventDefault();
+            resetPdfZoom()
+        break;
         /*case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","zoom_+_2").valore):
             event.preventDefault();
             zoomin()
@@ -2057,14 +2113,14 @@ async function getPdf(folder,fileName)
         iframe=document.createElement("iframe");
         iframe.setAttribute("id","");
         iframe.setAttribute("class","");
-        iframe.setAttribute("onload","fixPdf(this);shownPdf='"+fileName+"';");
+        iframe.setAttribute("onload","fixPdf(this,'"+folder+"');shownPdf='"+fileName+"';");
         var server_adress=await getServerValue("SERVER_ADDR");
         var server_port=await getServerValue("SERVER_PORT");
         iframe.setAttribute("src","http://"+server_adress+":"+server_port+"/mi_kit_pdf/pdf.js/web/viewer.html?file=pdf/"+folder+"/"+fileName+".pdf");
         container.appendChild(iframe);
     }
 }
-function fixPdf(iframe)
+function fixPdf(iframe,folder)
 {
     var scrollbarIframe = document.createElement("link");
     scrollbarIframe.href = "css/scrollbarIframe.css"; 
@@ -2087,6 +2143,77 @@ function fixPdf(iframe)
     iframe.contentWindow.document.getElementById("viewer").style.margin="10px";
     iframe.contentWindow.document.getElementById("viewer").style.width="calc(100% - 40px)";
     iframe.contentWindow.document.getElementById("viewer").style.height="calc(100% - 40px)";
+
+    resetPdfZoom(true,folder);
+}
+function resetPdfZoom(adjustZoom,folder)
+{
+    if(iframe!=null)
+    {
+        try {
+            clearInterval(intervalOverflowPdf1);
+        } catch (error) {}
+        try {
+            clearInterval(intervalOverflowPdf2);
+        } catch (error) {}
+
+        intervalOverflowPdf1 = setInterval(() => 
+        {
+            try {
+                overflow=checkOverflow(iframe.contentWindow.document.getElementById("viewerContainer"));
+            } catch (error) {
+                overflow=true;
+            }
+            if(!overflow)
+                zoomin();
+            else
+            {
+                clearInterval(intervalOverflowPdf1);
+                intervalOverflowPdf2 = setInterval(() => 
+                {
+                    try {
+                        overflow=checkOverflow(iframe.contentWindow.document.getElementById("viewerContainer"));
+                    } catch (error) {
+                        overflow=true;
+                    }
+                    if(overflow)
+                        zoomout();
+                    else
+                    {
+                        clearInterval(intervalOverflowPdf2);
+                        if(adjustZoom)
+                        {
+                            for (let index = 0; index < nZoomIn[stazione.nome][folder]; index++)
+                            {
+                                zoomin();
+                            }
+                            for (let index = 0; index < nScrolldown[stazione.nome][folder]; index++)
+                            {
+                                scrolldown();
+                            }
+                        }
+                    }
+                }, 10);
+            }
+        }, 10);
+    }
+}
+function checkOverflow(el)
+{
+    try {
+        var curOverflow = el.style.overflow;
+
+        if ( !curOverflow || curOverflow === "visible" )
+            el.style.overflow = "hidden";
+
+        var isOverflowing = el.clientWidth < el.scrollWidth || el.clientHeight < el.scrollHeight;
+
+        el.style.overflow = curOverflow;
+
+        return isOverflowing;
+    } catch (error) {
+        return true;
+    }
 }
 function getCabineECorridoi(lotto,commessa)
 {
