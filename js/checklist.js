@@ -12,6 +12,22 @@ var dot;
 var shownPdf;
 var intervalOverflowPdf1;
 var intervalOverflowPdf2;
+var nZoomIn=
+{
+    "checklist":
+    {
+        "kit":0,
+        "materie_prime":0
+    }
+}
+var nScrolldown=
+{
+    "checklist":
+    {
+        "kit":0,
+        "materie_prime":0
+    }
+}
 
 window.addEventListener("load", async function(event)
 {
@@ -28,6 +44,12 @@ window.addEventListener("load", async function(event)
         showCancelButton:false,
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
+
+    var adjustZoomHelp = await getParametriByHelp("adjustZoom");
+    nZoomIn["checklist"]["kit"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nZoomIn.checklist.kit'})[0].valore);
+    nScrolldown["checklist"]["kit"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nScrolldown.checklist.kit'})[0].valore);
+    nZoomIn["checklist"]["materie_prime"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nZoomIn.checklist.materie_prime'})[0].valore);
+    nScrolldown["checklist"]["materie_prime"]=parseInt(adjustZoomHelp.filter(function (el) {return el.nome == 'nScrolldown.checklist.materie_prime'})[0].valore);
 
     id_utente=await getSessionValue("id_utente");
 
@@ -571,14 +593,14 @@ async function getPdf(folder,fileName)
         iframe=document.createElement("iframe");
         iframe.setAttribute("id","");
         iframe.setAttribute("class","");
-        iframe.setAttribute("onload","fixPdf(this);shownPdf='"+fileName+"';");
+        iframe.setAttribute("onload","fixPdf(this,'"+folder+"');shownPdf='"+fileName+"';");
         var server_adress=await getServerValue("SERVER_ADDR");
         var server_port=await getServerValue("SERVER_PORT");
         iframe.setAttribute("src","http://"+server_adress+":"+server_port+"/mi_kit_pdf/pdf.js/web/viewer.html?file=pdf/"+folder+"/"+fileName+".pdf");
         container.appendChild(iframe);
     }
 }
-function fixPdf(iframe)
+function fixPdf(iframe,folder)
 {
     var scrollbarIframe = document.createElement("link");
     scrollbarIframe.href = "css/scrollbarIframe.css"; 
@@ -602,9 +624,9 @@ function fixPdf(iframe)
     iframe.contentWindow.document.getElementById("viewer").style.width="calc(100% - 40px)";
     iframe.contentWindow.document.getElementById("viewer").style.height="calc(100% - 40px)";
 
-    resetPdfZoom();
+    resetPdfZoom(true,folder);
 }
-function resetPdfZoom()
+function resetPdfZoom(adjustZoom,folder)
 {
     if(iframe!=null)
     {
@@ -637,7 +659,20 @@ function resetPdfZoom()
                     if(overflow)
                         pdfZoomout();
                     else
+                    {
                         clearInterval(intervalOverflowPdf2);
+                        if(adjustZoom)
+                        {
+                            for (let index = 0; index < nZoomIn[stazione.nome][folder]; index++)
+                            {
+                                pdfZoomin();
+                            }
+                            for (let index = 0; index < nScrolldown[stazione.nome][folder]; index++)
+                            {
+                                pdfScrolldown();
+                            }
+                        }
+                    }
                 }, 10);
             }
         }, 10);
@@ -922,6 +957,45 @@ function getComponentiStampaChecklist()
         function(response, status)
         {
 			//console.log(response);
+            if(status=="success")
+            {
+                if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+                {
+                    Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                    console.log(response);
+                    resolve([]);
+                }
+                else
+                {
+                    try {
+                        resolve(JSON.parse(response));
+                    } catch (error) {
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
+                        resolve([]);
+                    }
+                }
+            }
+            else
+            {
+                Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                console.log(response);
+                resolve([]);
+            }
+        });
+    });
+}
+function getParametriByHelp(help)
+{
+    return new Promise(function (resolve, reject) 
+    {
+        $.get("getParametriByHelp.php",
+        {
+            help
+        },
+        function(response, status)
+        {
             if(status=="success")
             {
                 if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
