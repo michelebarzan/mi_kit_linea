@@ -75,7 +75,7 @@ FROM         mi_db_tecnico.dbo.kit INNER JOIN
                 (SELECT   COUNT(*) AS n_fori, id_lamiera
                    FROM         mi_db_tecnico.dbo.lavorazioni_lamiere
                    GROUP BY id_lamiera) AS lavorazioni_lamiere_1 ON mi_db_tecnico.dbo.lamiere.id_lamiera = lavorazioni_lamiere_1.id_lamiera
-                   ORDER BY mi_db_tecnico.dbo.kit.codice_kit, mi_db_tecnico.dbo.pannelli_kit.posx";
+                   ORDER BY mi_db_tecnico.dbo.kit.codice_kit, mi_db_tecnico.dbo.pannelli_kit.posx DESC";
     $result2=sqlsrv_query($conn,$query2);
     if($result2==TRUE)
     {
