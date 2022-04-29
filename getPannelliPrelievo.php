@@ -100,15 +100,10 @@ FROM         mi_db_tecnico.dbo.kit INNER JOIN
     foreach ($kit as $kitObj)
     {
         $pannelli_lcl = [];
-        $i=0;
         foreach ($pannelli as $pannelloObj)
         {
             if($pannelloObj["codice_kit"] == $kitObj["kit"])
-            {
-                if($i<5)
-                    array_push($pannelli_lcl,$pannelloObj);
-                $i++;
-            }
+                array_push($pannelli_lcl,$pannelloObj);
         }
         $kitObj_cln = $kitObj;
         $kitObj_cln["pannelli"] = $pannelli_lcl;

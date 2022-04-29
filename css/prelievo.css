@@ -153,7 +153,7 @@ body
 }
 :root
 {
-    --listOuterContainerWidth:1230px
+    --listOuterContainerWidth:1280px
 }
 #listOuterContainer
 {
@@ -323,6 +323,7 @@ body
     max-width: 130px;
     min-width: 130px;
     color: #EBEBEB;
+    cursor: pointer;
 }
 .pannelli-container-info-kit span
 {
@@ -364,6 +365,18 @@ body
     letter-spacing: 2px;
     color: #EBEBEB;
     font-size: 14px;
+}
+.pannelli-item-scroll-buttons-container
+{
+    width: 40px;
+    max-width: 40px;
+    min-width: 40px;
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    height: 100%;
 }
 #labelLottoSelezionato b,#labelCabinaSelezionato b
 {

@@ -785,7 +785,7 @@ async function stampaChecklist()
     
         var printWindow = window.open('', '_blank', 'height=1080,width=1920');
     
-        //printWindow.document.body.setAttribute("onafterprint","window.close();");
+        printWindow.document.body.setAttribute("onafterprint","window.close();");
     
         printWindow.document.body.style.backgroundColor="white";
         printWindow.document.body.style.overflow="hidden";
@@ -871,7 +871,7 @@ async function stampaChecklist()
         tr.appendChild(th);
         var th=document.createElement("th");
         th.setAttribute("style","box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
-        th.innerHTML=`<div style="display:block;max-width:${((width/2)*30)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left">Descrizione</div>`;
+        th.innerHTML=`<div style="display:block;max-width:${((width/2)*38)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left">Descrizione</div>`;
         tr.appendChild(th);
         var th=document.createElement("th");
         th.setAttribute("style","box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
@@ -882,8 +882,8 @@ async function stampaChecklist()
         th.innerHTML=`<div style="display:block;max-width:${((width/2)*15)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left">Lung</div>`;
         tr.appendChild(th);
         var th=document.createElement("th");
-        th.setAttribute("style","box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
-        th.innerHTML=`<div style="display:block;max-width:${((width/2)*13)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left"></div>`;
+        th.setAttribute("style","border-left:1px solid black;box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
+        th.innerHTML=`<div style="display:block;max-width:${((width/2)*5)/100}cm;min-width:${((width/2)*5)/100}cm;width:${((width/2)*5)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left"></div>`;
         tr.appendChild(th);
 
         table1.appendChild(tr);
@@ -908,7 +908,7 @@ async function stampaChecklist()
             tr.appendChild(td);
             var td=document.createElement("td");
             td.setAttribute("style","box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
-            td.innerHTML=`<div style="display:block;max-width:${((width/2)*30)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${componente.descrizione}</div>`;
+            td.innerHTML=`<div style="display:block;max-width:${((width/2)*38)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${componente.descrizione}</div>`;
             tr.appendChild(td);
             var td=document.createElement("td");
             td.setAttribute("style","box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
@@ -919,11 +919,11 @@ async function stampaChecklist()
             td.innerHTML=`<div style="display:block;max-width:${((width/2)*15)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${componente.lung}</div>`;
             tr.appendChild(td);
             var td=document.createElement("td");
-            td.setAttribute("style","box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
+            td.setAttribute("style","border-left:1px solid black;box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
             if(componente.checked)
-                td.innerHTML=`<div style="display:block;max-width:${((width/2)*13)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;font-weight:bold">V</div>`;
+                td.innerHTML=`<div style="text-align:center;display:block;max-width:${((width/2)*5)/100}cm;min-width:${((width/2)*5)/100}cm;width:${((width/2)*5)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;font-weight:bold">X</div>`;
             else
-                td.innerHTML=`<div style="display:block;max-width:${((width/2)*13)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"></div>`;
+                td.innerHTML=`<div style="text-align:center;display:block;max-width:${((width/2)*5)/100}cm;min-width:${((width/2)*5)/100}cm;width:${((width/2)*5)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"></div>`;
             tr.appendChild(td);
     
             if(i<nRows)
