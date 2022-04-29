@@ -45,4 +45,11 @@
             die("error");
     }
 
+    $query3="SELECT COUNT(*) AS n FROM dbo.pannelli_prelievo WHERE lotto='$lotto' AND disegno_cabina='$disegno_cabina' AND kit='$kit' AND posizione='$posizione' AND numero_cabina='".$cabine[0]."'";	
+    $result3=sqlsrv_query($conn,$query3);
+    while($row3=sqlsrv_fetch_array($result3))
+    {
+        echo $row3["n"];
+    }
+
 ?>

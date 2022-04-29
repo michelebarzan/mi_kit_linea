@@ -11,7 +11,7 @@
 
     $query2="SELECT dbo.checklist.id_checklist, dbo.checklist.lotto, dbo.checklist.codice_carrello, dbo.checklist.numero_cabina, dbo.checklist.codice_cabina, dbo.checklist.codice_componente, dbo.checklist.posizione, dbo.checklist.descrizione, dbo.checklist.checked, dbo.checklist.utente, dbo.checklist.dataOra, dbo.checklist.commessa, dbo.checklist.qnt, ISNULL(mi_db_tecnico.dbo.kit.fori,'') AS fori, ISNULL(mi_db_tecnico.dbo.kit.lung,'') AS lung
             FROM dbo.checklist LEFT OUTER JOIN mi_db_tecnico.dbo.kit ON dbo.checklist.codice_componente COLLATE Latin1_General_CI_AS = mi_db_tecnico.dbo.kit.codice_kit
-            WHERE (dbo.checklist.lotto = '$lotto') AND (dbo.checklist.codice_carrello = '$CODCAR')";
+            WHERE (dbo.checklist.lotto = '$lotto') AND (dbo.checklist.codice_carrello = '$CODCAR') ORDER BY numero_cabina,posizione";
     $result2=sqlsrv_query($conn,$query2);
     if($result2==TRUE)
     {
