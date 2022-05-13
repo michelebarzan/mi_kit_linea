@@ -375,7 +375,7 @@ async function getListPannelli()
     {
         var kitContainer = document.createElement("div");
         kitContainer.setAttribute("class","pannelli-container");
-        kitContainer.setAttribute("id","pannelliContainer"+kit.kit);
+        kitContainer.setAttribute("id","pannelliContainer"+kit.kit+kit.posizione);
         if(j==0)
             kitContainer.setAttribute("style","margin-top:5px");
         if(j==(kit_pannelli.length-1))
@@ -383,9 +383,9 @@ async function getListPannelli()
 
         var div = document.createElement("div");
         div.setAttribute("class","pannelli-container-info-kit");
-        div.setAttribute("id","pannelliContainerInfoKit"+kit.kit);
+        div.setAttribute("id","pannelliContainerInfoKit"+kit.kit+kit.posizione);
         div.setAttribute("role","button");
-        div.setAttribute("onclick","getPdf('kit','"+kit.kit+"')");
+        div.setAttribute("onclick","getPdf('kit','"+kit.kit+"','"+kit.posizione+"')");
 
         var span = document.createElement("span");
         span.setAttribute("style","font-size:24px;font-weight: bold;");
@@ -411,12 +411,12 @@ async function getListPannelli()
             var backgroundColor="";
             if(pannello.prelevato)
             {
-                pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit.kit+"');eliminaPannelloPrelievo(this,'"+lottoSelezionato.lotto+"','"+cabinaSelezionata.disegno_cabina+"','"+kit.kit+"','"+kit.posizione+"','"+pannello.codice_pannello+"',"+i+")");
+                pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit.kit+"','"+kit.posizione+"');eliminaPannelloPrelievo(this,'"+lottoSelezionato.lotto+"','"+cabinaSelezionata.disegno_cabina+"','"+kit.kit+"','"+kit.posizione+"','"+pannello.codice_pannello+"',"+i+")");
                 backgroundColor="#70B085";
             }
             else
             {
-                pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit.kit+"');registraPannelloPrelievo(this,'"+lottoSelezionato.lotto+"','"+cabinaSelezionata.disegno_cabina+"','"+kit.kit+"','"+kit.posizione+"','"+pannello.codice_pannello+"',"+i+")");
+                pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit.kit+"','"+kit.posizione+"');registraPannelloPrelievo(this,'"+lottoSelezionato.lotto+"','"+cabinaSelezionata.disegno_cabina+"','"+kit.kit+"','"+kit.posizione+"','"+pannello.codice_pannello+"',"+i+")");
                 backgroundColor="#404040";
             }
             if(k>=5)
@@ -467,13 +467,13 @@ async function getListPannelli()
         if(kit.pannelli.length>5)
         {
             var button = document.createElement("button");
-            button.setAttribute("onclick","scrollPannelliContainer('right','"+kit.kit+"',"+kit.pannelli.length+")");
+            button.setAttribute("onclick","scrollPannelliContainer('right','"+kit.kit+"','"+kit.posizione+"',"+kit.pannelli.length+")");
             button.setAttribute("class","action-button");
             button.setAttribute("style","height:calc(50% - 5px);margin-left:0px");
             button.innerHTML='<i class="far fa-angle-right"></i>';
             scrollButtonsContainer.appendChild(button);
             var button = document.createElement("button");
-            button.setAttribute("onclick","scrollPannelliContainer('left','"+kit.kit+"',"+kit.pannelli.length+")");
+            button.setAttribute("onclick","scrollPannelliContainer('left','"+kit.kit+"','"+kit.posizione+"',"+kit.pannelli.length+")");
             button.setAttribute("class","action-button");
             button.setAttribute("style","height:calc(50% - 5px);margin-left:0px");
             button.innerHTML='<i class="far fa-angle-left"></i>';
@@ -488,7 +488,7 @@ async function getListPannelli()
 
     if(kit_pannelli.length>0)
     {
-        document.getElementById("pannelliContainerInfoKit"+kit_pannelli[0].kit).click();
+        document.getElementById("pannelliContainerInfoKit"+kit_pannelli[0].kit+kit_pannelli[0].posizione).click();
     }
 
     const findDuplicates = (arr) =>
@@ -523,12 +523,12 @@ async function getListPannelli()
 
     Swal.close();
 }
-function scrollPannelliContainer(how,kit,length)
+function scrollPannelliContainer(how,kit,posizione,length)
 {
     if(how=="right")
     {
         var n;
-        var pannelliItems = document.getElementById("pannelliContainer"+kit).getElementsByClassName("pannelli-item");
+        var pannelliItems = document.getElementById("pannelliContainer"+kit+posizione).getElementsByClassName("pannelli-item");
         for (let index = 0; index < pannelliItems.length; index++)
         {
             const pannelloContainer = pannelliItems[index];
@@ -541,14 +541,14 @@ function scrollPannelliContainer(how,kit,length)
         }
         if((n+5) < length)
         {
-            document.getElementById("pannelliContainer"+kit).getElementsByClassName("pannelli-item")[n].style.display="none";
-            document.getElementById("pannelliContainer"+kit).getElementsByClassName("pannelli-item")[n+5].style.display="";
+            document.getElementById("pannelliContainer"+kit+posizione).getElementsByClassName("pannelli-item")[n].style.display="none";
+            document.getElementById("pannelliContainer"+kit+posizione).getElementsByClassName("pannelli-item")[n+5].style.display="";
         }
     }
     else
     {
         var n;
-        var pannelliItems = document.getElementById("pannelliContainer"+kit).getElementsByClassName("pannelli-item");
+        var pannelliItems = document.getElementById("pannelliContainer"+kit+posizione).getElementsByClassName("pannelli-item");
         for (let index = pannelliItems.length-1; index >= 0; index--)
         {
             const pannelloContainer = pannelliItems[index];
@@ -561,8 +561,8 @@ function scrollPannelliContainer(how,kit,length)
         }
         if((n-5) >= 0)
         {
-            document.getElementById("pannelliContainer"+kit).getElementsByClassName("pannelli-item")[n].style.display="none";
-            document.getElementById("pannelliContainer"+kit).getElementsByClassName("pannelli-item")[n-5].style.display="";
+            document.getElementById("pannelliContainer"+kit+posizione).getElementsByClassName("pannelli-item")[n].style.display="none";
+            document.getElementById("pannelliContainer"+kit+posizione).getElementsByClassName("pannelli-item")[n-5].style.display="";
         }
     }
 }
@@ -594,13 +594,13 @@ function registraPannelloPrelievo(pannelloContainer,lotto,disegno_cabina,kit,pos
             }
             else
             {
-                pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit+"');eliminaPannelloPrelievo(this,'"+lotto+"','"+disegno_cabina+"','"+kit+"','"+posizione+"','"+codice_pannello+"',"+i+")");
+                pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit+"','"+posizione+"');eliminaPannelloPrelievo(this,'"+lotto+"','"+disegno_cabina+"','"+kit+"','"+posizione+"','"+codice_pannello+"',"+i+")");
                 pannelloContainer.style.backgroundColor = "#70B085";
 
-                if(parseInt(response) == parseInt(document.getElementById("pannelliContainer"+kit).getElementsByClassName("pannelli-item").length))
-                if(document.getElementById("pannelliContainer"+kit).nextSibling)
+                if(parseInt(response) == parseInt(document.getElementById("pannelliContainer"+kit+posizione).getElementsByClassName("pannelli-item").length))
+                if(document.getElementById("pannelliContainer"+kit+posizione).nextSibling)
                 {
-                    document.getElementById("pannelliContainer"+kit).nextSibling.getElementsByClassName("pannelli-container-info-kit")[0].click();
+                    document.getElementById("pannelliContainer"+kit+posizione).nextSibling.getElementsByClassName("pannelli-container-info-kit")[0].click();
                     document.getElementById("listInnerContainer").scrollTop=document.getElementById("listInnerContainer").scrollTop+80;
                 }
                 else
@@ -641,7 +641,7 @@ function eliminaPannelloPrelievo(pannelloContainer,lotto,disegno_cabina,kit,posi
             }
             else
             {
-                pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit+"');registraPannelloPrelievo(this,'"+lotto+"','"+disegno_cabina+"','"+kit+"','"+posizione+"','"+codice_pannello+"',"+i+")");
+                pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit+"','"+posizione+"');registraPannelloPrelievo(this,'"+lotto+"','"+disegno_cabina+"','"+kit+"','"+posizione+"','"+codice_pannello+"',"+i+")");
                 pannelloContainer.style.backgroundColor = "#404040";
                 Swal.close();
             }
@@ -700,7 +700,7 @@ function logout()
         window.location = 'login.html';
     });
 }
-async function getPdf(folder,fileName)
+async function getPdf(folder,fileName,posizione)
 {
     try {
         var pannelliContainers = document.getElementsByClassName("pannelli-container-info-kit");
@@ -710,7 +710,7 @@ async function getPdf(folder,fileName)
     
             pannelloContainer.style.color="#EBEBEB";
         }
-        document.getElementById("pannelliContainerInfoKit"+fileName).style.color="#548CFF";
+        document.getElementById("pannelliContainerInfoKit"+fileName+posizione).style.color="#548CFF";
     } catch (error) {}
 
     if(fileName != shownPdf)
