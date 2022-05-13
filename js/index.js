@@ -2579,7 +2579,7 @@ async function stampaEtichettaCarrello()
         
         cabine.forEach(function(cabina)
         {
-            if(i<3)
+            if(i<5)
             {
                 var tr=document.createElement("tr");
     
