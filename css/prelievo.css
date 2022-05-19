@@ -198,6 +198,9 @@ body
     font-weight: normal;
     text-align: left;
     font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .listTitleItemRow i
 {
@@ -290,6 +293,69 @@ body
     color:#548CFF;
     text-shadow: 2px 4px 3px rgb(0 0 0 / 30%);
 }
+.pannelli-cabine-container
+{
+    min-height: 55px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+}
+.pannelli-cabine-container-cabine-item
+{
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    border: none;
+    box-sizing: border-box;
+    margin: 0px;
+    padding: 0px;
+    background-color: #313131;
+    border-radius: 4px;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.16), 0 2px 3px rgba(0,0,0,0.23);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    color:#EBEBEB;
+    padding-left: 10px;
+    padding-right: 10px;
+    cursor: pointer;
+    border: 2px solid black;
+    margin: 5px;
+}
+.pannelli-cabine-container-cabine-item span
+{
+    font-family: 'Questrial', sans-serif;
+    letter-spacing: 2px;
+    font-weight: bold;
+}
+.pannelli-outer-container
+{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    /*height: calc(100% - 60px);
+    min-height: calc(100% - 60px);
+    max-height: calc(100% - 60px);*/
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+}
 .pannelli-container
 {
     width: calc(100% - 10px);
@@ -378,7 +444,7 @@ body
     justify-content: space-between;
     height: 100%;
 }
-#labelLottoSelezionato b,#labelCabinaSelezionato b
+#labelLottoSelezionato b,#labelCabinaSelezionata b
 {
     letter-spacing: 1px;
     text-shadow: 2px 4px 3px rgb(0 0 0 / 30%);
@@ -459,14 +525,12 @@ body
 .listButtonIndietro
 {
     height: 30px;
-    line-height: 30px;
     margin-top: 10px;
     margin-bottom: 10px;
     margin-right: 10px;
     padding-left: 10px;
     padding-right: 10px;
     box-sizing: border-box;
-    text-align: left;
     border:none;
     background-color:#313131 ;
     border-radius: 4px;
@@ -475,6 +539,14 @@ body
     transition: all 0.3s cubic-bezier(.25,.8,.25,1);
     outline: none;
     cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
 }
 .listButtonIndietro span
 {
