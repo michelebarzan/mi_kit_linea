@@ -45,11 +45,27 @@
             die("error");
     }
 
-    $query3="SELECT COUNT(*) AS n FROM dbo.pannelli_prelievo WHERE lotto='$lotto' AND disegno_cabina='$disegno_cabina' AND kit='$kit' AND posizione='$posizione' AND numero_cabina='".$cabine[0]."'";	
+    $query3="SELECT COUNT(DISTINCT codice_pannello) AS n FROM dbo.pannelli_prelievo WHERE lotto='$lotto' AND disegno_cabina='$disegno_cabina' AND kit='$kit' AND posizione='$posizione'";	
     $result3=sqlsrv_query($conn,$query3);
+    if (!$result3)
+        die("error".$query3);
     while($row3=sqlsrv_fetch_array($result3))
     {
-        echo $row3["n"];
+        $responseObj["n"] = $row3["n"];
     }
+
+    $numeri_cabina_pannello = [];
+    $query4="SELECT numero_cabina FROM dbo.pannelli_prelievo WHERE lotto='$lotto' AND disegno_cabina='$disegno_cabina' AND kit='$kit' AND posizione='$posizione' AND codice_pannello='".$codice_pannello."' AND i=".$i."";	
+    $result4=sqlsrv_query($conn,$query4);
+    if (!$result4)
+        die("error".$query4);
+    while($row4=sqlsrv_fetch_array($result4))
+    {
+        array_push($numeri_cabina_pannello,$row4["numero_cabina"]);
+    }
+
+    $responseObj["numeri_cabina_pannello"] = $numeri_cabina_pannello;
+
+    echo json_encode($responseObj);
 
 ?>
