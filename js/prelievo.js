@@ -283,9 +283,22 @@ async function getListCabine()
         item.setAttribute("style","flex-direction: column;align-items: flex-start;justify-content: space-evenly;height: 50px;min-height: 50px;");
         item.setAttribute("onclick","selectCabina('"+cabina.disegno_cabina+"')");
 
+        var div = document.createElement("div");
+        div.setAttribute("style","width:100%;display:flex;flex-direction:row;align-items:center;justify-content:flex-start");
+
         var span=document.createElement("span");
         span.innerHTML=cabina.disegno_cabina;
-        item.appendChild(span);
+        div.appendChild(span);
+
+        if(cabina.chiusa)
+        {
+            var fa=document.createElement("i");
+            fa.setAttribute("class","fad fa-check-circle");
+            fa.setAttribute("style","color:#70B085;font-size:17px;margin-left:auto;margin-right:7px");
+            div.appendChild(fa);
+        }
+
+        item.appendChild(div);
 
         var span=document.createElement("span");
         span.setAttribute("style","text-align:left;width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;font-weight:normal");
@@ -566,6 +579,29 @@ async function getListKitPannelli()
             div.appendChild(span);
             
             pannelloContainer.appendChild(div);
+    
+            var checked = true;
+            /*if(pannello.numeri_cabina.length > 0)
+            {
+                for (let index1 = 0; index1 < numeri_cabina.length; index1++)
+                {
+                    const numero_cabinaLcl = numeri_cabina[index1];
+                    
+                    if(!pannello.numeri_cabina.includes(numero_cabinaLcl))
+                        checked = false;
+                }
+            }
+            else
+                checked = false;*/
+            if(checked)
+            {
+                var div = document.createElement("div");
+                div.setAttribute("class","pannelli-item-icon-container-pannello");
+                var icon = document.createElement("i");
+                icon.setAttribute("class","fas fa-check-circle");
+                div.appendChild(icon);
+                pannelloContainer.appendChild(div);
+            }
 
             kitContainer.appendChild(pannelloContainer);
 
@@ -790,6 +826,20 @@ function registraPannelloPrelievo(pannelloContainer,lotto,disegno_cabina,kit,pos
                     
                     pannelloContainer.style.backgroundColor = backgroundColor;
 
+                    if(pannelloContainer.getElementsByClassName("pannelli-item-icon-container-pannello")[0] != null)
+                        pannelloContainer.getElementsByClassName("pannelli-item-icon-container-pannello")[0].remove();
+                    /*let checker = (arr, target) => target.every(v => arr.includes(v));
+                    console.log(numeri_cabina, numeri_cabina_pannello)
+                    if(numeri_cabina_pannello.length > 0 && checker(numeri_cabina, numeri_cabina_pannello))
+                    {
+                        var div = document.createElement("div");
+                        div.setAttribute("class","pannelli-item-icon-container-pannello");
+                        var icon = document.createElement("i");
+                        icon.setAttribute("class","fas fa-check-circle");
+                        div.appendChild(icon);
+                        pannelloContainer.appendChild(div);
+                    }*/
+
                     //per passare al prossimo se tutti sono colorati
                     if(parseInt(responseObj.n) == parseInt(document.getElementById("pannelliContainer"+kit+posizione).getElementsByClassName("pannelli-item").length))
                     {
@@ -859,6 +909,8 @@ function eliminaPannelloPrelievo(pannelloContainer,lotto,disegno_cabina,kit,posi
             {
                 pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit+"','"+posizione+"');registraPannelloPrelievo(this,'"+lotto+"','"+disegno_cabina+"','"+kit+"','"+posizione+"','"+codice_pannello+"',"+i+")");
                 pannelloContainer.style.backgroundColor = "#404040";
+                if(pannelloContainer.getElementsByClassName("pannelli-item-icon-container-pannello")[0] != null)
+                    pannelloContainer.getElementsByClassName("pannelli-item-icon-container-pannello")[0].remove();
                 Swal.close();
             }
         }

@@ -277,7 +277,7 @@ body
     border-radius: 4px;
     padding:0px;
     padding-left:10px;
-    padding-right:10px;
+    /*padding-right:10px;*/
 }
 .lotti-item span,.cabine-item span
 {
@@ -429,6 +429,22 @@ body
     letter-spacing: 2px;
     color: white;
     font-size: 14px;
+}
+.pannelli-item-icon-container-pannello
+{
+    margin-left:auto;
+    background-color:white;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border: 2px solid white;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
+.pannelli-item-icon-container-pannello i
+{
+    color:#548CFF;
+    font-size:18px;
 }
 .pannelli-item-scroll-buttons-container
 {
