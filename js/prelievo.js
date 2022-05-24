@@ -579,20 +579,14 @@ async function getListKitPannelli()
             div.appendChild(span);
             
             pannelloContainer.appendChild(div);
-    
-            var checked = true;
-            /*if(pannello.numeri_cabina.length > 0)
+
+            var checked = false;
+            if(pannello.numeri_cabina.length > 0)
             {
-                for (let index1 = 0; index1 < numeri_cabina.length; index1++)
-                {
-                    const numero_cabinaLcl = numeri_cabina[index1];
-                    
-                    if(!pannello.numeri_cabina.includes(numero_cabinaLcl))
-                        checked = false;
-                }
+                let checker = (arr, target) => target.every(v => arr.includes(v));
+                if(checker(pannello.numeri_cabina, numeri_cabina))
+                    checked=true;
             }
-            else
-                checked = false;*/
             if(checked)
             {
                 var div = document.createElement("div");
@@ -828,9 +822,15 @@ function registraPannelloPrelievo(pannelloContainer,lotto,disegno_cabina,kit,pos
 
                     if(pannelloContainer.getElementsByClassName("pannelli-item-icon-container-pannello")[0] != null)
                         pannelloContainer.getElementsByClassName("pannelli-item-icon-container-pannello")[0].remove();
-                    /*let checker = (arr, target) => target.every(v => arr.includes(v));
-                    console.log(numeri_cabina, numeri_cabina_pannello)
-                    if(numeri_cabina_pannello.length > 0 && checker(numeri_cabina, numeri_cabina_pannello))
+
+                    var checked = false;
+                    if(numeri_cabina_pannello.length > 0)
+                    {
+                        let checker = (arr, target) => target.every(v => arr.includes(v));
+                        if(checker(numeri_cabina_pannello, numeri_cabina))
+                            checked=true;
+                    }
+                    if(checked)
                     {
                         var div = document.createElement("div");
                         div.setAttribute("class","pannelli-item-icon-container-pannello");
@@ -838,7 +838,7 @@ function registraPannelloPrelievo(pannelloContainer,lotto,disegno_cabina,kit,pos
                         icon.setAttribute("class","fas fa-check-circle");
                         div.appendChild(icon);
                         pannelloContainer.appendChild(div);
-                    }*/
+                    }
 
                     //per passare al prossimo se tutti sono colorati
                     if(parseInt(responseObj.n) == parseInt(document.getElementById("pannelliContainer"+kit+posizione).getElementsByClassName("pannelli-item").length))

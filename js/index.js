@@ -884,13 +884,110 @@ window.addEventListener("keydown", async function(event)
             {
                 if(stazione.nome == "traversine")
                 {
+                    Swal.fire
+                    ({
+                        width:"100%",
+                        background:"transparent",
+                        title:"Caricamento in corso...",
+                        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+                        allowOutsideClick:false,
+                        showCloseButton:false,
+                        showConfirmButton:false,
+                        allowEscapeKey:false,
+                        showCancelButton:false,
+                        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+                    });
+
+                    kitSelezionato=getFirstObjByPropValue(kit,"number",focused);
+
                     if(raggruppaKit=="true")
-                        eliminaRegistrazioneAvanzamentoKitRaggruppati(focused);
+                        var cabine_lcl = await getOccorrenzeKitLotto(lottoSelezionato.lotto,kitSelezionato.kit,kitSelezionato.posizioni);
                     else
-                        eliminaRegistrazioneAvanzamentoKit(focused);
+                        var cabine_lcl = await getOccorrenzeKitLotto(lottoSelezionato.lotto,kitSelezionato.kit,[{posizione:kitSelezionato.posizione}]);
+                    if(cabine_lcl.length>1)
+                    {
+                        Swal.fire
+                        ({
+                            icon:"question",
+                            title: 'Vuoi eliminare la registrazione del kit '+kitSelezionato.kit+' per tutte le '+cabine_lcl.length+' cabine ('+cabina_corridoioSelezionato.disegno_cabina+') del lotto '+lottoSelezionato.lotto+'?',
+                            showCloseButton: false,
+                            showConfirmButton:true,
+                            showCancelButton:true,
+                            width:"40%",
+                            confirmButtonText:"Tutte le cabine [BKS]",
+                            cancelButtonText:"Solo la cabina "+cabina_corridoioSelezionato.numero_cabina+" [CTRL]",
+                            cancelButtonColor:"gray",
+                            background:"#353535",
+                            onOpen : function()
+                                    {
+                                        document.getElementsByClassName("swal2-close")[0].style.outline="none";
+                                        document.getElementsByClassName("swal2-title")[0].style.fontSize="18px";
+
+                                        try
+                                        {
+                                            document.getElementsByClassName("swal2-popup")[0].addEventListener("keydown", async function(event)
+                                            {
+                                                var keyCode=event.keyCode;
+                                                switch (keyCode) 
+                                                {
+                                                    case 8://BKS
+                                                        event.preventDefault();
+                                                        if(raggruppaKit=="true")
+                                                            eliminaRegistrazioneAvanzamentoKitRaggruppati(cabine_lcl);
+                                                        else
+                                                            eliminaRegistrazioneAvanzamentoKit(cabine_lcl);
+                                                    break;
+                                                    case 17://CTRL
+                                                        event.preventDefault();
+                                                        if(raggruppaKit=="true")
+                                                        {
+                                                            var cabine_lcl_2=[];
+                                                            kitSelezionato.posizioni.forEach(posizione =>
+                                                            {
+                                                                var cabina_lcl_2=
+                                                                {
+                                                                    "numero_cabina":cabina_corridoioSelezionato.numero_cabina,
+                                                                    "posizione":posizione.posizione
+                                                                }
+                                                                cabine_lcl_2.push(cabina_lcl_2);
+                                                            });
+                                                            eliminaRegistrazioneAvanzamentoKitRaggruppati(cabine_lcl_2);
+                                                        }
+                                                        else
+                                                            eliminaRegistrazioneAvanzamentoKit([{numero_cabina:cabina_corridoioSelezionato.numero_cabina}]);
+                                                    break;
+                                                    case 27://ESC
+                                                        event.preventDefault();
+                                                        Swal.close();
+                                                    break;
+                                                }
+                                            });
+                                        } catch (error) {}
+                                    },
+                        });
+                    }
+                    else
+                    {
+                        if(raggruppaKit=="true")
+                        {
+                            var cabine_lcl_2=[];
+                            kitSelezionato.posizioni.forEach(posizione =>
+                            {
+                                var cabina_lcl_2=
+                                {
+                                    "numero_cabina":cabina_corridoioSelezionato.numero_cabina,
+                                    "posizione":posizione.posizione
+                                }
+                                cabine_lcl_2.push(cabina_lcl_2);
+                            });
+                            eliminaRegistrazioneAvanzamentoKitRaggruppati(cabine_lcl_2);
+                        }
+                        else
+                            eliminaRegistrazioneAvanzamentoKit([{numero_cabina:cabina_corridoioSelezionato.numero_cabina}]);
+                    }
                 }
                 else
-                    eliminaRegistrazioneAvanzamentoKit(focused);
+                    eliminaRegistrazioneAvanzamentoKit([{numero_cabina:cabina_corridoioSelezionato.numero_cabina}]);
             }
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_mostra_misure_traversine").valore):
@@ -1062,7 +1159,7 @@ window.addEventListener("keydown", async function(event)
                                     Swal.fire
                                     ({
                                         icon:"question",
-                                        title: 'Vuoi registrare il kit '+kitSelezionato.kit+' per tutte le '+cabine_lcl.length+' cabine del lotto '+lottoSelezionato.lotto+'?',
+                                        title: 'Vuoi registrare il kit '+kitSelezionato.kit+' per tutte le '+cabine_lcl.length+' cabine ('+cabina_corridoioSelezionato.disegno_cabina+') del lotto '+lottoSelezionato.lotto+'?',
                                         showCloseButton: false,
                                         showConfirmButton:true,
                                         showCancelButton:true,
@@ -1302,18 +1399,31 @@ function scrollright()
             iframe.contentWindow.document.getElementById("viewerContainer").scrollLeft+=50;
     } catch (error) {}
 }
-function eliminaRegistrazioneAvanzamentoKitRaggruppati(number)
+function eliminaRegistrazioneAvanzamentoKitRaggruppati(cabine_lcl)
 {
-    kitSelezionato=getFirstObjByPropValue(kit,"number",number);
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
+    kitSelezionato=getFirstObjByPropValue(kit,"number",focused);
 
     var lotto=lottoSelezionato.lotto;
-    var cabina=cabina_corridoioSelezionato.numero_cabina;
     var id_stazione=stazione.id_stazione;
 
     $.get("eliminaRegistrazioneAvanzamentoKitRaggruppati.php",
     {
         lotto,
-        cabina,
+        cabine:cabine_lcl,
         posizioni:kitSelezionato.posizioni,
         id_stazione
     },
@@ -1321,6 +1431,7 @@ function eliminaRegistrazioneAvanzamentoKitRaggruppati(number)
     {
         if(status=="success")
         {
+            Swal.close();
             if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
             {
                 Swal.fire
@@ -1350,18 +1461,31 @@ function eliminaRegistrazioneAvanzamentoKitRaggruppati(number)
         }
     });
 }
-async function eliminaRegistrazioneAvanzamentoKit(number)
+async function eliminaRegistrazioneAvanzamentoKit(cabine_lcl)
 {
-    kitSelezionato=getFirstObjByPropValue(kit,"number",number);
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
+    kitSelezionato=getFirstObjByPropValue(kit,"number",focused);
 
     var lotto=lottoSelezionato.lotto;
-    var cabina=cabina_corridoioSelezionato.numero_cabina;
     var id_stazione=stazione.id_stazione;
 
     $.get("eliminaRegistrazioneAvanzamentoKit.php",
     {
         lotto,
-        cabina,
+        cabine:cabine_lcl,
         posizione:kitSelezionato.posizione,
         id_stazione
     },
@@ -1369,6 +1493,7 @@ async function eliminaRegistrazioneAvanzamentoKit(number)
     {
         if(status=="success")
         {
+            Swal.close();
             if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
             {
                 Swal.fire
@@ -1554,11 +1679,32 @@ function selectCabinaCorridoio(number)
 {
     cabina_corridoioSelezionato=getFirstObjByPropValue(cabine_corridoi,"number",number);
     if(cabina_corridoioSelezionato.tipo=="cabina")
-        document.getElementById("labelCabinaCorridoioSelezionato").innerHTML=cabina_corridoioSelezionato.tipo.charAt(0).toUpperCase() + cabina_corridoioSelezionato.tipo.slice(1)+` <b>`+cabina_corridoioSelezionato.numero_cabina+` ${dot} `+cabina_corridoioSelezionato.disegno_cabina+`</b>`;
+        document.getElementById("labelCabinaCorridoioSelezionato").innerHTML=cabina_corridoioSelezionato.tipo.charAt(0).toUpperCase() + cabina_corridoioSelezionato.tipo.slice(1)+` <b>`+cabina_corridoioSelezionato.numero_cabina+` ${dot} `+cabina_corridoioSelezionato.disegno_cabina+`</b> `+[...new Set(cabina_corridoioSelezionato.numeri_cabina)].join(", ");
     else
-        document.getElementById("labelCabinaCorridoioSelezionato").innerHTML=cabina_corridoioSelezionato.tipo.charAt(0).toUpperCase() + cabina_corridoioSelezionato.tipo.slice(1)+` <b>`+cabina_corridoioSelezionato.numero_cabina+`</b>`;
+        document.getElementById("labelCabinaCorridoioSelezionato").innerHTML=cabina_corridoioSelezionato.tipo.charAt(0).toUpperCase() + cabina_corridoioSelezionato.tipo.slice(1)+` <b>`+cabina_corridoioSelezionato.numero_cabina+`</b> `+[...new Set(cabina_corridoioSelezionato.numeri_cabina)].join(", ");
 
     getListKit(true);
+}
+function getInfoCabinaCorridoioSelezionato()
+{
+    if(cabina_corridoioSelezionato != null)
+    {
+        Swal.fire
+        ({
+            icon:"warning",
+            title: 'Cabine con disegno '+cabina_corridoioSelezionato.disegno_cabina,
+            html: [...new Set(cabina_corridoioSelezionato.numeri_cabina)].join(", "),
+            showCloseButton: true,
+            showConfirmButton:false,
+            showCancelButton:false,
+            background:"#353535",
+            onOpen : function()
+                    {
+                        document.getElementsByClassName("swal2-close")[0].style.outline="none";
+                        document.getElementsByClassName("swal2-title")[0].style.fontSize="18px";
+                    }
+        });
+    }
 }
 async function getListKit(cleanFocused,callback)
 {
@@ -1809,7 +1955,7 @@ async function getListKit(cleanFocused,callback)
         for (let index = 0; index < kitItems.length; index++)
         {
             const kitItem = kitItems[index];
-            var height=kitItem.offsetHeight;
+            var height=kitItem.getElementsByTagName("div")[0].offsetHeight;
             if(mostraMisureTraversine=="true")
                 height+=kitItem.getElementsByClassName("misure-traversine-table")[0].offsetHeight;
             if(raggruppaKit=="true")
@@ -2039,6 +2185,21 @@ async function getListCabineECorridoi(cleanFocused)
 
     var i=1;
     cabine_corridoi=await getCabineECorridoi(lottoSelezionato.lotto,lottoSelezionato.commessa);
+    if(stazione.nome == "traversine")
+    {
+        function compare( a, b )
+        {
+            if ( a.disegno_cabina < b.disegno_cabina ){
+                return -1;
+            }
+            if ( a.disegno_cabina > b.disegno_cabina ){
+                return 1;
+            }
+            return 0;
+        }
+            
+        cabine_corridoi.sort( compare );
+    }
     cabine_corridoi.forEach(function (cabina_corridoio)
     {
         if(i<10)
@@ -2792,116 +2953,137 @@ async function getPopupRaggruppamentoTraversine()
 
     var data=await getRaggruppamentoTraversine();
 
-    var tableContainer=document.createElement("div");
-    tableContainer.setAttribute("class","raggruppamento-traversine-table-container");
-
-    var headers=
-    [
-        "POS",
-        "LUNG",
-        "CODMAT",
-        "CODKIT",
-        "LOTTO",
-        "QNT_CABINE",
-        "CABINE"
-    ];
-
-    var table_width = 1710;
-    var col_widths = [((table_width - 30) * 5)/100,((table_width - 30) * 5)/100,((table_width - 30) * 10)/100,((table_width - 30) * 10)/100,((table_width - 30) * 10)/100,((table_width - 30) * 10)/100,((table_width - 30) * 50)/100];
+    if(data.length == 0)
+    {
+        Swal.fire
+        ({
+            icon:"warning",
+            title: 'Nessuna riga trovata',
+            showCloseButton: true,
+            showConfirmButton:false,
+            showCancelButton:false,
+            background:"#353535",
+            onOpen : function()
+                    {
+                        document.getElementsByClassName("swal2-close")[0].style.outline="none";
+                        document.getElementsByClassName("swal2-title")[0].style.fontSize="18px";
+                    },
+        });
+    }
+    else
+    {
+        var tableContainer=document.createElement("div");
+        tableContainer.setAttribute("class","raggruppamento-traversine-table-container");
     
-    var raggruppamentoTraversineTable=document.createElement("table");
-    raggruppamentoTraversineTable.setAttribute("id","raggruppamentoTraversineTable");
-    raggruppamentoTraversineTable.setAttribute("style","width:"+table_width+"px");
-
-    var thead=document.createElement("thead");
-    var tr=document.createElement("tr");
-    var i = 0;
-    headers.forEach(function (header)
-    {
-        var th=document.createElement("th");
-        th.setAttribute("class","raggruppamentoTraversineTableCell"+header);
-        if(ordinamentoRaggruppamentoTraversineTable==i)
-            th.setAttribute("style","text-decoration:underline;color:#548CFF;width:"+col_widths[i]+"px");
-        else
-            th.setAttribute("style","width:"+col_widths[i]+"px");
-        th.innerHTML=header;
-        tr.appendChild(th);
-        i++;
-    });
-    thead.appendChild(tr);
-    raggruppamentoTraversineTable.appendChild(thead);
-
-    var tbody=document.createElement("tbody");
-    var i=0;
-    data.forEach(function (row)
-    {
+        var headers=
+        [
+            "POS",
+            "LUNG",
+            "CODMAT",
+            "CODKIT",
+            "LOTTO",
+            "QNT_CABINE",
+            "CABINE",
+            "DISEGNO_CABINA"
+        ];
+    
+        var table_width = 1710;
+        var col_widths = [((table_width - 30) * 5)/100,((table_width - 30) * 5)/100,((table_width - 30) * 10)/100,((table_width - 30) * 10)/100,((table_width - 30) * 10)/100,((table_width - 30) * 10)/100,((table_width - 30) * 40)/100,((table_width - 30) * 10)/100];
+        
+        var raggruppamentoTraversineTable=document.createElement("table");
+        raggruppamentoTraversineTable.setAttribute("id","raggruppamentoTraversineTable");
+        raggruppamentoTraversineTable.setAttribute("style","width:"+table_width+"px");
+    
+        var thead=document.createElement("thead");
         var tr=document.createElement("tr");
-        var j = 0;
+        var i = 0;
         headers.forEach(function (header)
         {
-            var td=document.createElement("td");
-            td.setAttribute("class","raggruppamentoTraversineTableCell"+header);
-            td.setAttribute("style","width:"+col_widths[j]+"px");
-            td.innerHTML=row[header];
-            tr.appendChild(td);
-            j++;
+            var th=document.createElement("th");
+            th.setAttribute("class","raggruppamentoTraversineTableCell"+header);
+            if(ordinamentoRaggruppamentoTraversineTable==i)
+                th.setAttribute("style","text-decoration:underline;color:#548CFF;width:"+col_widths[i]+"px;min-width:"+col_widths[i]+"px;max-width:"+col_widths[i]+"px");
+            else
+                th.setAttribute("style","width:"+col_widths[i]+"px;min-width:"+col_widths[i]+"px;max-width:"+col_widths[i]+"px");
+            th.innerHTML=header;
+            tr.appendChild(th);
+            i++;
         });
-        tbody.appendChild(tr);
-        i++;
-    });
-    raggruppamentoTraversineTable.appendChild(tbody);
-
-    tableContainer.appendChild(raggruppamentoTraversineTable);
-
-    Swal.fire
-    ({
-        html: tableContainer.outerHTML,
-        showConfirmButton:false,
-        showCloseButton:false,
-        allowEscapeKey:true,
-        allowOutsideClick:true,
-        onOpen : function()
-                {
-                    document.getElementsByClassName("swal2-title")[0].remove();
-                    document.getElementsByClassName("swal2-popup")[0].style.padding="0px";
-                    document.getElementsByClassName("swal2-popup")[0].style.borderRadius="4px";
-                    document.getElementsByClassName("swal2-popup")[0].style.width=table_width+"px";
-
-                    sortRaggruppamentoTraversineTable();
-					
-					try
-					{
-						document.getElementsByClassName("swal2-popup")[0].addEventListener("keydown", async function(event)
-						{
-							var keyCode=event.keyCode;
-							switch (keyCode) 
-							{
-								case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","scorri_giu_di_1").valore):
-									event.preventDefault();
-									document.getElementById("raggruppamentoTraversineTable").getElementsByTagName("tbody")[0].scroll(0,document.getElementById("raggruppamentoTraversineTable").getElementsByTagName("tbody")[0].scrollTop+50)
-								break;
-								case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","scorri_su_di_1").valore):
-									event.preventDefault();
-									document.getElementById("raggruppamentoTraversineTable").getElementsByTagName("tbody")[0].scroll(0,document.getElementById("raggruppamentoTraversineTable").getElementsByTagName("tbody")[0].scrollTop-50)
-								break;
-                                case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_ordinamento").valore):
-                                    event.preventDefault();
-                                    
-                                    if((ordinamentoRaggruppamentoTraversineTable) == (headers.length - 1))
-                                        ordinamentoRaggruppamentoTraversineTable = 0;
-                                    else
-                                        ordinamentoRaggruppamentoTraversineTable++;
-
-                                    sortRaggruppamentoTraversineTable();
-                                break;
-                            }
-						});
-					} catch (error) {}
-                }
-    }).then((result) => 
-    {
-        popupRaggruppamentoTraversine=false;
-    });
+        thead.appendChild(tr);
+        raggruppamentoTraversineTable.appendChild(thead);
+    
+        var tbody=document.createElement("tbody");
+        var i=0;
+        data.forEach(function (row)
+        {
+            var tr=document.createElement("tr");
+            var j = 0;
+            headers.forEach(function (header)
+            {
+                var td=document.createElement("td");
+                td.setAttribute("class","raggruppamentoTraversineTableCell"+header);
+                td.setAttribute("style","width:"+col_widths[j]+"px;min-width:"+col_widths[j]+"px;max-width:"+col_widths[j]+"px");
+                td.innerHTML=row[header];
+                tr.appendChild(td);
+                j++;
+            });
+            tbody.appendChild(tr);
+            i++;
+        });
+        raggruppamentoTraversineTable.appendChild(tbody);
+    
+        tableContainer.appendChild(raggruppamentoTraversineTable);
+    
+        Swal.fire
+        ({
+            html: tableContainer.outerHTML,
+            showConfirmButton:false,
+            showCloseButton:false,
+            allowEscapeKey:true,
+            allowOutsideClick:true,
+            onOpen : function()
+                    {
+                        document.getElementsByClassName("swal2-title")[0].remove();
+                        document.getElementsByClassName("swal2-popup")[0].style.padding="0px";
+                        document.getElementsByClassName("swal2-popup")[0].style.borderRadius="4px";
+                        document.getElementsByClassName("swal2-popup")[0].style.width=table_width+"px";
+    
+                        sortRaggruppamentoTraversineTable();
+                        
+                        try
+                        {
+                            document.getElementsByClassName("swal2-popup")[0].addEventListener("keydown", async function(event)
+                            {
+                                var keyCode=event.keyCode;
+                                switch (keyCode) 
+                                {
+                                    case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","scorri_giu_di_1").valore):
+                                        event.preventDefault();
+                                        document.getElementById("raggruppamentoTraversineTable").getElementsByTagName("tbody")[0].scroll(0,document.getElementById("raggruppamentoTraversineTable").getElementsByTagName("tbody")[0].scrollTop+50)
+                                    break;
+                                    case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","scorri_su_di_1").valore):
+                                        event.preventDefault();
+                                        document.getElementById("raggruppamentoTraversineTable").getElementsByTagName("tbody")[0].scroll(0,document.getElementById("raggruppamentoTraversineTable").getElementsByTagName("tbody")[0].scrollTop-50)
+                                    break;
+                                    case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_ordinamento").valore):
+                                        event.preventDefault();
+                                        
+                                        if((ordinamentoRaggruppamentoTraversineTable) == (headers.length - 1))
+                                            ordinamentoRaggruppamentoTraversineTable = 0;
+                                        else
+                                            ordinamentoRaggruppamentoTraversineTable++;
+    
+                                        sortRaggruppamentoTraversineTable();
+                                    break;
+                                }
+                            });
+                        } catch (error) {}
+                    }
+        }).then((result) => 
+        {
+            popupRaggruppamentoTraversine=false;
+        });
+    }
 }
 function sortRaggruppamentoTraversineTable()
 {
@@ -2968,7 +3150,8 @@ function getRaggruppamentoTraversine()
         {
             JSONkit,
             lotto:lottoSelezionato.lotto,
-            cabina:cabina_corridoioSelezionato.numero_cabina
+            cabina:cabina_corridoioSelezionato.numero_cabina,
+            disegno_cabina:cabina_corridoioSelezionato.disegno_cabina
         },
         function(response, status)
         {
@@ -3190,7 +3373,7 @@ function getOccorrenzeKitLotto(lotto,kit,posizioni)
 {
     return new Promise(function (resolve, reject) 
     {
-        $.get("getOccorrenzeKitLotto.php",{lotto,kit,posizioni},
+        $.get("getOccorrenzeKitLotto.php",{lotto,kit,posizioni,disegno_cabina:cabina_corridoioSelezionato.disegno_cabina},
         function(response, status)
         {
             if(status=="success")

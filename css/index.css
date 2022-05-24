@@ -225,6 +225,7 @@ input[type=number]::-webkit-outer-spin-button {
     border-collapse: collapse;
     margin-right: 40px;
     margin-left: 40px;
+    color:#ddd;
 }
 .misure-traversine-table th
 {
@@ -232,7 +233,6 @@ input[type=number]::-webkit-outer-spin-button {
     font-family: 'Questrial', sans-serif;
     font-weight: normal;
     font-size: 16px;
-    color:gray;
     text-align: left;
     padding:5px;
 }
@@ -242,7 +242,6 @@ input[type=number]::-webkit-outer-spin-button {
     font-family: 'Questrial', sans-serif;
     font-weight: normal;
     font-size: 16px;
-    color:#ddd;
     text-align: left;
     padding:5px;
 }
@@ -252,6 +251,10 @@ input[type=number]::-webkit-outer-spin-button {
     background-color: #494949;
     color:#548CFF;
     text-shadow: 2px 4px 3px rgb(0 0 0 / 30%);
+}
+.kit-item:focus table
+{
+    color:#548CFF;
 }
 .lotti-item:active,.cabine_corridoi-item:active,.kit-item:active
 {
@@ -448,6 +451,7 @@ input[type=number]::-webkit-outer-spin-button {
     font-size:14px;
     padding:10px;
     word-wrap: break-word;
+    line-height: 20px;
 }
 /*-------------------------------------------------------*/
 .popup-ricerca-pannello-outer-container
