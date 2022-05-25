@@ -318,9 +318,20 @@ async function getListCarrelli()
     document.getElementById("listButtonIndietro").disabled=false;
 
     container.innerHTML="";
+	
+	for(var i=0;i<carrelli.length;i++)
+    {
+		var carrello = carrelli[i];
+		
+		carrello.id_CODCAR = carrello.id_CODCAR.replace(/(?:\r\n|\r|\n)/g,'');
+		carrello.CODCAR = carrello.CODCAR.replace(/(?:\r\n|\r|\n)/g,'');
+	}
 
     carrelli.forEach(function (carrello)
     {
+		carrello.id_CODCAR = carrello.id_CODCAR.replace(/(?:\r\n|\r|\n)/g,'');
+		carrello.CODCAR = carrello.CODCAR.replace(/(?:\r\n|\r|\n)/g,'');
+		
         var item=document.createElement("button");
         item.setAttribute("class","carrelli-item");
         item.setAttribute("style","flex-direction: column;align-items: flex-start;justify-content: space-evenly;height: 50px;min-height: 50px;");
@@ -412,7 +423,6 @@ async function getListComponenti()
 
     var i=1;
     componenti=await getComponenti(carrelloSelezionato.CODCAR,lottoSelezionato.lotto);
-    console.log(componenti);
 
     document.getElementById("listButtonIndietro").disabled=false;
 
@@ -759,6 +769,72 @@ function listScrolldown()
 {
     document.getElementById("listInnerContainer").scrollTop = document.getElementById("listInnerContainer").scrollTop+45;
 }
+function generaPdfChecklist()
+{
+    setTimeout(() =>
+    {
+        html2canvas(document.querySelector("#printOuterContainer")).then(canvas =>
+        {
+            document.getElementById("printCanvasContainer").appendChild(canvas);
+
+            var canvasEl = document.getElementsByTagName('canvas')[0];
+
+            var imgData = canvasEl.toDataURL("image/jpeg", 1.0);
+            var pdf = new jsPDF();
+
+            pdf.addImage(imgData, 'JPEG', 0, 0);
+            //pdf.save("download.pdf");
+
+            //--------------------------------------------------------------------------------
+
+            function dataURLtoFile(dataurl, filename)
+            {
+                var arr = dataurl.split(','),
+                    mime = arr[0].match(/:(.*?);/)[1],
+                    bstr = atob(arr[1]), 
+                    n = bstr.length, 
+                    u8arr = new Uint8Array(n);
+                    
+                while(n--){
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                
+                return new File([u8arr], filename, {type:mime});
+            }
+
+            var currentdate = new Date(); 
+            var datetime = currentdate.getDate() + "."
+                            + (currentdate.getMonth()+1)  + "." 
+                            + currentdate.getFullYear() + "-"  
+                            + currentdate.getHours() + "."  
+                            + currentdate.getMinutes() + "." 
+                            + currentdate.getSeconds();
+            
+            var file = dataURLtoFile(pdf.output('datauristring'),'checklist_' + lottoSelezionato.lotto + '_' + carrelloSelezionato.CODCAR + '_' + datetime + '.pdf');
+
+            //--------------------------------------------------------------------------------
+
+            var data= new FormData();
+            data.append('file',file);
+            $.ajax
+            ({
+                url:'uploadPdfChecklist.php',
+                data:data,
+                processData:false,
+                contentType:false,
+                type:'POST',
+                success:function(response)
+                    {
+                        if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+                        {
+                            Swal.fire({icon:"error",title: "Errore. Impossibile salvare copia della checklist. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="16px";}});
+                            console.log(response);
+                        }
+                    }
+            });
+        });
+    }, 500);
+}
 async function stampaChecklist()
 {
     if(lottoSelezionato != null && carrelloSelezionato != null)
@@ -775,6 +851,9 @@ async function stampaChecklist()
             onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="white";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";document.getElementsByClassName("swal2-close")[0].style.outline="none";}
         });
 
+        document.getElementById("printOuterContainer").innerHTML="";
+        document.getElementById("printCanvasContainer").innerHTML="";
+
         var componentiChecklist = await getComponentiStampaChecklist();
     
         var server_adress=await getServerValue("SERVER_ADDR");
@@ -789,10 +868,6 @@ async function stampaChecklist()
     
         printWindow.document.body.style.backgroundColor="white";
         printWindow.document.body.style.overflow="hidden";
-    
-        var style=document.createElement("script");
-        style.innerHTML="@media print {.pagebreak { page-break-before: always; }}";
-        printWindow.document.head.appendChild(style);
     
         var outerContainer=document.createElement("div");
         outerContainer.setAttribute("id","printContainer");
@@ -933,13 +1008,15 @@ async function stampaChecklist()
     
             i++;
         });
-    
-        //---------
+
+        const outerContainerClone = outerContainer.cloneNode(true);
+        document.getElementById("printOuterContainer").appendChild(outerContainerClone);
+        generaPdfChecklist();
     
         var script=document.createElement("script");
         script.innerHTML="setTimeout(function(){window.print();}, 500);";
         outerContainer.appendChild(script);
-        
+
         printWindow.document.body.appendChild(outerContainer);
     
         Swal.close();
