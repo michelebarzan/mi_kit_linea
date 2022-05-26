@@ -12,6 +12,7 @@ var ordinamentoKit;
 var mostraMisureTraversine;
 var raggruppaKit;
 var filtroAvanzamento;
+var filtroLinea;
 var turno;
 var linea;
 var stazione;
@@ -150,6 +151,20 @@ window.addEventListener("load", async function(event)
         filtroAvanzamento="inattivo";
     setFiltroAvanzamentoLabel();
 
+    if(stazione.nome=="traversine")
+    {
+        filtroLinea="inattivo";
+        document.getElementById("filtroLineaContainer").style.display="none";
+    }
+    else
+    {
+        document.getElementById("filtroLineaContainer").style.display="";
+        filtroLinea=await getCookie("filtroLinea");
+        if(filtroLinea=="")
+            filtroLinea="inattivo";
+        setFiltroLineaLabel();
+    }
+
     dot=document.title;
     if(linea=="")
         document.title=stazione.label;
@@ -261,6 +276,14 @@ function setFiltroAvanzamentoLabel()
     if(filtroAvanzamento=="inattivo")
         document.getElementById("filtroAvanzamentoContainer").style.color="#DA6969";
 }
+function setFiltroLineaLabel()
+{
+    document.getElementById("filtroLineaContainer").innerHTML="Filtro linea "+filtroLinea;
+    if(filtroLinea=="attivo")
+        document.getElementById("filtroLineaContainer").style.color="#548CFF";
+    if(filtroLinea=="inattivo")
+        document.getElementById("filtroLineaContainer").style.color="#DA6969";
+}
 function toggleFiltroAvanzamento()
 {
     if(stazione.nome == "traversine" && view=="kit")
@@ -286,6 +309,32 @@ function toggleFiltroAvanzamento()
 
     if(view=="kit")
         getListKit(true);
+    if(view=="cabine_corridoi")
+        getListCabineECorridoi(true);
+}
+function toggleFiltroLinea()
+{
+    if(stazione.nome == "traversine" && view=="kit")
+    {
+        if(raggruppaKit=="false")
+        {
+            if(filtroLinea=="attivo")
+                filtroLinea="inattivo";
+            else
+                filtroLinea="attivo";
+        }
+    }
+    else
+    {
+        if(filtroLinea=="attivo")
+            filtroLinea="inattivo";
+        else
+            filtroLinea="attivo";
+    }
+
+    setCookie("filtroLinea",filtroLinea);
+    setFiltroLineaLabel();
+
     if(view=="cabine_corridoi")
         getListCabineECorridoi(true);
 }
@@ -1071,6 +1120,8 @@ window.addEventListener("keydown", async function(event)
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_filtro_linea").valore):
             event.preventDefault();
+            if(stazione.nome!="traversine")
+                toggleFiltroLinea();
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","cambia_filtro_stazione").valore):
             event.preventDefault();
@@ -2380,6 +2431,7 @@ function getCabineECorridoi(lotto,commessa)
 {
     return new Promise(function (resolve, reject) 
     {
+        console.log(linea.id_linea);
         var id_turno=turno.id_turno;
         $.get("getCabineECorridoi.php",
         {
@@ -2387,6 +2439,8 @@ function getCabineECorridoi(lotto,commessa)
             commessa,
             id_turno,
             filtroAvanzamento,
+            filtroLinea,
+            id_linea:linea.id_linea,
             stazione:stazione.id_stazione
         },
         function(response, status)
