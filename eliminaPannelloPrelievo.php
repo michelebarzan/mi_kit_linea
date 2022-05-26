@@ -15,11 +15,7 @@
     {
         $query0="DELETE FROM dbo.pannelli_prelievo WHERE lotto='$lotto' AND disegno_cabina='$disegno_cabina' AND kit='$kit' AND posizione='$posizione' AND codice_pannello='$codice_pannello' AND i=$i AND numero_cabina='$numero_cabina'";
         $result0=sqlsrv_query($conn,$query0);
-        if($result0==TRUE)
-        {
-            
-        }
-        else
+        if(!$result0)
             die("error");
     }
 

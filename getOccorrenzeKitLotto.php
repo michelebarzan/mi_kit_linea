@@ -5,6 +5,7 @@
     $kit = $_REQUEST["kit"];
     $posizioni = $_REQUEST["posizioni"];
     $lotto = $_REQUEST["lotto"];
+    $disegno_cabina = $_REQUEST["disegno_cabina"];
 
     $cabine=[];
 
@@ -14,11 +15,11 @@
 
         $query3="SELECT numero_cabina
                 FROM dbo.view_corridoi
-                WHERE (lotto = '$lotto') AND (kit = '$kit') AND (posizione = '$posizione')
+                WHERE (lotto = '$lotto') AND (kit = '$kit') AND (posizione = '$posizione') AND disegno_cabina = '$disegno_cabina'
                 UNION
                 SELECT numero_cabina
                 FROM dbo.view_cabine
-                WHERE (lotto = '$lotto') AND (kit = '$kit') AND (posizione = '$posizione')";
+                WHERE (lotto = '$lotto') AND (kit = '$kit') AND (posizione = '$posizione') AND disegno_cabina = '$disegno_cabina'";
         $result3=sqlsrv_query($conn,$query3);
         if($result3==TRUE)
         {
