@@ -9,7 +9,7 @@
 
     $componenti=[];
 
-    $query2="SELECT * FROM checklist WHERE lotto = '$lotto' AND codice_carrello = '$CODCAR' ORDER BY numero_cabina,posizione";
+    $query2="SELECT * FROM checklist WHERE lotto = '$lotto' AND codice_carrello LIKE '$CODCAR%' ORDER BY numero_cabina,posizione";
     $result2=sqlsrv_query($conn,$query2);
     if($result2==TRUE)
     {

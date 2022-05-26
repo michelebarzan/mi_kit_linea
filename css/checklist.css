@@ -15,6 +15,7 @@ html
     height:1080px;
     min-height:1080px;
     max-height:1080px;
+    overflow: hidden;
 }
 body
 {
@@ -26,6 +27,7 @@ body
     max-height:1080px;
     background-color: #1e1e1e;
     margin:0px;
+    overflow: hidden;
 }
 .structure-header
 {

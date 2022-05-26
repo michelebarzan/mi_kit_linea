@@ -4,7 +4,7 @@
 
     $lotti=[];
 
-    $query2="SELECT * FROM dbo.lotti WHERE producibile='true' and chiuso='false'";	
+    $query2="SELECT * FROM dbo.lotti WHERE producibile='true' and chiuso='false' ORDER BY commessa ASC,lotto ASC";	
     $result2=sqlsrv_query($conn,$query2);
     if($result2==TRUE)
     {

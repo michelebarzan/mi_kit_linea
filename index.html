@@ -10,6 +10,7 @@
     <link href="libs/css/fontawesome/css/all.css" rel="stylesheet">
     <script src="libs/js/sweetalert2.all.min.js"></script>
     <script src="libs/js/socket.io.js"></script>
+    <script src="libs/js/encodeCode128.js"></script>
 
     <script src="js/global.js"></script>
     <link href="css/global.css" rel="stylesheet">
@@ -20,6 +21,7 @@
 <body>
     <header class="structure-header">
         <div class="structure-header-inner-container" style="width:calc(50% - 60px);box-sizing:border-box;padding-right: 10px;">
+            <div id="filtroLineaContainer" class="info-filters-container"></div>
             <div id="filtroAvanzamentoContainer" class="info-filters-container"></div>
             <div id="ordinamentoContainer" style="display :none;" class="info-filters-container"></div>
             <div id="mostraMisureTraversineContainer" style="display :none;" class="info-filters-container"></div>
@@ -44,9 +46,9 @@
                         <i class="fad fa-layer-group"></i>
                         <span id="labelLottoSelezionato">Scegli un lotto</span>
                     </div>
-                    <div class="listTitleItemRow">
+                    <div class="listTitleItemRow" onclick = "getInfoCabinaCorridoioSelezionato()">
                         <i class="fal fa-cube"></i>
-                        <span id="labelCabinaCorridoioSelezionato">Scegli una cabina / un corridoio</span>
+                        <span id="labelCabinaCorridoioSelezionato" style="margin-right:10px;width:385px;min-width:385px;max-width:385px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">Scegli una cabina / un corridoio</span>
                     </div>
                 </div>
                 <input type="number" id="inputNumber">

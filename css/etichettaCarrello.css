@@ -25,11 +25,7 @@
 }
 .etichetta-barcode
 {
-	/*line-height: 70px;*/
 	width: 100%;
-	font-size:40px;
-	/*font-size:80px;*/
-	font-family: 'Libre Barcode 39 Extended', cursive;
 	overflow: hidden;
 }
 .etichetta-span

@@ -162,12 +162,14 @@ async function getListLotti()
     lottoSelezionato=null;
     document.getElementById("labelLottoSelezionato").innerHTML="Scegli un lotto";
     cabinaSelezionata=null;
-    document.getElementById("labelCabinaSelezionato").innerHTML="Scegli un cabina";
+    document.getElementById("labelCabinaSelezionata").innerHTML="Scegli un cabina";
 
     document.getElementById("pdfContainer").innerHTML="";
     iframe=null;
 
     var container=document.getElementById("listInnerContainer");
+    container.style.overflow="";
+    container.style.padding="";
     container.innerHTML='<div id="listInnerContainerSpinner"><i class="fad fa-spinner fa-spin"></i><span>Caricamento in corso...</span></div>';
 
     document.getElementById("listButtonIndietro").disabled=true;
@@ -258,9 +260,11 @@ async function getListCabine()
     iframe=null;
 
     cabinaSelezionata=null;
-    document.getElementById("labelCabinaSelezionato").innerHTML="Scegli un cabina";
+    document.getElementById("labelCabinaSelezionata").innerHTML="Scegli un cabina";
 
     var container=document.getElementById("listInnerContainer");
+    container.style.overflow="";
+    container.style.padding="";
     container.innerHTML='<div id="listInnerContainerSpinner"><i class="fad fa-spinner fa-spin"></i><span>Caricamento in corso...</span></div>';
 
     document.getElementById("listButtonIndietro").disabled=true;
@@ -279,9 +283,22 @@ async function getListCabine()
         item.setAttribute("style","flex-direction: column;align-items: flex-start;justify-content: space-evenly;height: 50px;min-height: 50px;");
         item.setAttribute("onclick","selectCabina('"+cabina.disegno_cabina+"')");
 
+        var div = document.createElement("div");
+        div.setAttribute("style","width:100%;display:flex;flex-direction:row;align-items:center;justify-content:flex-start");
+
         var span=document.createElement("span");
         span.innerHTML=cabina.disegno_cabina;
-        item.appendChild(span);
+        div.appendChild(span);
+
+        if(cabina.chiusa)
+        {
+            var fa=document.createElement("i");
+            fa.setAttribute("class","fad fa-check-circle");
+            fa.setAttribute("style","color:#70B085;font-size:17px;margin-left:auto;margin-right:7px");
+            div.appendChild(fa);
+        }
+
+        item.appendChild(div);
 
         var span=document.createElement("span");
         span.setAttribute("style","text-align:left;width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;font-weight:normal");
@@ -328,7 +345,7 @@ function getCabine(lotto,commessa)
 function selectCabina(disegno_cabina)
 {
     cabinaSelezionata=getFirstObjByPropValue(cabine,"disegno_cabina",disegno_cabina);
-    document.getElementById("labelCabinaSelezionato").innerHTML=`Cabina <b>`+cabinaSelezionata.disegno_cabina+`</b> ${dot} `+cabinaSelezionata.numeri_cabina.join(",");
+    document.getElementById("labelCabinaSelezionata").innerHTML=`Cabina <b>`+cabinaSelezionata.disegno_cabina+`</b> ${dot} `+cabinaSelezionata.numeri_cabina.join(",");
 
     getListPannelli();
 }
@@ -350,6 +367,26 @@ async function getListPannelli()
 
     view="pannelli";
 
+    var cookie_numeri_cabina={};
+    var cookie_numeri_cabina_string = await getCookie("cookie_numeri_cabina_string");
+    if(cookie_numeri_cabina_string != "" && cookie_numeri_cabina_string != null && cookie_numeri_cabina_string != undefined)
+        cookie_numeri_cabina = JSON.parse(cookie_numeri_cabina_string);
+
+    var is_undefined = true;
+    if(cookie_numeri_cabina[lottoSelezionato.lotto] != undefined)
+    {
+        if(cookie_numeri_cabina[lottoSelezionato.lotto][cabinaSelezionata.disegno_cabina] != undefined)
+        {
+            is_undefined = false;
+        }
+    }
+    if(is_undefined)
+    {
+        cookie_numeri_cabina[lottoSelezionato.lotto] = {}
+        cookie_numeri_cabina[lottoSelezionato.lotto][cabinaSelezionata.disegno_cabina] = cabinaSelezionata.numeri_cabina;
+        setCookie("cookie_numeri_cabina_string",JSON.stringify(cookie_numeri_cabina));
+    }
+
     document.getElementById("totaliPrelievoLabel").innerHTML="";
     document.getElementById("totaliPrelievoLabel").style.display="";
 
@@ -357,17 +394,78 @@ async function getListPannelli()
     iframe=null;
 
     var container=document.getElementById("listInnerContainer");
-    container.innerHTML='<div id="listInnerContainerSpinner"><i class="fad fa-spinner fa-spin"></i><span>Caricamento in corso...</span></div>';
+    container.style.overflow="hidden";
+    container.style.padding="0px";
+    container.innerHTML="";
 
-    document.getElementById("listButtonIndietro").disabled=true;
+    var numeriCabinaContainer = document.createElement("div");
+    numeriCabinaContainer.setAttribute("class","pannelli-cabine-container");
+    
+    for (let index = 0; index < cabinaSelezionata.numeri_cabina.length; index++)
+    {
+        const numero_cabina = cabinaSelezionata.numeri_cabina[index];
+    
+        var numeroCabinaItem = document.createElement("button");
+        numeroCabinaItem.setAttribute("class","pannelli-cabine-container-cabine-item");
+        numeroCabinaItem.setAttribute("id","pannelliCabineContainerCabineItem"+numero_cabina);
+        numeroCabinaItem.setAttribute("onclick","filterCabineListPanelli('"+numero_cabina+"')");
+        var active = false;
+        if(cookie_numeri_cabina[lottoSelezionato.lotto] != undefined)
+        {
+            if(cookie_numeri_cabina[lottoSelezionato.lotto][cabinaSelezionata.disegno_cabina] != undefined)
+            {
+                if(cookie_numeri_cabina[lottoSelezionato.lotto][cabinaSelezionata.disegno_cabina].includes(numero_cabina))
+                    active = true;
+            }
+        }
+        if(active)
+        {
+            numeroCabinaItem.setAttribute("active","true");
+            numeroCabinaItem.setAttribute("style","background-color:#548CFF");
+        }
+        else
+        {
+            numeroCabinaItem.setAttribute("active","false");
+        }
+        var span = document.createElement("span");
+        span.innerHTML = numero_cabina;
+        numeroCabinaItem.appendChild(span);
 
-    kit_pannelli=await getPannelli(cabinaSelezionata.disegno_cabina,lottoSelezionato.lotto);
+        numeriCabinaContainer.appendChild(numeroCabinaItem);
+    }
+    container.appendChild(numeriCabinaContainer);
+
+    var pannelliOuterContainer = document.createElement("div");
+    pannelliOuterContainer.setAttribute("class","pannelli-outer-container");
+    pannelliOuterContainer.setAttribute("id","pannelliOuterContainer");
+    container.appendChild(pannelliOuterContainer);
+
+    Swal.close();
+
+    getListKitPannelli();
+}
+async function getListKitPannelli()
+{
+    Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });
+
+    var pannelliOuterContainer = document.getElementById("pannelliOuterContainer");
+    pannelliOuterContainer.innerHTML="";
+
+    kit_pannelli=await getPannelli();
 
     var pannelli = [];
-
-    document.getElementById("listButtonIndietro").disabled=false;
-
-    container.innerHTML="";
 
     var i=1;
     var j=0;
@@ -408,17 +506,38 @@ async function getListPannelli()
             pannelloContainer.setAttribute("class","pannelli-item");
             pannelloContainer.setAttribute("codice_pannello",pannello.codice_pannello);
             pannelloContainer.setAttribute("role","button");
-            var backgroundColor="";
-            if(pannello.prelevato)
+            pannelloContainer.setAttribute("oncontextmenu","getNumeriCabinaPannello(event,this,'"+lottoSelezionato.lotto+"','"+cabinaSelezionata.disegno_cabina+"','"+kit.kit+"','"+kit.posizione+"','"+pannello.codice_pannello+"',"+i+")");
+
+            var numeri_cabina = [];
+            var pannelliCabineContainerCabineItems = document.getElementsByClassName("pannelli-cabine-container-cabine-item");
+            for (let index = 0; index < pannelliCabineContainerCabineItems.length; index++)
             {
+                const item = pannelliCabineContainerCabineItems[index];
+                
+                if(item.getAttribute("active") == "true")
+                    numeri_cabina.push(item.firstChild.innerHTML);
+            }
+            
+            var backgroundColor="";
+            if(JSON.stringify(numeri_cabina.sort()) == JSON.stringify(pannello.numeri_cabina.sort()))
+            {
+                backgroundColor="#70B085";//green
                 pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit.kit+"','"+kit.posizione+"');eliminaPannelloPrelievo(this,'"+lottoSelezionato.lotto+"','"+cabinaSelezionata.disegno_cabina+"','"+kit.kit+"','"+kit.posizione+"','"+pannello.codice_pannello+"',"+i+")");
-                backgroundColor="#70B085";
             }
             else
             {
-                pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit.kit+"','"+kit.posizione+"');registraPannelloPrelievo(this,'"+lottoSelezionato.lotto+"','"+cabinaSelezionata.disegno_cabina+"','"+kit.kit+"','"+kit.posizione+"','"+pannello.codice_pannello+"',"+i+")");
-                backgroundColor="#404040";
+                if(pannello.numeri_cabina.length == 0)
+                {
+                    backgroundColor="#404040";//black
+                    pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit.kit+"','"+kit.posizione+"');registraPannelloPrelievo(this,'"+lottoSelezionato.lotto+"','"+cabinaSelezionata.disegno_cabina+"','"+kit.kit+"','"+kit.posizione+"','"+pannello.codice_pannello+"',"+i+")");
+                }
+                else
+                {
+                    backgroundColor="#E9A93A";//orange
+                    pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit.kit+"','"+kit.posizione+"');registraPannelloPrelievo(this,'"+lottoSelezionato.lotto+"','"+cabinaSelezionata.disegno_cabina+"','"+kit.kit+"','"+kit.posizione+"','"+pannello.codice_pannello+"',"+i+")");
+                }
             }
+
             if(k>=5)
                 pannelloContainer.setAttribute("style","display:none;background-color: "+backgroundColor+";");
             else
@@ -426,7 +545,7 @@ async function getListPannelli()
 
             var div = document.createElement("div");
             div.setAttribute("class","pannelli-item-info-pannello");
-            div.setAttribute("style","align-items:center;justify-content:center;margin-right:10px;box-sizing:border-box");
+            div.setAttribute("style","align-items:center;justify-content:center;margin-right:10px;");
 
             var span = document.createElement("span");
             span.setAttribute("style","font-family: 'Questrial', sans-serif;letter-spacing: 2px;font-size:24px;font-weight: bold;");
@@ -437,6 +556,7 @@ async function getListPannelli()
 
             var div = document.createElement("div");
             div.setAttribute("class","pannelli-item-info-pannello");
+            div.setAttribute("style","align-items:felx-start;justify-content:space-evenly;");
     
             var span = document.createElement("span");
             span.setAttribute("style","font-weight:bold");
@@ -444,7 +564,11 @@ async function getListPannelli()
             div.appendChild(span);
     
             var span = document.createElement("span");
-            span.innerHTML = "Angolo "+pannello.ang;
+            span.innerHTML = "Angolo "+pannello.ang + "°";
+            div.appendChild(span);
+    
+            var span = document.createElement("span");
+            span.innerHTML = pannello.n_fori + " fori";
             div.appendChild(span);
     
             var span = document.createElement("span");
@@ -455,6 +579,23 @@ async function getListPannelli()
             div.appendChild(span);
             
             pannelloContainer.appendChild(div);
+
+            var checked = false;
+            if(pannello.numeri_cabina.length > 0)
+            {
+                let checker = (arr, target) => target.every(v => arr.includes(v));
+                if(checker(pannello.numeri_cabina, numeri_cabina))
+                    checked=true;
+            }
+            if(checked)
+            {
+                var div = document.createElement("div");
+                div.setAttribute("class","pannelli-item-icon-container-pannello");
+                var icon = document.createElement("i");
+                icon.setAttribute("class","fas fa-check-circle");
+                div.appendChild(icon);
+                pannelloContainer.appendChild(div);
+            }
 
             kitContainer.appendChild(pannelloContainer);
 
@@ -469,19 +610,19 @@ async function getListPannelli()
             var button = document.createElement("button");
             button.setAttribute("onclick","scrollPannelliContainer('right','"+kit.kit+"','"+kit.posizione+"',"+kit.pannelli.length+")");
             button.setAttribute("class","action-button");
-            button.setAttribute("style","height:calc(50% - 5px);margin-left:0px");
+            button.setAttribute("style","height:calc(50% - 5px);margin-left:0px;width:40px");
             button.innerHTML='<i class="far fa-angle-right"></i>';
             scrollButtonsContainer.appendChild(button);
             var button = document.createElement("button");
             button.setAttribute("onclick","scrollPannelliContainer('left','"+kit.kit+"','"+kit.posizione+"',"+kit.pannelli.length+")");
             button.setAttribute("class","action-button");
-            button.setAttribute("style","height:calc(50% - 5px);margin-left:0px");
+            button.setAttribute("style","height:calc(50% - 5px);margin-left:0px;width:40px");
             button.innerHTML='<i class="far fa-angle-left"></i>';
             scrollButtonsContainer.appendChild(button);
         }
         kitContainer.appendChild(scrollButtonsContainer);
 
-        container.appendChild(kitContainer);
+        pannelliOuterContainer.appendChild(kitContainer);
 
         j++;
     });
@@ -503,12 +644,21 @@ async function getListPannelli()
         return results;
     }
 
-    var colors = ["#F7FD04","#FF5403","#F037A5","#4EEAF6","#F7F7EE","#28FFBF","#2D46B9"];
     var pannelliItems = document.getElementsByClassName("pannelli-item");
     for (let index2 = 0; index2 < [...new Set(findDuplicates(pannelli))].length; index2++)
     {
         const codice_pannello = [...new Set(findDuplicates(pannelli))][index2];
-        var color = colors[index2];
+
+        var count = 0;
+        for (let index = 0; index < pannelliItems.length; index++)
+        {
+            const pannelloContainer = pannelliItems[index];
+            
+            if(codice_pannello == pannelloContainer.getAttribute("codice_pannello"))
+                count++;
+        }
+
+        var color = "hsl( " + makeColor(index2, count) + ", 100%, 50% )";
 
         for (let index = 0; index < pannelliItems.length; index++)
         {
@@ -519,9 +669,47 @@ async function getListPannelli()
         }
     }
 
-    document.getElementById("totaliPrelievoLabel").innerHTML=kit_pannelli.length + " kit, " + i + " pannelli";
+    document.getElementById("totaliPrelievoLabel").innerHTML=kit_pannelli.length + " kit, " + (i - 1) + " pannelli";
 
     Swal.close();
+}
+function makeColor(colorNum, colors){
+    if (colors < 1) colors = 1; // defaults to one color - avoid divide by zero
+    return colorNum * (360 / colors) % 360;
+}
+async function filterCabineListPanelli(numero_cabina)
+{
+    var cookie_numeri_cabina = [];
+    var button = document.getElementById("pannelliCabineContainerCabineItem"+numero_cabina);
+    if(button.getAttribute("active") == "true")
+    {
+        button.style.backgroundColor="";
+        button.setAttribute("active","false");
+    }
+    else
+    {
+        button.style.backgroundColor="#548CFF";
+        button.setAttribute("active","true");
+    }
+
+    var cookie_numeri_cabina={};
+    var cookie_numeri_cabina_string = await getCookie("cookie_numeri_cabina_string");
+    if(cookie_numeri_cabina_string != "" && cookie_numeri_cabina_string != null && cookie_numeri_cabina_string != undefined)
+        cookie_numeri_cabina = JSON.parse(cookie_numeri_cabina_string);
+    if(cookie_numeri_cabina[lottoSelezionato.lotto] == undefined)
+        cookie_numeri_cabina[lottoSelezionato.lotto] = {}
+    cookie_numeri_cabina[lottoSelezionato.lotto][cabinaSelezionata.disegno_cabina] = [];
+    var pannelliCabineContainerCabineItems = document.getElementsByClassName("pannelli-cabine-container-cabine-item");
+    for (let index = 0; index < pannelliCabineContainerCabineItems.length; index++)
+    {
+        const item = pannelliCabineContainerCabineItems[index];
+        
+        if(item.getAttribute("active") == "true")
+            cookie_numeri_cabina[lottoSelezionato.lotto][cabinaSelezionata.disegno_cabina].push(item.firstChild.innerHTML);
+    }
+    setCookie("cookie_numeri_cabina_string",JSON.stringify(cookie_numeri_cabina));
+
+    getListKitPannelli();
 }
 function scrollPannelliContainer(how,kit,posizione,length)
 {
@@ -582,7 +770,17 @@ function registraPannelloPrelievo(pannelloContainer,lotto,disegno_cabina,kit,pos
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
 
-    $.post("registraPannelloPrelievo.php",{lotto,disegno_cabina,kit,posizione,codice_pannello,i,cabine:cabinaSelezionata.numeri_cabina,id_utente},
+    var numeri_cabina = [];
+    var pannelliCabineContainerCabineItems = document.getElementsByClassName("pannelli-cabine-container-cabine-item");
+    for (let index = 0; index < pannelliCabineContainerCabineItems.length; index++)
+    {
+        const item = pannelliCabineContainerCabineItems[index];
+        
+        if(item.getAttribute("active") == "true")
+            numeri_cabina.push(item.firstChild.innerHTML);
+    }
+
+    $.post("registraPannelloPrelievo.php",{lotto,disegno_cabina,kit,posizione,codice_pannello,i,cabine:numeri_cabina,id_utente},
     function(response, status)
     {
         if(status=="success")
@@ -594,24 +792,82 @@ function registraPannelloPrelievo(pannelloContainer,lotto,disegno_cabina,kit,pos
             }
             else
             {
-                pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit+"','"+posizione+"');eliminaPannelloPrelievo(this,'"+lotto+"','"+disegno_cabina+"','"+kit+"','"+posizione+"','"+codice_pannello+"',"+i+")");
-                pannelloContainer.style.backgroundColor = "#70B085";
-
-                if(parseInt(response) == parseInt(document.getElementById("pannelliContainer"+kit+posizione).getElementsByClassName("pannelli-item").length))
-                if(document.getElementById("pannelliContainer"+kit+posizione).nextSibling)
-                {
-                    document.getElementById("pannelliContainer"+kit+posizione).nextSibling.getElementsByClassName("pannelli-container-info-kit")[0].click();
-                    document.getElementById("listInnerContainer").scrollTop=document.getElementById("listInnerContainer").scrollTop+80;
-                }
-                else
-                {
-                    document.getElementsByClassName("pannelli-container")[0].getElementsByClassName("pannelli-container-info-kit")[0].click();
-                    document.getElementById("listInnerContainer").scrollTop=0;
-                }
                 Swal.close();
+                try
+                {
+                    var responseObj = JSON.parse(response);
+                    var numeri_cabina_pannello = responseObj.numeri_cabina_pannello;
+                    
+                    var backgroundColor="";
+                    if(JSON.stringify(numeri_cabina.sort()) == JSON.stringify(numeri_cabina_pannello.sort()))
+                    {
+                        backgroundColor="#70B085";//green
+                        pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit+"','"+posizione+"');eliminaPannelloPrelievo(this,'"+lotto+"','"+disegno_cabina+"','"+kit+"','"+posizione+"','"+codice_pannello+"',"+i+")");
+                    }
+                    else
+                    {
+                        if(numeri_cabina_pannello.length == 0)
+                        {
+                            backgroundColor="#404040";//black
+                            pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit+"','"+posizione+"');registraPannelloPrelievo(this,'"+lotto+"','"+disegno_cabina+"','"+kit+"','"+posizione+"','"+codice_pannello+"',"+i+")");
+                        }
+                        else
+                        {
+                            backgroundColor="#E9A93A";//orange
+                            pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit+"','"+posizione+"');registraPannelloPrelievo(this,'"+lotto+"','"+disegno_cabina+"','"+kit+"','"+posizione+"','"+codice_pannello+"',"+i+")");
+                        }
+                    }
+                    
+                    pannelloContainer.style.backgroundColor = backgroundColor;
+
+                    if(pannelloContainer.getElementsByClassName("pannelli-item-icon-container-pannello")[0] != null)
+                        pannelloContainer.getElementsByClassName("pannelli-item-icon-container-pannello")[0].remove();
+
+                    var checked = false;
+                    if(numeri_cabina_pannello.length > 0)
+                    {
+                        let checker = (arr, target) => target.every(v => arr.includes(v));
+                        if(checker(numeri_cabina_pannello, numeri_cabina))
+                            checked=true;
+                    }
+                    if(checked)
+                    {
+                        var div = document.createElement("div");
+                        div.setAttribute("class","pannelli-item-icon-container-pannello");
+                        var icon = document.createElement("i");
+                        icon.setAttribute("class","fas fa-check-circle");
+                        div.appendChild(icon);
+                        pannelloContainer.appendChild(div);
+                    }
+
+                    //per passare al prossimo se tutti sono colorati
+                    if(parseInt(responseObj.n) == parseInt(document.getElementById("pannelliContainer"+kit+posizione).getElementsByClassName("pannelli-item").length))
+                    {
+                        if(document.getElementById("pannelliContainer"+kit+posizione).nextSibling)
+                        {
+                            document.getElementById("pannelliContainer"+kit+posizione).nextSibling.getElementsByClassName("pannelli-container-info-kit")[0].click();
+                            //document.getElementById("pannelliOuterContainer").scrollTop=document.getElementById("pannelliOuterContainer").scrollTop+80;
+                        }
+                        else
+                        {
+                            document.getElementsByClassName("pannelli-container")[0].getElementsByClassName("pannelli-container-info-kit")[0].click();
+                            document.getElementById("pannelliOuterContainer").scrollTop=0;
+                        }
+                    }
+                }
+                catch (error)
+                {
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                }
             }
         }
     });
+}
+function getNumeriCabinaPannello(event,pannelloContainer,lotto,disegno_cabina,kit,posizione,codice_pannello,i)
+{
+    console.log("y'all");
 }
 function eliminaPannelloPrelievo(pannelloContainer,lotto,disegno_cabina,kit,posizione,codice_pannello,i)
 {
@@ -629,7 +885,17 @@ function eliminaPannelloPrelievo(pannelloContainer,lotto,disegno_cabina,kit,posi
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
 
-    $.post("eliminaPannelloPrelievo.php",{lotto,disegno_cabina,kit,posizione,codice_pannello,i,cabine:cabinaSelezionata.numeri_cabina,id_utente},
+    var numeri_cabina = [];
+    var pannelliCabineContainerCabineItems = document.getElementsByClassName("pannelli-cabine-container-cabine-item");
+    for (let index = 0; index < pannelliCabineContainerCabineItems.length; index++)
+    {
+        const item = pannelliCabineContainerCabineItems[index];
+        
+        if(item.getAttribute("active") == "true")
+            numeri_cabina.push(item.firstChild.innerHTML);
+    }
+
+    $.post("eliminaPannelloPrelievo.php",{lotto,disegno_cabina,kit,posizione,codice_pannello,i,cabine:numeri_cabina,id_utente},
     function(response, status)
     {
         if(status=="success")
@@ -643,6 +909,8 @@ function eliminaPannelloPrelievo(pannelloContainer,lotto,disegno_cabina,kit,posi
             {
                 pannelloContainer.setAttribute("onclick","getPdf('kit','"+kit+"','"+posizione+"');registraPannelloPrelievo(this,'"+lotto+"','"+disegno_cabina+"','"+kit+"','"+posizione+"','"+codice_pannello+"',"+i+")");
                 pannelloContainer.style.backgroundColor = "#404040";
+                if(pannelloContainer.getElementsByClassName("pannelli-item-icon-container-pannello")[0] != null)
+                    pannelloContainer.getElementsByClassName("pannelli-item-icon-container-pannello")[0].remove();
                 Swal.close();
             }
         }
@@ -652,11 +920,21 @@ function disableCheckboxPannello(event)
 {
     event.stopPropagation();
 }
-function getPannelli(disegno_cabina,lotto)
+function getPannelli()
 {
+    var numeri_cabina = [];
+    var pannelliCabineContainerCabineItems = document.getElementsByClassName("pannelli-cabine-container-cabine-item");
+    for (let index = 0; index < pannelliCabineContainerCabineItems.length; index++)
+    {
+        const item = pannelliCabineContainerCabineItems[index];
+        
+        if(item.getAttribute("active") == "true")
+            numeri_cabina.push(item.firstChild.innerHTML);
+    }
+
     return new Promise(function (resolve, reject) 
     {
-        $.get("getPannelliPrelievo.php",{disegno_cabina,lotto},
+        $.get("getPannelliPrelievo.php",{disegno_cabina:cabinaSelezionata.disegno_cabina,lotto:lottoSelezionato.lotto,numeri_cabina},
         function(response, status)
         {
             if(status=="success")
@@ -875,19 +1153,31 @@ function pdfScrollright()
 }
 function listToTop()
 {
-    document.getElementById("listInnerContainer").scrollTop = 0;
+    if(view == "pannelli")
+        document.getElementById("pannelliOuterContainer").scrollTop = 0;
+    else
+        document.getElementById("listInnerContainer").scrollTop = 0;
 }
 function listToBottom()
 {
-    document.getElementById("listInnerContainer").scrollTo(0,document.getElementById("listInnerContainer").scrollHeight);
+    if(view == "pannelli")
+        document.getElementById("pannelliOuterContainer").scrollTo(0,document.getElementById("pannelliOuterContainer").scrollHeight);
+    else
+        document.getElementById("listInnerContainer").scrollTo(0,document.getElementById("listInnerContainer").scrollHeight);
 }
 function listScrolltop()
 {
-    document.getElementById("listInnerContainer").scrollTop = document.getElementById("listInnerContainer").scrollTop-45;
+    if(view == "pannelli")
+        document.getElementById("pannelliOuterContainer").scrollTop = document.getElementById("pannelliOuterContainer").scrollTop-45;
+    else
+        document.getElementById("listInnerContainer").scrollTop = document.getElementById("listInnerContainer").scrollTop-45;
 }
 function listScrolldown()
 {
-    document.getElementById("listInnerContainer").scrollTop = document.getElementById("listInnerContainer").scrollTop+45;
+    if(view == "pannelli")
+        document.getElementById("pannelliOuterContainer").scrollTop = document.getElementById("pannelliOuterContainer").scrollTop+45;
+    else
+        document.getElementById("listInnerContainer").scrollTop = document.getElementById("listInnerContainer").scrollTop+45;
 }
 function getParametriByHelp(help)
 {
