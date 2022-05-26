@@ -777,3 +777,60 @@ function clickNumpadButtonPopupCheckPassword(n)
         checkPasswordCambiaLineaStazione();
     }
 }
+function getPopupSpegniComputer()
+{
+    Swal.fire
+    ({
+        icon:"question",
+        title: 'Vuoi spegnere il computer? Dovrà essere riaccendeso manualmente',
+        showCloseButton: false,
+        showConfirmButton:true,
+        showCancelButton:true,
+        confirmButtonText:"Spegni [INVIO]",
+        cancelButtonText:"Annulla [ESC]",
+        cancelButtonColor:"gray",
+        background:"#353535",
+        onOpen : function()
+                {
+                    document.getElementsByClassName("swal2-close")[0].style.outline="none";
+                    document.getElementsByClassName("swal2-title")[0].style.fontSize="18px";
+                },
+    }).then((result) => 
+    {
+        if(result.value)
+        {
+            Swal.fire
+            ({
+                width:"100%",
+                background:"transparent",
+                title:"Caricamento in corso...",
+                html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+                allowOutsideClick:false,
+                showCloseButton:false,
+                showConfirmButton:false,
+                allowEscapeKey:false,
+                showCancelButton:false,
+                onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+            });
+            
+            $.post("sendSpegniComputer.php",(response, status) =>
+            {
+                if(status=="success")
+                {
+                    if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+                    {
+                        Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                        console.log(response);
+                    }
+                    else
+                    {
+                        setTimeout(() =>
+                        {
+                            Swal.fire({icon:"error",title: "Errore. Impossibile spegnere il computer. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="16px";}});
+                        }, 8000);
+                    }
+                }
+            })
+        }
+    });
+}
