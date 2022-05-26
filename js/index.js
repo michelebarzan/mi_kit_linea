@@ -2431,7 +2431,6 @@ function getCabineECorridoi(lotto,commessa)
 {
     return new Promise(function (resolve, reject) 
     {
-        console.log(linea.id_linea);
         var id_turno=turno.id_turno;
         $.get("getCabineECorridoi.php",
         {
