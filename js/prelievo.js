@@ -841,7 +841,7 @@ function registraPannelloPrelievo(pannelloContainer,lotto,disegno_cabina,kit,pos
                     }
 
                     //per passare al prossimo se tutti sono colorati
-                    if(parseInt(responseObj.n) == parseInt(document.getElementById("pannelliContainer"+kit+posizione).getElementsByClassName("pannelli-item").length))
+                    /*if(parseInt(responseObj.n) == parseInt(document.getElementById("pannelliContainer"+kit+posizione).getElementsByClassName("pannelli-item").length))
                     {
                         if(document.getElementById("pannelliContainer"+kit+posizione).nextSibling)
                         {
@@ -853,7 +853,7 @@ function registraPannelloPrelievo(pannelloContainer,lotto,disegno_cabina,kit,pos
                             document.getElementsByClassName("pannelli-container")[0].getElementsByClassName("pannelli-container-info-kit")[0].click();
                             document.getElementById("pannelliOuterContainer").scrollTop=0;
                         }
-                    }
+                    }*/
                 }
                 catch (error)
                 {
