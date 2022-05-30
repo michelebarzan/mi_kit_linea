@@ -25,8 +25,12 @@
     if($username != "" && $password != "" && $username != null && $password != null && isset($username) && isset($password))
     {
         $cmd1 = "net use \\\\$ip\IPC$ /delete";
-        $cmd2 = "net use \\\\$ip $password /user:$username";
+        $cmd2 = 'net use \\\\'.$ip.' '.$password.' /user:"'.$username.'"';
         $cmd3 = "shutdown /s /f /t 0 /m \\\\$ip";
+		
+		/*echo $cmd1."\n\n";
+		echo $cmd2."\n\n";
+		echo $cmd3."\n\n";*/
         
         exec($cmd1);
         exec($cmd2);
