@@ -236,6 +236,36 @@ function selectLotto(id_lotto)
 
     getListCabine();
 }
+function getCabineChiusePrelievo(lotto,commessa)
+{
+    return new Promise(function (resolve, reject) 
+    {
+        $.get("getCabineChiusePrelievo.php",{lotto,commessa},
+        function(response, status)
+        {
+            if(status=="success")
+            {
+                if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+                {
+                    Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                    console.log(response);
+                    resolve([]);
+                }
+                else
+                {
+                    try {
+                        resolve(JSON.parse(response));
+                    } catch (error) {
+                        setTimeout(() => {
+                            Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                        }, 500);
+                        resolve([]);
+                    }
+                }
+            }
+        });
+    });
+}
 async function getListCabine()
 {
     Swal.fire
@@ -271,6 +301,9 @@ async function getListCabine()
 
     var i=1;
     cabine=await getCabine(lottoSelezionato.lotto,lottoSelezionato.commessa);
+
+    var cabine_chiuse = await getCabineChiusePrelievo(lottoSelezionato.lotto,lottoSelezionato.commessa);
+    console.log(cabine_chiuse);
 
     document.getElementById("listButtonIndietro").disabled=false;
 
