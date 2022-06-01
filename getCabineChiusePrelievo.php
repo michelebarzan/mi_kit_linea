@@ -7,7 +7,7 @@
     
     $cabine=[];
 
-    $query1="SELECT [lotto],[disegno_cabina] FROM [mi_linea_kit].[dbo].[cabine_chiuse_prelievo]";
+    $query1="SELECT [lotto],[disegno_cabina] FROM [mi_linea_kit].[dbo].[cabine_chiuse_prelievo] ORDER BY disegno_cabina";
 
     $result1=sqlsrv_query($conn,$query1);
     if($result1==TRUE)

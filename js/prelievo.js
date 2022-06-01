@@ -299,16 +299,33 @@ async function getListCabine()
 
     document.getElementById("listButtonIndietro").disabled=true;
 
-    var i=1;
     cabine=await getCabine(lottoSelezionato.lotto,lottoSelezionato.commessa);
 
     var cabine_chiuse = await getCabineChiusePrelievo(lottoSelezionato.lotto,lottoSelezionato.commessa);
-    console.log(cabine_chiuse);
+    var cabine_chiuse_lotto_obj = cabine_chiuse.filter(function (cabina_chiusa) {return cabina_chiusa.lotto == lottoSelezionato.lotto});
+    var cabine_chiuse_lotto = [];
+    for (let index = 0; index < cabine_chiuse_lotto_obj.length; index++)
+    {
+        const element = cabine_chiuse_lotto_obj[index];
+
+        cabine_chiuse_lotto.push(element.disegno_cabina);
+    }
+    
+    for (let index = 0; index < cabine.length; index++)
+    {
+        const cabina = cabine[index];
+
+        if(cabine_chiuse_lotto.includes(cabina.disegno_cabina))
+            cabina.chiusa = true;
+        else
+            cabina.chiusa = false;
+    }
 
     document.getElementById("listButtonIndietro").disabled=false;
 
     container.innerHTML="";
 
+    var i=1;
     cabine.forEach(function (cabina)
     {
         var item=document.createElement("button");
