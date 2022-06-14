@@ -814,6 +814,9 @@ function generaPdfChecklist()
 
             //--------------------------------------------------------------------------------
 
+            document.getElementById("printOuterContainer").style.display="none";
+            document.getElementById("printCanvasContainer").style.display="none";
+
             var data= new FormData();
             data.append('file',file);
             $.ajax
@@ -851,8 +854,13 @@ async function stampaChecklist()
             onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="white";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";document.getElementsByClassName("swal2-close")[0].style.outline="none";}
         });
 
+        document.getElementById("printOuterContainer").style.display="";
+        document.getElementById("printCanvasContainer").style.display="";
+
         document.getElementById("printOuterContainer").innerHTML="";
         document.getElementById("printCanvasContainer").innerHTML="";
+        
+        $("#printContainer").remove();
 
         var componentiChecklist = await getComponentiStampaChecklist();
     
@@ -861,13 +869,20 @@ async function stampaChecklist()
         
         var eight = 28.5;
         var width = 19;
-    
-        var printWindow = window.open('', '_blank', 'height=1080,width=1920');
-    
-        printWindow.document.body.setAttribute("onafterprint","window.close();");
-    
-        printWindow.document.body.style.backgroundColor="white";
-        printWindow.document.body.style.overflow="hidden";
+
+        document.getElementsByClassName("structure-header")[0].style.display="none";
+        document.getElementsByClassName("section-container")[0].style.display="none";
+        document.getElementById("poweredBy").style.display="none";
+
+        document.body.style.width = "revert";
+        document.body.style.minWidth = "revert";
+        document.body.style.maxWidth = "revert";
+        document.body.style.height = "revert";
+        document.body.style.minHeight = "revert";
+        document.body.style.maxHeight = "revert";
+
+        document.body.style.backgroundColor="white";
+        document.body.style.overflow="hidden";
     
         var outerContainer=document.createElement("div");
         outerContainer.setAttribute("id","printContainer");
@@ -1009,17 +1024,31 @@ async function stampaChecklist()
             i++;
         });
 
+        document.body.appendChild(outerContainer);
+
         const outerContainerClone = outerContainer.cloneNode(true);
         document.getElementById("printOuterContainer").appendChild(outerContainerClone);
         generaPdfChecklist();
     
-        var script=document.createElement("script");
-        script.innerHTML="setTimeout(function(){window.print();}, 500);";
-        outerContainer.appendChild(script);
-
-        printWindow.document.body.appendChild(outerContainer);
-    
         Swal.close();
+
+        setTimeout(() =>
+        {
+            window.print();
+            
+            document.getElementsByClassName("structure-header")[0].style.display="";
+            document.getElementsByClassName("section-container")[0].style.display="";
+            document.getElementById("poweredBy").style.display="";
+
+            document.body.style.width = "";
+            document.body.style.minWidth = "";
+            document.body.style.maxWidth = "";
+            document.body.style.height = "";
+            document.body.style.minHeight = "";
+            document.body.style.maxHeight = "";
+            document.body.style.backgroundColor="";
+            document.body.style.overflow="";
+        }, 1000);
     }
 }
 function getComponentiStampaChecklist()
