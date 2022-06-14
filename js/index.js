@@ -2616,26 +2616,24 @@ async function stampaEtichettaCarrello()
         var body_vertical_padding = 0.15;
         var body_horizontal_padding = 0.35;
         var pages_space = 10;
-    
-        var printWindow = window.open('', '_blank', 'height=1080,width=1920');
-    
-        printWindow.document.body.setAttribute("onafterprint","window.close();");
-    
-        printWindow.document.body.style.backgroundColor="white";
-        printWindow.document.body.style.overflow="hidden";
-        printWindow.document.body.style.paddingTop=body_vertical_padding+"cm";
-        printWindow.document.body.style.paddingLeft=body_horizontal_padding+"cm";
-        printWindow.document.body.style.boxSizing="border-box";
-    
-        var link=document.createElement("link");
-        link.setAttribute("href","http://"+server_adress+":"+server_port+"/mi_kit_linea/css/etichettaCarrello.css");
-        link.setAttribute("rel","stylesheet");
-        printWindow.document.head.appendChild(link);
-    
-        var link=document.createElement("link");
-        link.setAttribute("href","http://"+server_adress+":"+server_port+"/mi_kit_linea/css/fonts.css");
-        link.setAttribute("rel","stylesheet");
-        printWindow.document.head.appendChild(link);
+
+        document.getElementsByClassName("structure-header")[0].style.display="none";
+        document.getElementsByClassName("section-container")[0].style.display="none";
+        document.getElementById("poweredBy").style.display="none";
+
+        document.body.style.width = "revert";
+        document.body.style.minWidth = "revert";
+        document.body.style.maxWidth = "revert";
+        document.body.style.height = "revert";
+        document.body.style.minHeight = "revert";
+        document.body.style.maxHeight = "revert";
+        document.body.style.margin = "revert";
+
+        document.body.style.backgroundColor="white";
+        document.body.style.overflow="hidden";
+        document.body.style.paddingTop=body_vertical_padding+"cm";
+        document.body.style.paddingLeft=body_horizontal_padding+"cm";
+        document.body.style.boxSizing="border-box";
     
         var testo_cantiere=getFirstObjByPropValue(testiEtichette,"nome","testo_cantiere");
         var testo_costruzione=getFirstObjByPropValue(testiEtichette,"nome","testo_costruzione");
@@ -2671,7 +2669,9 @@ async function stampaEtichettaCarrello()
         var barcode=document.createElement("span");
         barcode.setAttribute("class","etichetta-barcode");
         barcode.setAttribute("style","font-family: 'Libre Barcode 128', cursive;font-size:40px;text-align:center;box-sizing:border-box;padding-top:10px");
-        barcode.innerHTML=encodeCode128(carrello);
+        var pattern = /[^a-z|^0-9|_|+]/ig
+		var newCarr = carrello.replace(pattern, "");
+        barcode.innerHTML=encodeCode128(newCarr);
         div.appendChild(barcode);
         outerContainer.appendChild(div);
     
@@ -2817,7 +2817,7 @@ async function stampaEtichettaCarrello()
     
         outerContainer.appendChild(tableCabine);
     
-        printWindow.document.body.appendChild(outerContainer);
+        document.body.appendChild(outerContainer);
     
         var outerContainer=document.createElement("div");
         outerContainer.setAttribute("class","etichetta-outer-container");
@@ -2846,14 +2846,34 @@ async function stampaEtichettaCarrello()
         row.appendChild(span);
     
         outerContainer.appendChild(row);
-
-        var script=document.createElement("script");
-        script.innerHTML="setTimeout(function(){window.print();}, 800);";
-        outerContainer.appendChild(script);
-    
-        printWindow.document.body.appendChild(outerContainer);
+        
+        document.body.appendChild(outerContainer);
     
         Swal.close();
+        
+        setTimeout(() =>
+        {
+            window.print();
+    
+            document.getElementsByClassName("structure-header")[0].style.display="";
+            document.getElementsByClassName("section-container")[0].style.display="";
+            document.getElementById("poweredBy").style.display="";
+
+            document.body.style.width = "";
+            document.body.style.minWidth = "";
+            document.body.style.maxWidth = "";
+            document.body.style.height = "";
+            document.body.style.minHeight = "";
+            document.body.style.maxHeight = "";
+            document.body.style.margin = "";
+            document.body.style.backgroundColor="";
+            document.body.style.overflow="";
+            document.body.style.paddingTop="";
+            document.body.style.paddingLeft="";
+            document.body.style.boxSizing="";
+        
+            $(".etichetta-outer-container").remove();
+        }, 1000);
     }
 }
 async function stampaEtichettaKit(printListLcl)
@@ -2869,28 +2889,29 @@ async function stampaEtichettaKit(printListLcl)
         var item_margin_bottom = 0.5;
         var body_vertical_padding = 0.15;
         var body_horizontal_padding = 0.35;
-
-			
-		var printWindow = window.open('', '_blank', 'height=1080,width=1920');
 		
-		setTimeout(function(){
+        document.getElementsByClassName("structure-header")[0].style.display="none";
+        document.getElementsByClassName("section-container")[0].style.display="none";
+        document.getElementById("poweredBy").style.display="none";
 
-        printWindow.document.body.setAttribute("onafterprint","window.close();");
+        document.body.style.width = "revert";
+        document.body.style.minWidth = "revert";
+        document.body.style.maxWidth = "revert";
+        document.body.style.height = "revert";
+        document.body.style.minHeight = "revert";
+        document.body.style.maxHeight = "revert";
+        document.body.style.margin = "revert";
 
-        printWindow.document.body.style.backgroundColor="white";
-        printWindow.document.body.style.overflow="hidden";
-        printWindow.document.body.style.paddingTop=body_vertical_padding+"cm";
-        printWindow.document.body.style.paddingLeft=body_horizontal_padding+"cm";
-        printWindow.document.body.style.boxSizing="border-box";
+        document.body.style.backgroundColor="white";
+        document.body.style.overflow="hidden";
+        document.body.style.paddingTop=body_vertical_padding+"cm";
+        document.body.style.paddingLeft=body_horizontal_padding+"cm";
+        document.body.style.boxSizing="border-box";
 
-        var link=document.createElement("link");
-        link.setAttribute("href","http://"+server_adress+":"+server_port+"/mi_kit_linea/css/fonts.css");
-        link.setAttribute("rel","stylesheet");
-        printWindow.document.head.appendChild(link);
-        
         printListLcl.forEach(printObj =>
         {
             var outerContainer=document.createElement("div");
+            outerContainer.setAttribute("class","stampa-etichetta-kit-outer-xontainer");
             outerContainer.setAttribute("style","display: flex;flex-direction: row;align-items: flex-start;justify-content: flex-start;height: "+item_height+"cm;width: "+width+"cm;border:.5mm solid black;box-sizing:border-box;margin-bottom:"+item_margin_bottom+"cm");
 
             var img=document.createElement("img");
@@ -2979,15 +3000,33 @@ async function stampaEtichettaKit(printListLcl)
             span.innerHTML="0474/"+n;
             column.appendChild(span);
             outerContainer.appendChild(column);
-
-            var script=document.createElement("script");
-            script.innerHTML="setTimeout(function(){window.print();}, 800);";
-            outerContainer.appendChild(script);
     
-            printWindow.document.body.appendChild(outerContainer);
+            document.body.appendChild(outerContainer);
         });
 
-		}, 500);
+        setTimeout(() =>
+        {
+            window.print();
+    
+            document.getElementsByClassName("structure-header")[0].style.display="";
+            document.getElementsByClassName("section-container")[0].style.display="";
+            document.getElementById("poweredBy").style.display="";
+    
+            document.body.style.width = "";
+            document.body.style.minWidth = "";
+            document.body.style.maxWidth = "";
+            document.body.style.height = "";
+            document.body.style.minHeight = "";
+            document.body.style.maxHeight = "";
+            document.body.style.margin = "";
+            document.body.style.backgroundColor="";
+            document.body.style.overflow="";
+            document.body.style.paddingTop="";
+            document.body.style.paddingLeft="";
+            document.body.style.boxSizing="";
+        
+            $(".stampa-etichetta-kit-outer-xontainer").remove();
+        }, 1000);
     }
 }
 async function getPopupRaggruppamentoTraversine()
