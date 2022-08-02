@@ -2597,6 +2597,7 @@ async function stampaEtichettaCarrello()
     var server_port=await getServerValue("SERVER_PORT");
     
     var testiEtichette=await getTestiEtichetta();
+
     const carrello = await getCarrelloCabinaCommessa(cabina_corridoioSelezionato.numero_cabina,lottoSelezionato.commessa.substring(2, 6));
     var commessa_breve=carrello.substring(0, 4);
     var descrizioneCarrello=await getDescrizioniCarrelli(commessa_breve);
@@ -2645,6 +2646,7 @@ async function stampaEtichettaCarrello()
         var testo_colonna_codice=getFirstObjByPropValue(testiEtichette,"nome","testo_colonna_codice");
         var testo_apertura_carrelli=getFirstObjByPropValue(testiEtichette,"nome","testo_apertura_carrelli");
         var testo_indicazioni=getFirstObjByPropValue(testiEtichette,"nome","testo_indicazioni");
+        var testo_apertura_carrelli_italiano=getFirstObjByPropValue(testiEtichette,"nome","testo_apertura_carrelli_italiano");
     
         var cantiere=getFirstObjByPropValue(descrizioneCarrello,"nome","cantiere");
         cantiere.descrizione.replace(/\r?\n/g, "<br />");
@@ -2818,10 +2820,12 @@ async function stampaEtichettaCarrello()
         outerContainer.appendChild(tableCabine);
     
         document.body.appendChild(outerContainer);
+
+        //pag 2
     
         var outerContainer=document.createElement("div");
         outerContainer.setAttribute("class","etichetta-outer-container");
-        outerContainer.setAttribute("style","height: "+height+"cm;width: "+width+"cm;margin-top:"+pages_space+"mm");
+        outerContainer.setAttribute("style","height: "+height+"cm;width: "+width+"cm;max-height: "+height+"cm;max-width: "+width+"cm;min-height: "+height+"cm;min-width: "+width+"cm;margin-top:"+pages_space+"mm;overflow:hidden");
     
         var row=document.createElement("div");
         row.setAttribute("class","etichetta-row");
@@ -2843,6 +2847,26 @@ async function stampaEtichettaCarrello()
         span.setAttribute("class","etichetta-span");
         span.setAttribute("style","font-size:13px;text-align:left;font-weight:bold");
         span.innerHTML = testo_apertura_carrelli.testo.replace(/\r?\n/g, "<br />");
+        row.appendChild(span);
+    
+        outerContainer.appendChild(row);
+        
+        document.body.appendChild(outerContainer);
+
+        //pag 3
+    
+        var outerContainer=document.createElement("div");
+        outerContainer.setAttribute("class","etichetta-outer-container");
+        outerContainer.setAttribute("style","height: "+height+"cm;width: "+width+"cm;max-height: "+height+"cm;max-width: "+width+"cm;min-height: "+height+"cm;min-width: "+width+"cm;margin-top:"+pages_space+"mm;overflow:hidden");
+    
+        var row=document.createElement("div");
+        row.setAttribute("class","etichetta-row");
+        row.setAttribute("style","box-sizing:border-box;padding:5mm;border-top:1px solid black;box-sizing:border-box;");
+    
+        var span=document.createElement("span");
+        span.setAttribute("class","etichetta-span");
+        span.setAttribute("style","font-size:13px;text-align:left;font-weight:bold");
+        span.innerHTML = testo_apertura_carrelli_italiano.testo.replace(/\r?\n/g, "<br />");
         row.appendChild(span);
     
         outerContainer.appendChild(row);
