@@ -18,7 +18,7 @@
         {
             $testo["id_testo"]=$row["id_testo"];
             $testo["nome"]=$row["nome"];
-            $testo["testo"]=$row["testo"];
+            $testo["testo"]=utf8_encode($row["testo"]);
             $testo["label"]=$row["label"];
 
             array_push($testiEtichette,$testo);
