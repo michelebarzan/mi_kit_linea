@@ -1035,6 +1035,7 @@ async function stampaChecklist()
         setTimeout(() =>
         {
             window.print();
+            window.print();
             
             document.getElementsByClassName("structure-header")[0].style.display="";
             document.getElementsByClassName("section-container")[0].style.display="";
