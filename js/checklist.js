@@ -860,7 +860,7 @@ async function stampaChecklist()
         document.getElementById("printOuterContainer").innerHTML="";
         document.getElementById("printCanvasContainer").innerHTML="";
         
-        $("#printContainer").remove();
+        $(".print-container").remove();
 
         var componentiChecklist = await getComponentiStampaChecklist();
     
@@ -883,159 +883,169 @@ async function stampaChecklist()
 
         document.body.style.backgroundColor="white";
         document.body.style.overflow="hidden";
-    
-        var outerContainer=document.createElement("div");
-        outerContainer.setAttribute("id","printContainer");
-        outerContainer.setAttribute("style","display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;height: "+eight+"cm;width: "+width+"cm;border:.5mm solid black;box-sizing:border-box;margin:5mm");
-    
-        //---------Checklist Carrello
-        var row=document.createElement("div");
-        row.setAttribute("style","min-width:100%;max-width:100%;width:100%;min-height:5%;max-height:5%;height:5%;display: flex;flex-direction: row;align-items: center;justify-content: flex-start;border-bottom:.5mm solid black;box-sizing:border-box;padding-left:10px;padding-right:10px");
-        var div=document.createElement("div");
-        div.setAttribute("style","min-width:80%;max-width:80%;width:80%;min-height:100%;max-height:100%;height:100%;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box");
-        var span=document.createElement("span");
-        span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:5mm;min-width:100%;max-width:100%;width:100%;white-space: nowraptext-overflow: clip;");
-        span.innerHTML="<b>Checklist Carrello</b>";
-        div.appendChild(span);
-        row.appendChild(div);
-        //---------Logo
-        var img=document.createElement("img");
-        img.setAttribute("style","min-width:20%;max-width:20%;width:20%;min-height:100%;max-height:100%;height:100%;box-sizing:border-box");
-        img.setAttribute("src","http://"+server_adress+":"+server_port+"/mi_kit_linea/images/logoCabins.png");
-        row.appendChild(img);
-        outerContainer.appendChild(row);
-    
-        //---------Lotto
-        var row=document.createElement("div");
-        row.setAttribute("style","min-width:100%;max-width:100%;width:100%;min-height:5%;max-height:5%;height:5%;display: flex;flex-direction: row;align-items: center;justify-content: flex-start;border-bottom:.5mm solid black;box-sizing:border-box");
-        var div=document.createElement("div");
-        div.setAttribute("style","overflow:hidden;min-width:50%;max-width:50%;width:50%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box;padding-left:10px;padding-right:10px");
-        var span=document.createElement("span");
-        span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);white-space: nowrap;overflow: hidden;text-overflow: clip;");
-        span.innerHTML="<b>Lotto: </b>"+lottoSelezionato.lotto;
-        div.appendChild(span);
-        row.appendChild(div);
-        outerContainer.appendChild(row);
-    
-        //---------Carrello
-        var div=document.createElement("div");
-        div.setAttribute("style","overflow:hidden;min-width:50%;max-width:50%;width:50%;min-height:100%;max-height:100%;height:100%;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box;padding-left:10px;padding-right:10px");
-        var span=document.createElement("span");
-        span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);white-space: nowrap;overflow: hidden;text-overflow: clip;");
-        span.innerHTML="<b>Carrello: </b>"+carrelloSelezionato.CODCAR;
-        div.appendChild(span);
-        row.appendChild(div);
-        outerContainer.appendChild(row);
-    
-        //---------Contenitore tabelle pannelli
-        var tablesContainer=document.createElement(`div`);
-        tablesContainer.setAttribute(`style`,`min-height:90%;max-height:90%;height:90%;width: 100%;min-width:100%;max-width:100%;overflow:hidden;display:flex;flex-direction:row;align-items:flex-start;justify-content:flex-start`);
 
-        var table1Container = document.createElement(`div`);
-        table1Container.setAttribute(`style`, `min-height:100%;max-height:100%;height:100%;width: ${width/2}cm;min-width:${width/2}cm;max-width:${width/2}cm;overflow:hidden`);
-        var table1=document.createElement(`table`);
-        table1.setAttribute(`style`,`max-height:100%;width:${width/2}cm;min-width:${width/2}cm;max-width:${width/2}cm;overflow:hidden;border-collapse: collapse;border:none;box-sizing:border-box;border-right:.5mm solid black`);
-        table1Container.appendChild(table1);
-        tablesContainer.appendChild(table1Container);
-    
-        var table2Container = document.createElement(`div`);
-        table2Container.setAttribute(`style`, `min-height:100%;max-height:100%;height:100%;width: ${width/2}cm;min-width:${width/2}cm;max-width:${width/2}cm;overflow:hidden`);
-        var table2=document.createElement(`table`);
-        table2.setAttribute(`style`,`max-height:100%;width:${width/2}cm;min-width:${width/2}cm;max-width:${width/2}cm;overflow:hidden;border-collapse: collapse;border:none;`);
-        table2Container.appendChild(table2);
-        if(componentiChecklist.length>40)
-            tablesContainer.appendChild(table2Container);
-    
-        outerContainer.appendChild(tablesContainer);
-    
-        var nRows=53;
-        var trHeight=((85*eight)/100)/nRows;
-        var tr=document.createElement("tr");
-        var th=document.createElement("th");
-        th.setAttribute("style","box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
-        th.innerHTML=`<div style="display:block;max-width:${((width/2)*25)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left">Codice</div>`;
-        tr.appendChild(th);
-        var th=document.createElement("th");
-        th.setAttribute("style","box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
-        th.innerHTML=`<div style="display:block;max-width:${((width/2)*7)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left">PZ</div>`;
-        tr.appendChild(th);
-        var th=document.createElement("th");
-        th.setAttribute("style","box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
-        th.innerHTML=`<div style="display:block;max-width:${((width/2)*38)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left">Descrizione</div>`;
-        tr.appendChild(th);
-        var th=document.createElement("th");
-        th.setAttribute("style","box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
-        th.innerHTML=`<div style="display:block;max-width:${((width/2)*10)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left">Fori</div>`;
-        tr.appendChild(th);
-        var th=document.createElement("th");
-        th.setAttribute("style","box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
-        th.innerHTML=`<div style="display:block;max-width:${((width/2)*15)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left">Lung</div>`;
-        tr.appendChild(th);
-        var th=document.createElement("th");
-        th.setAttribute("style","border-left:1px solid black;box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
-        th.innerHTML=`<div style="display:block;max-width:${((width/2)*5)/100}cm;min-width:${((width/2)*5)/100}cm;width:${((width/2)*5)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left"></div>`;
-        tr.appendChild(th);
-
-        table1.appendChild(tr);
-        table2.appendChild(tr.cloneNode(true));
-    
-        var i=1;
-        componentiChecklist.forEach(componente =>
+        var n_stampe_checklist = 2;
+        for (let index2 = 0; index2 < n_stampe_checklist; index2++)
         {
-            var bg;
-            if(i % 2)
-                bg="#ddd";
+            var marginTop;
+            if(index2 == 0)
+                marginTop = 5;
             else
-                bg="white";
+                marginTop = 10;
+
+            var outerContainer=document.createElement("div");
+            //outerContainer.setAttribute("id","printContainer");
+            outerContainer.setAttribute("class","print-container");
+            outerContainer.setAttribute("style","display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;height: "+eight+"cm;width: "+width+"cm;border:.5mm solid black;box-sizing:border-box;margin-left:5mm;margin-right:5mm;margin-top:"+marginTop+"mm;margin-bottom:5mm");
+        
+            //---------Checklist Carrello
+            var row=document.createElement("div");
+            row.setAttribute("style","min-width:100%;max-width:100%;width:100%;min-height:5%;max-height:5%;height:5%;display: flex;flex-direction: row;align-items: center;justify-content: flex-start;border-bottom:.5mm solid black;box-sizing:border-box;padding-left:10px;padding-right:10px");
+            var div=document.createElement("div");
+            div.setAttribute("style","min-width:80%;max-width:80%;width:80%;min-height:100%;max-height:100%;height:100%;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box");
+            var span=document.createElement("span");
+            span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:5mm;min-width:100%;max-width:100%;width:100%;white-space: nowraptext-overflow: clip;");
+            span.innerHTML="<b>Checklist Carrello</b>";
+            div.appendChild(span);
+            row.appendChild(div);
+            //---------Logo
+            var img=document.createElement("img");
+            img.setAttribute("style","min-width:20%;max-width:20%;width:20%;min-height:100%;max-height:100%;height:100%;box-sizing:border-box");
+            img.setAttribute("src","http://"+server_adress+":"+server_port+"/mi_kit_linea/images/logoCabins.png");
+            row.appendChild(img);
+            outerContainer.appendChild(row);
+        
+            //---------Lotto
+            var row=document.createElement("div");
+            row.setAttribute("style","min-width:100%;max-width:100%;width:100%;min-height:5%;max-height:5%;height:5%;display: flex;flex-direction: row;align-items: center;justify-content: flex-start;border-bottom:.5mm solid black;box-sizing:border-box");
+            var div=document.createElement("div");
+            div.setAttribute("style","overflow:hidden;min-width:50%;max-width:50%;width:50%;min-height:100%;max-height:100%;height:100%;border-right:.5mm solid black;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box;padding-left:10px;padding-right:10px");
+            var span=document.createElement("span");
+            span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);white-space: nowrap;overflow: hidden;text-overflow: clip;");
+            span.innerHTML="<b>Lotto: </b>"+lottoSelezionato.lotto;
+            div.appendChild(span);
+            row.appendChild(div);
+            outerContainer.appendChild(row);
+        
+            //---------Carrello
+            var div=document.createElement("div");
+            div.setAttribute("style","overflow:hidden;min-width:50%;max-width:50%;width:50%;min-height:100%;max-height:100%;height:100%;display:flex;flex-direction:row;align-items:center;justify-content:center;box-sizing:border-box;padding-left:10px;padding-right:10px");
+            var span=document.createElement("span");
+            span.setAttribute("style","font-family: 'Questrial', sans-serif;font-size:5mm;min-width:calc(100% - 10px);max-width:calc(100% - 10px);width:calc(100% - 10px);white-space: nowrap;overflow: hidden;text-overflow: clip;");
+            span.innerHTML="<b>Carrello: </b>"+carrelloSelezionato.CODCAR;
+            div.appendChild(span);
+            row.appendChild(div);
+            outerContainer.appendChild(row);
+        
+            //---------Contenitore tabelle pannelli
+            var tablesContainer=document.createElement(`div`);
+            tablesContainer.setAttribute(`style`,`min-height:90%;max-height:90%;height:90%;width: 100%;min-width:100%;max-width:100%;overflow:hidden;display:flex;flex-direction:row;align-items:flex-start;justify-content:flex-start`);
+
+            var table1Container = document.createElement(`div`);
+            table1Container.setAttribute(`style`, `min-height:100%;max-height:100%;height:100%;width: ${width/2}cm;min-width:${width/2}cm;max-width:${width/2}cm;overflow:hidden`);
+            var table1=document.createElement(`table`);
+            table1.setAttribute(`style`,`max-height:100%;width:${width/2}cm;min-width:${width/2}cm;max-width:${width/2}cm;overflow:hidden;border-collapse: collapse;border:none;box-sizing:border-box;border-right:.5mm solid black`);
+            table1Container.appendChild(table1);
+            tablesContainer.appendChild(table1Container);
+        
+            var table2Container = document.createElement(`div`);
+            table2Container.setAttribute(`style`, `min-height:100%;max-height:100%;height:100%;width: ${width/2}cm;min-width:${width/2}cm;max-width:${width/2}cm;overflow:hidden`);
+            var table2=document.createElement(`table`);
+            table2.setAttribute(`style`,`max-height:100%;width:${width/2}cm;min-width:${width/2}cm;max-width:${width/2}cm;overflow:hidden;border-collapse: collapse;border:none;`);
+            table2Container.appendChild(table2);
+            if(componentiChecklist.length>40)
+                tablesContainer.appendChild(table2Container);
+        
+            outerContainer.appendChild(tablesContainer);
+        
+            var nRows=53;
+            var trHeight=((85*eight)/100)/nRows;
             var tr=document.createElement("tr");
-            var td=document.createElement("td");
-            td.setAttribute("style","box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
-            td.innerHTML=`<div style="display:block;max-width:${((width/2)*25)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${componente.codice_componente}</div>`;
-            tr.appendChild(td);
-            var td=document.createElement("td");
-            td.setAttribute("style","box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
-            td.innerHTML=`<div style="display:block;max-width:${((width/2)*7)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${componente.qnt}</div>`;
-            tr.appendChild(td);
-            var td=document.createElement("td");
-            td.setAttribute("style","box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
-            td.innerHTML=`<div style="display:block;max-width:${((width/2)*38)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${componente.descrizione}</div>`;
-            tr.appendChild(td);
-            var td=document.createElement("td");
-            td.setAttribute("style","box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
-            td.innerHTML=`<div style="display:block;max-width:${((width/2)*10)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${componente.fori}</div>`;
-            tr.appendChild(td);
-            var td=document.createElement("td");
-            td.setAttribute("style","box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
-            td.innerHTML=`<div style="display:block;max-width:${((width/2)*15)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${componente.lung}</div>`;
-            tr.appendChild(td);
-            var td=document.createElement("td");
-            td.setAttribute("style","border-left:1px solid black;box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
-            if(componente.checked)
-                td.innerHTML=`<div style="text-align:center;display:block;max-width:${((width/2)*5)/100}cm;min-width:${((width/2)*5)/100}cm;width:${((width/2)*5)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;font-weight:bold">X</div>`;
-            else
-                td.innerHTML=`<div style="text-align:center;display:block;max-width:${((width/2)*5)/100}cm;min-width:${((width/2)*5)/100}cm;width:${((width/2)*5)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"></div>`;
-            tr.appendChild(td);
-    
-            if(i<nRows)
-                table1.appendChild(tr);
-            else
-                table2.appendChild(tr);
-    
-            i++;
-        });
+            var th=document.createElement("th");
+            th.setAttribute("style","box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
+            th.innerHTML=`<div style="display:block;max-width:${((width/2)*25)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left">Codice</div>`;
+            tr.appendChild(th);
+            var th=document.createElement("th");
+            th.setAttribute("style","box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
+            th.innerHTML=`<div style="display:block;max-width:${((width/2)*7)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left">PZ</div>`;
+            tr.appendChild(th);
+            var th=document.createElement("th");
+            th.setAttribute("style","box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
+            th.innerHTML=`<div style="display:block;max-width:${((width/2)*38)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left">Descrizione</div>`;
+            tr.appendChild(th);
+            var th=document.createElement("th");
+            th.setAttribute("style","box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
+            th.innerHTML=`<div style="display:block;max-width:${((width/2)*10)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left">Fori</div>`;
+            tr.appendChild(th);
+            var th=document.createElement("th");
+            th.setAttribute("style","box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
+            th.innerHTML=`<div style="display:block;max-width:${((width/2)*15)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left">Lung</div>`;
+            tr.appendChild(th);
+            var th=document.createElement("th");
+            th.setAttribute("style","border-left:1px solid black;box-sizing:border-box;min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;font-weight:bold");
+            th.innerHTML=`<div style="display:block;max-width:${((width/2)*5)/100}cm;min-width:${((width/2)*5)/100}cm;width:${((width/2)*5)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align:left"></div>`;
+            tr.appendChild(th);
 
-        document.body.appendChild(outerContainer);
+            table1.appendChild(tr);
+            table2.appendChild(tr.cloneNode(true));
+        
+            var i=1;
+            componentiChecklist.forEach(componente =>
+            {
+                var bg;
+                if(i % 2)
+                    bg="#ddd";
+                else
+                    bg="white";
+                var tr=document.createElement("tr");
+                var td=document.createElement("td");
+                td.setAttribute("style","box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
+                td.innerHTML=`<div style="display:block;max-width:${((width/2)*25)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${componente.codice_componente}</div>`;
+                tr.appendChild(td);
+                var td=document.createElement("td");
+                td.setAttribute("style","box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
+                td.innerHTML=`<div style="display:block;max-width:${((width/2)*7)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${componente.qnt}</div>`;
+                tr.appendChild(td);
+                var td=document.createElement("td");
+                td.setAttribute("style","box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
+                td.innerHTML=`<div style="display:block;max-width:${((width/2)*38)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${componente.descrizione}</div>`;
+                tr.appendChild(td);
+                var td=document.createElement("td");
+                td.setAttribute("style","box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
+                td.innerHTML=`<div style="display:block;max-width:${((width/2)*10)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${componente.fori}</div>`;
+                tr.appendChild(td);
+                var td=document.createElement("td");
+                td.setAttribute("style","box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
+                td.innerHTML=`<div style="display:block;max-width:${((width/2)*15)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${componente.lung}</div>`;
+                tr.appendChild(td);
+                var td=document.createElement("td");
+                td.setAttribute("style","border-left:1px solid black;box-sizing:border-box;background-color:"+bg+";min-height:"+trHeight+"px;max-height:"+trHeight+"px;height:"+trHeight+"px;white-space: nowrap;overflow: hidden;text-overflow: clip;font-family: 'Questrial', sans-serif;font-size:3.8mm;");
+                if(componente.checked)
+                    td.innerHTML=`<div style="text-align:center;display:block;max-width:${((width/2)*5)/100}cm;min-width:${((width/2)*5)/100}cm;width:${((width/2)*5)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;font-weight:bold">X</div>`;
+                else
+                    td.innerHTML=`<div style="text-align:center;display:block;max-width:${((width/2)*5)/100}cm;min-width:${((width/2)*5)/100}cm;width:${((width/2)*5)/100}cm;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"></div>`;
+                tr.appendChild(td);
+        
+                if(i<nRows)
+                    table1.appendChild(tr);
+                else
+                    table2.appendChild(tr);
+        
+                i++;
+            });
 
-        const outerContainerClone = outerContainer.cloneNode(true);
-        document.getElementById("printOuterContainer").appendChild(outerContainerClone);
-        generaPdfChecklist();
-    
+            document.body.appendChild(outerContainer);
+        }
+
         Swal.close();
 
         setTimeout(() =>
         {
             window.print();
-            window.print();
+
+            const outerContainerClone = outerContainer.cloneNode(true);
+            document.getElementById("printOuterContainer").appendChild(outerContainerClone);
+            generaPdfChecklist();
             
             document.getElementsByClassName("structure-header")[0].style.display="";
             document.getElementsByClassName("section-container")[0].style.display="";
