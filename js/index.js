@@ -1363,6 +1363,10 @@ window.addEventListener("keydown", async function(event)
             event.preventDefault();
             scrollright();
         break;
+        case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","ruota").valore):
+            event.preventDefault();
+            rotate();
+        break;
         default:
             event.preventDefault();
         break;
@@ -1448,6 +1452,14 @@ function scrollright()
     {
         if(iframe!=null)
             iframe.contentWindow.document.getElementById("viewerContainer").scrollLeft+=50;
+    } catch (error) {}
+}
+function rotate()
+{
+    try
+    {
+        if(iframe!=null)
+            iframe.contentWindow.document.getElementById("pageRotateCcw").click();
     } catch (error) {}
 }
 function eliminaRegistrazioneAvanzamentoKitRaggruppati(cabine_lcl)
