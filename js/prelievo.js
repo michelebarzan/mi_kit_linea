@@ -1201,6 +1201,14 @@ function pdfScrollright()
             iframe.contentWindow.document.getElementById("viewerContainer").scrollLeft+=50;
     } catch (error) {}
 }
+function pdfRotate()
+{
+    try
+    {
+        if(iframe!=null)
+            iframe.contentWindow.document.getElementById("pageRotateCcw").click();
+    } catch (error) {}
+}
 function listToTop()
 {
     if(view == "pannelli")
