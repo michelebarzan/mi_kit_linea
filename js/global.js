@@ -246,3 +246,94 @@ function groupByJS(arguments)
         return array_unique;
     }
 }
+function getPopupMessage()
+{
+    var messagesHtml = document.getElementById("messageContainer").innerHTML;
+
+    var outerContainer = document.createElement("div");
+    outerContainer.setAttribute("class","outer-container-popup-message");
+    outerContainer.innerHTML = messagesHtml;
+
+    Swal.fire
+    ({
+        icon:"warning",
+        title: 'Messaggi previsti',
+        html: outerContainer.outerHTML,
+        showCloseButton: true,
+        showConfirmButton:false,
+        showCancelButton:false,
+        background:"#353535",
+        onOpen : function()
+                {
+                    document.getElementsByClassName("swal2-close")[0].style.outline="none";
+                    document.getElementsByClassName("swal2-title")[0].style.fontSize="18px";
+                }
+    });
+}
+function checkMessage(commessa,lotto,numero_cabina,disegno_cabina,kit,stazione)
+{
+    /*Swal.fire
+    ({
+        width:"100%",
+        background:"transparent",
+        title:"Caricamento in corso...",
+        html:'<i class="fad fa-spinner-third fa-spin fa-3x" style="color:white"></i>',
+        allowOutsideClick:false,
+        showCloseButton:false,
+        showConfirmButton:false,
+        allowEscapeKey:false,
+        showCancelButton:false,
+        onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
+    });*/
+
+    var container = document.getElementById("messageContainer");
+    container.style.display = "none";
+    container.innerHTML = "";
+
+    $.get("checkMessage.php",
+    {
+        commessa,lotto,numero_cabina,disegno_cabina,kit,stazione
+    },
+    function(response, status)
+    {
+        if(status=="success")
+        {
+            //Swal.close();
+            if(response.toLowerCase().indexOf("error")>-1 || response.toLowerCase().indexOf("notice")>-1 || response.toLowerCase().indexOf("warning")>-1)
+            {
+                Swal.fire({icon:"error",title: "Errore messaggistica. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+                console.log(response);
+            }
+            else
+            {
+                try
+                {
+                    var messages = JSON.parse(response);
+
+                    if(messages.length > 0)
+                    {
+                        container.style.display = "";
+
+                        for (let index = 0; index < messages.length; index++)
+                        {
+                            const message = messages[index];
+                            
+                            var span = document.createElement("span");
+                            span.innerHTML = message;
+                            container.appendChild(span);
+                        }
+                    }
+                } catch (error) {console.log(error,response)
+                    setTimeout(() => {
+                        Swal.fire({icon:"error",title: "Errore messaggistica. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
+                    }, 500);
+                }
+            }
+        }
+        else
+        {
+            Swal.fire({icon:"error",title: "Errore messaggistica. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.color="gray";document.getElementsByClassName("swal2-title")[0].style.fontSize="14px";}});
+            console.log(response);
+        }
+    });
+}

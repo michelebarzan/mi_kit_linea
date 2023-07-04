@@ -1746,6 +1746,8 @@ function selectCabinaCorridoio(number)
     else
         document.getElementById("labelCabinaCorridoioSelezionato").innerHTML=cabina_corridoioSelezionato.tipo.charAt(0).toUpperCase() + cabina_corridoioSelezionato.tipo.slice(1)+` <b>`+cabina_corridoioSelezionato.numero_cabina+`</b> `+[...new Set(cabina_corridoioSelezionato.numeri_cabina)].join(", ");
 
+    checkMessage(lottoSelezionato.commessa,lottoSelezionato.lotto,cabina_corridoioSelezionato.numero_cabina,cabina_corridoioSelezionato.disegno_cabina,'',stazione.nome);
+
     getListKit(true);
 }
 function getInfoCabinaCorridoioSelezionato()
@@ -1784,6 +1786,9 @@ async function getListKit(cleanFocused,callback)
         showCancelButton:false,
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
+
+    document.getElementById("messageContainer").style.display = "none";
+    document.getElementById("messageContainer").innerHTML = "";
 
     if(view!="kit")
         old_focused_cabine_corridoi = focused;
@@ -1870,7 +1875,7 @@ async function getListKit(cleanFocused,callback)
 
         var item=document.createElement("button");
         item.setAttribute("class","kit-item");
-        item.setAttribute("onfocus","checkItemScroll(event,this);getPdf('kit','"+codiceKit+"')");
+        item.setAttribute("onfocus","getPdf('kit','"+codiceKit+"');");
         item.setAttribute("id","kitItem"+kitItem.number);
 
         var div=document.createElement("div");
@@ -2122,6 +2127,9 @@ async function getListLotti(cleanFocused)
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
 
+    document.getElementById("messageContainer").style.display = "none";
+    document.getElementById("messageContainer").innerHTML = "";
+
     old_focused_cabine_corridoi = null;
 
     view="lotti";
@@ -2201,6 +2209,8 @@ function selectLotto(number)
     lottoSelezionato=getFirstObjByPropValue(lotti,"number",number);
     document.getElementById("labelLottoSelezionato").innerHTML="Lotto <b>"+lottoSelezionato.lotto+"</b>";
 
+    checkMessage(lottoSelezionato.commessa,lottoSelezionato.lotto,'','','',stazione.nome);
+
     getListCabineECorridoi(true);
 }
 async function getListCabineECorridoi(cleanFocused)
@@ -2218,6 +2228,9 @@ async function getListCabineECorridoi(cleanFocused)
         showCancelButton:false,
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
+
+    document.getElementById("messageContainer").style.display = "none";
+    document.getElementById("messageContainer").innerHTML = "";
 
     if(view=="lotti")
         old_focused_lotti = focused;
@@ -2328,6 +2341,9 @@ async function getListCabineECorridoi(cleanFocused)
 }
 async function getPdf(folder,fileName)
 {
+    if(folder == "kit")
+        checkMessage(lottoSelezionato.commessa,lottoSelezionato.lotto,cabina_corridoioSelezionato.numero_cabina,cabina_corridoioSelezionato.disegno_cabina,fileName,stazione.nome);
+
     if(fileName != shownPdf)//delete
     {
         shownPdf=fileName;

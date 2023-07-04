@@ -155,6 +155,9 @@ async function getListLotti()
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
 
+    document.getElementById("messageContainer").style.display = "none";
+    document.getElementById("messageContainer").innerHTML = "";
+
     view="lotti";
 
     document.getElementById("totaliPrelievoLabel").style.display="none";
@@ -234,6 +237,8 @@ function selectLotto(id_lotto)
     lottoSelezionato=getFirstObjByPropValue(lotti,"id_lotto",id_lotto);
     document.getElementById("labelLottoSelezionato").innerHTML="Lotto <b>"+lottoSelezionato.lotto+"</b>";
 
+    checkMessage(lottoSelezionato.commessa,lottoSelezionato.lotto,'%','','%',stazione.nome);
+
     getListCabine();
 }
 function getCabineChiusePrelievo(lotto,commessa)
@@ -281,6 +286,9 @@ async function getListCabine()
         showCancelButton:false,
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
+
+    document.getElementById("messageContainer").style.display = "none";
+    document.getElementById("messageContainer").innerHTML = "";
 
     view="cabine";
 
@@ -396,6 +404,8 @@ function selectCabina(disegno_cabina)
 {
     cabinaSelezionata=getFirstObjByPropValue(cabine,"disegno_cabina",disegno_cabina);
     document.getElementById("labelCabinaSelezionata").innerHTML=`Cabina <b>`+cabinaSelezionata.disegno_cabina+`</b> ${dot} `+cabinaSelezionata.numeri_cabina.join(",");
+
+    checkMessage(lottoSelezionato.commessa,lottoSelezionato.lotto,'%',cabinaSelezionata.disegno_cabina,'%',stazione.nome);
 
     getListPannelli();
 }
@@ -1040,6 +1050,8 @@ async function getPdf(folder,fileName,posizione)
         }
         document.getElementById("pannelliContainerInfoKit"+fileName+posizione).style.color="#548CFF";
     } catch (error) {}
+
+    checkMessage(lottoSelezionato.commessa,lottoSelezionato.lotto,'%',cabinaSelezionata.disegno_cabina,fileName,stazione.nome);
 
     if(fileName != shownPdf)
     {
