@@ -202,6 +202,9 @@ async function getListLotti()
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
 
+    document.getElementById("messageContainer").style.display = "none";
+    document.getElementById("messageContainer").innerHTML = "";
+
     view="lotti";
 
     document.getElementById("totaliChecklistLabel").style.display="none";
@@ -279,6 +282,8 @@ function selectLotto(id_lotto)
     lottoSelezionato=getFirstObjByPropValue(lotti,"id_lotto",id_lotto);
     document.getElementById("labelLottoSelezionato").innerHTML="Lotto <b>"+lottoSelezionato.lotto+"</b>";
 
+    checkMessage(lottoSelezionato.commessa,lottoSelezionato.lotto,'','','',stazione.nome);
+
     getListCarrelli();
 }
 async function getListCarrelli()
@@ -296,6 +301,9 @@ async function getListCarrelli()
         showCancelButton:false,
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
+
+    document.getElementById("messageContainer").style.display = "none";
+    document.getElementById("messageContainer").innerHTML = "";
 
     view="carrelli";
 
@@ -389,6 +397,8 @@ function selectCarrello(id_CODCAR)
     carrelloSelezionato=getFirstObjByPropValue(carrelli,"id_CODCAR",id_CODCAR);
         document.getElementById("labelCarrelloSelezionato").innerHTML=`Carrello <b>`+carrelloSelezionato.CODCAR+`</b>`;
 
+    checkMessage(lottoSelezionato.commessa,lottoSelezionato.lotto,'%','%','%',stazione.nome);
+
     getListComponenti();
 }
 async function getListComponenti()
@@ -406,6 +416,9 @@ async function getListComponenti()
         showCancelButton:false,
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
+
+    document.getElementById("messageContainer").style.display = "none";
+    document.getElementById("messageContainer").innerHTML = "";
 
     view="componenti";
 
@@ -594,6 +607,8 @@ function logout()
 }
 async function getPdf(folder,fileName)
 {
+    checkMessage(lottoSelezionato.commessa,lottoSelezionato.lotto,'%','%',fileName,stazione.nome);
+
     if(fileName != shownPdf)
     {
         //shownPdf=fileName;
