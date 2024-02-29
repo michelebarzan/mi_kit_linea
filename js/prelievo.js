@@ -1066,8 +1066,7 @@ async function getPdf(folder,fileName,posizione)
         iframe.setAttribute("onload","fixPdf(this,'"+folder+"');shownPdf='"+fileName+"';");
         var server_adress=await getServerValue("SERVER_ADDR");
         var server_port=await getServerValue("SERVER_PORT");
-        iframe.setAttribute("src","http://"+server_adress+":"+server_port+"/mi_kit_pdf/pdf.js/web/viewer.html?file=pdf/"+folder+"/"+fileName+".pdf");
-        container.appendChild(iframe);
+        $.getJSON("http://"+server_adress+":"+server_port+"/mi_amministrazione_produzione_files/parameters.json", function(data){iframe.setAttribute("src","http://"+server_adress+":"+server_port+"/mi_kit_pdf/pdf.js/web/viewer.html?file=pdf/"+folder+data.linea_kit["pdf_"+folder+"_version"]+"/"+fileName+".pdf");container.appendChild(iframe);});
     }
 }
 function fixPdf(iframe,folder)
