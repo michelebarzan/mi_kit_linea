@@ -92,6 +92,8 @@ window.addEventListener("load", async function(event)
     Swal.close();
     
     getListLotti();
+	
+	$.ajaxSetup({cache:false});
 });
 function getParametro(nome)
 {
