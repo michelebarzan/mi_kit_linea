@@ -86,6 +86,8 @@ window.addEventListener("load", async function(event)
 
         container.appendChild(item);
     });
+	
+	$.ajaxSetup({cache:false});
 });
 function getFunzioniTasti()
 {
