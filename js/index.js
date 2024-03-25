@@ -208,6 +208,8 @@ window.addEventListener("load", async function(event)
     Swal.close();
 
     getListLotti(true);
+	
+	$.ajaxSetup({cache:false});
 });
 function getFunzioniTasti()
 {
