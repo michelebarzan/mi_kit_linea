@@ -13,6 +13,9 @@ var funzioniTasti;
 var popupCheckPassword=false;
 var nClickNumpadButtonPopupCheckPassword;
 var codiceCambiaLineaStazione;
+var version = "";
+var server_adress;
+var server_port;
 
 window.addEventListener("load", async function(event)
 {
@@ -88,6 +91,10 @@ window.addEventListener("load", async function(event)
     });
 	
 	$.ajaxSetup({cache:false});
+
+    server_adress=await getServerValue("SERVER_ADDR");
+    server_port=await getServerValue("SERVER_PORT");
+    $.getJSON("http://"+server_adress+":"+server_port+"/mi_amministrazione_produzione_files/parameters.json", function(data){version = Math.max.apply(null, data.linea_kit.mi_kit_linea_versions).toString();document.getElementById("loginTitleContainerSpan").innerHTML = "Login v" + version;});
 });
 function getFunzioniTasti()
 {
@@ -240,7 +247,7 @@ async function login(number)
             else
             {
                 button.innerHTML='<i class="far fa-check-circle" style="color:#70B085"></i>';
-                window.location = stazione.pagina;
+                window.location = "http://"+server_adress+":"+server_port+"/mi_kit_linea" + version + "/" + stazione.pagina;
             }
         }
         else
