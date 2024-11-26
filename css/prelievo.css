@@ -536,7 +536,7 @@ body
     font-size: 12px;
     color:gray;
 }
-.listButtonIndietro
+.list-button
 {
     height: 30px;
     margin-top: 10px;
@@ -545,10 +545,9 @@ body
     padding-left: 10px;
     padding-right: 10px;
     box-sizing: border-box;
-    border:none;
-    background-color:#313131 ;
+    background-color:#313131;
     border-radius: 4px;
-    color:rgb(182, 182, 182);
+    color: #f1f1f1;
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
     transition: all 0.3s cubic-bezier(.25,.8,.25,1);
     outline: none;
@@ -561,19 +560,20 @@ body
     width: 100px;
     min-width: 100px;
     max-width: 100px;
+    border: 1px solid black;
 }
-.listButtonIndietro span
+.list-button span
 {
     font-family: 'Questrial', sans-serif;
     font-weight: normal;
     font-size: 14px;
     font-weight: bold;
 }
-.listButtonIndietro i
+.list-button i
 {
     margin-right: 5px;
 }
-.listButtonIndietro:active
+.list-button:active
 {
     color:#548CFF;
     text-shadow: 2px 4px 3px rgb(0 0 0 / 30%);
