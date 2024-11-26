@@ -886,8 +886,8 @@ window.addEventListener("keydown", async function(event)
 {
     var keyCode=event.keyCode;
     keys_pressed[keyCode] = true;
-    /*console.log(keyCode);
-    console.log(event.key);*/
+    console.log(keyCode);
+    console.log(event.key);
     switch (keyCode) 
     {
         case 48:setNumber(event.key);break;//0
@@ -1368,6 +1368,10 @@ window.addEventListener("keydown", async function(event)
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","ruota").valore):
             event.preventDefault();
             rotate();
+        break;
+        case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","espandi_messaggio").valore):
+            event.preventDefault();
+            getPopupMessage();
         break;
         default:
             event.preventDefault();
