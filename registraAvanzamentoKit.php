@@ -42,7 +42,7 @@
                 die("error".$query2);
         }
         else
-            die("error");
+            die("error".$query0);
     }
 
 ?>

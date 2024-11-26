@@ -46,10 +46,13 @@
                 <div class="listTitleItem" style="margin-left:auto">
                     <span id="totaliPrelievoLabel" style="width: 125px;min-width: 125px;max-width: 125px;"></span>
                 </div>
-                <div class="listTitleItem">
-                    <button class="listButtonIndietro" id="listButtonIndietro" onclick="indietro()">
+                <div class="listTitleItem" style="flex-direction:row">
+                    <button class="list-button" id="listButtonIndietro" onclick="indietro()">
                         <i class="fas fa-chevron-left"></i>
                         <span>INDIETRO</span>
+                    </button>
+                    <button class="list-button" id="listButtonFiltraCabine" style="display:none;" onclick="getListKitPannelli()">
+                        <span>FILTRA CAB</span>
                     </button>
                 </div>
             </div>
