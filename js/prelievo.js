@@ -157,6 +157,8 @@ async function getListLotti()
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
 
+    document.getElementById("listButtonFiltraCabine").style.display = "none";
+
     document.getElementById("messageContainer").style.display = "none";
     document.getElementById("messageContainer").innerHTML = "";
 
@@ -288,6 +290,8 @@ async function getListCabine()
         showCancelButton:false,
         onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="white";}
     });
+
+    document.getElementById("listButtonFiltraCabine").style.display = "none";
 
     document.getElementById("messageContainer").style.display = "none";
     document.getElementById("messageContainer").innerHTML = "";
