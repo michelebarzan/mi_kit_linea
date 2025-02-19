@@ -546,19 +546,19 @@ async function getListKitPannelli()
     
     var error = false;
 
-    kit_pannelli = [];
-    var responseString = await getPannelli(numeri_cabina);
-    if(responseString.toLowerCase().indexOf("phperror")>-1 || responseString.toLowerCase().indexOf("notice")>-1 || responseString.toLowerCase().indexOf("warning")>-1)
-        error = true;
-    else
-        try {kit_pannelli = JSON.parse(responseString);} catch (err) {error = true;}
-
     var dati_linea_t = [];
     var responseString = await getDatiLineaT(numeri_cabina);
     if(responseString.toLowerCase().indexOf("phperror")>-1 || responseString.toLowerCase().indexOf("notice")>-1 || responseString.toLowerCase().indexOf("warning")>-1)
         error = true;
     else
         try {dati_linea_t = JSON.parse(responseString);} catch (err) {error = true;}
+
+    kit_pannelli = [];
+    var responseString = await getPannelli(numeri_cabina);
+    if(responseString.toLowerCase().indexOf("phperror")>-1 || responseString.toLowerCase().indexOf("notice")>-1 || responseString.toLowerCase().indexOf("warning")>-1)
+        error = true;
+    else
+        try {kit_pannelli = JSON.parse(responseString);} catch (err) {error = true;}
 
     if(error)
         Swal.fire({icon:"error",title: "Errore. Se il problema persiste contatta l' amministratore",onOpen : function(){document.getElementsByClassName("swal2-title")[0].style.fontWeight="bold";document.getElementsByClassName("swal2-title")[0].style.color="black";document.getElementsByClassName("swal2-title")[0].style.fontSize="15px";}});
