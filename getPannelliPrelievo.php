@@ -41,7 +41,7 @@
         }
     }
     else
-        die("error".$query1);
+        die("phperror".$query1);
 
     $kit_in = "'".implode("','",$kit_in_array)."'";
     
@@ -193,7 +193,7 @@
         }
     }
     else
-        die("error".$query2);
+        die("phperror".$query2);
 
     foreach ($kit as $kitObj)
     {

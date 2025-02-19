@@ -417,6 +417,34 @@ body
     min-width: 200px;
     cursor: pointer;
 }
+.pannelli-item-linea-t-eq
+{
+    background: repeating-linear-gradient(
+        45deg, 
+        transparent 0px, 
+        transparent 25px,
+        rgb(84, 140, 255) 25px, 
+        rgb(84, 140, 255) 27px
+    );
+}
+.pannelli-item-linea-t-diff
+{
+    background: 
+    repeating-linear-gradient(
+        45deg, 
+        transparent 0px, 
+        transparent 25px,
+        rgb(84, 140, 255) 25px, 
+        rgb(84, 140, 255) 27px
+    ),
+    repeating-linear-gradient(
+        -45deg,  /* Opposite diagonal */
+        transparent 0px, 
+        transparent 25px,
+        rgb(84, 140, 255) 25px, 
+        rgb(84, 140, 255) 27px
+    );
+}
 .pannelli-item-info-pannello
 {
     display: flex;

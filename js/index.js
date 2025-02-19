@@ -1370,6 +1370,7 @@ window.addEventListener("keydown", async function(event)
             rotate();
         break;
         case parseInt(getFirstObjByPropValue(funzioniTasti,"nome","espandi_messaggio").valore):
+            console.log("premuto");
             event.preventDefault();
             getPopupMessage();
         break;
