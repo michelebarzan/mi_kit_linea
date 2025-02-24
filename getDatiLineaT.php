@@ -21,10 +21,11 @@
 
     $query1 = "SELECT   TOP (100) PERCENT t.lotto, t.codice_pannello, t.codice_kit, t.numero_cabina, t.disegno_cabina, t.pos, t.prelevato, t.stato, CASE WHEN disegno_cabina LIKE '%CR%' THEN CONVERT(VARCHAR(MAX),alf.n) ELSE alf.l END AS pos_kit_l
                 FROM (SELECT   TOP (100) PERCENT Lotto AS lotto, Codice AS codice_pannello, CodiceKit AS codice_kit, REPLACE(CodiceCabina, '+V' + CONVERT(varchar(MAX), Commessa) + '_', '') 
-                                                    AS numero_cabina, CASE WHEN TipoCabinaCorrid LIKE '%CR%' THEN REPLACE(CodiceCabina, '+V' + CONVERT(varchar(MAX), Commessa) + '_', '')  ELSE TipoCabinaCorrid END AS disegno_cabina, PosRastrelliera AS pos, CASE WHEN StatoArea LIKE '9000%' THEN 'true' ELSE 'false' END AS prelevato, 
+                                                    AS numero_cabina, CASE WHEN TipoCabinaCorrid LIKE '%CR%' THEN REPLACE(CodiceCabina, '+V' + CONVERT(varchar(MAX), Commessa) + '_', '')  ELSE TipoCabinaCorrid END AS disegno_cabina, PosRastrelliera AS pos,
+													CASE WHEN StatoDettaglio >= 5301 AND StatoDettaglio <= 5316 THEN 'true' ELSE 'false' END AS prelevato, 
                                                     StatoArea AS stato, CONVERT(int, OrdinaCabinaKit) AS pos_kit_n
                            FROM         dbo.dati_linea_t AS dati_linea_t_1
-                           WHERE     (Lotto = '$lotto')) AS t INNER JOIN
+                           WHERE     (Lotto = '$lotto') AND StatoArea IN (5000,9000) AND StatoDettaglio >= 5000 AND StatoDettaglio < 5900) AS t INNER JOIN
                              conversione_posizioni_kit AS alf ON t.pos_kit_n = alf.n
             WHERE (disegno_cabina = '$disegno_cabina')
             ORDER BY t.pos";
@@ -70,19 +71,22 @@
     else
         die("phperror".$query2);
     
-    $query2="INSERT INTO [dbo].[pannelli_prelievo]
-                    ([lotto]
-                    ,[disegno_cabina]
-                    ,[kit]
-                    ,[posizione]
-                    ,[codice_pannello]
-                    ,[i]
-                    ,[numero_cabina]
-                    ,[dataOra]
-                    ,[utente]) VALUES $values";
-    $result2=sqlsrv_query($conn,$query2);
-    if (!$result2)
-        die("phperror".$query2);
+	if($values != "")
+	{
+		$query2="INSERT INTO [dbo].[pannelli_prelievo]
+						([lotto]
+						,[disegno_cabina]
+						,[kit]
+						,[posizione]
+						,[codice_pannello]
+						,[i]
+						,[numero_cabina]
+						,[dataOra]
+						,[utente]) VALUES $values";
+		$result2=sqlsrv_query($conn,$query2);
+		if (!$result2)
+			die("phperror".$query2);
+	}
 
     echo json_encode($dati_linea_t);
 
